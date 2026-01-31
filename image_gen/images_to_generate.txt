@@ -1,0 +1,159 @@
+FLYING ACE — IMAGE GENERATION LIST
+====================================
+
+Style suffix (append to every prompt):
+"WW2 propaganda poster style, vintage hand-painted illustration, limited color palette of military olive green, brass gold, navy blue, and warm red on aged cream/sepia paper texture, bold graphic lines, slightly weathered and distressed, no text, no letters, no words"
+
+Place all generated images in: public/images/
+
+
+===================
+BACKGROUNDS (3)
+===================
+
+1. bg-map.png (1920x1080)
+An aged WW2-era aviation navigation map viewed from above, showing faded topographic lines, coastal outlines, compass roses, and dotted flight path routes. Sepia and olive tones, coffee-stained edges, folded crease marks visible. Subtle and not too busy -- meant to sit behind UI elements. 1920x1080 landscape composition. [style suffix]
+
+2. bg-briefing.png (1920x1080)
+A WW2 mission briefing table viewed from above, scattered with maps, pencils, a compass, aviator sunglasses, dog tags, and a coffee mug ring stain. Warm lamplight illuminates the scene from one corner. Top-down flat lay composition. 1920x1080 landscape composition. [style suffix]
+
+3. bg-cockpit.png (1920x1080)
+Interior view looking out from a WW2 fighter plane cockpit, riveted metal frame, analog gauges and dials visible on the dashboard, open sky with scattered clouds visible through the windscreen. Warm golden hour lighting. Slightly blurred/soft to work as a background. 1920x1080 landscape composition. [style suffix]
+
+
+============================
+TITLE & BRANDING (2)
+============================
+
+4. title-logo.png (768x768, transparent)
+A WW2 bomber nose art style emblem: a bold propeller plane viewed head-on with wings spread wide, surrounded by a circular badge with laurel wreaths and stars. Brass gold and olive green tones. Painted with visible brushstrokes like aircraft nose art. Transparent/plain background. 768x768 square composition. [style suffix]
+
+5. title-banner.png (1024x256, transparent)
+A vintage military ribbon banner, unfurled and slightly wavy, with riveted metal texture and worn brass edges. Empty center area for text overlay. Horizontal composition. Transparent/plain background. 1024x256 wide horizontal strip. [style suffix]
+
+
+========================
+HANDOVER SCREEN (2)
+========================
+
+6. pilot-ready.png (768x768, transparent)
+A confident WW2 fighter pilot from the chest up, wearing a leather flight helmet with raised goggles, a fur-lined bomber jacket, and a white silk scarf. Looking directly at the viewer with a slight smirk. Dramatic lighting from one side. Propaganda poster heroic composition. Transparent/plain background. 768x768 square composition. [style suffix]
+
+7. pilot-salute.png (768x768, transparent)
+A WW2 pilot silhouette standing next to a propeller fighter plane on a runway at dawn, one hand resting on the propeller blade. Dramatic backlit golden sky. Strong graphic silhouette composition. Transparent/plain background. 768x768 square composition. [style suffix]
+
+
+========================
+DIE ROLL RESULTS (4)
+========================
+
+8. roll-shotdown.png (768x768, transparent)
+A WW2 propeller fighter plane spiraling downward trailing thick black smoke and flames from its engine. Dramatic diagonal composition. Dark stormy sky background. Intense and urgent mood. 768x768 square composition. [style suffix]
+
+9. roll-dogfight.png (768x768, transparent)
+Two WW2 fighter planes locked in a tight spiral dogfight maneuver, contrails crossing, one chasing the other through clouds. Dynamic swirling composition showing motion and tension. Blue sky with dramatic clouds. 768x768 square composition. [style suffix]
+
+10. roll-fuel.png (768x768, transparent)
+A WW2 ground crew loading fuel barrels and jerry cans onto a supply truck next to a parked fighter plane on a grass airfield. Busy but cheerful scene. Green grass, olive vehicles, warm afternoon light. 768x768 square composition. [style suffix]
+
+11. roll-jackpot.png (768x768, transparent)
+A formation of five WW2 fighter planes flying in perfect V-formation through a golden sunset sky, contrails streaming behind them. Triumphant and glorious mood. Rich gold and amber tones dominating. 768x768 square composition. [style suffix]
+
+
+==========================
+DOGFIGHT SEQUENCE (3)
+==========================
+
+12. dogfight-challenge.png (768x768, transparent)
+Two WW2 pilots standing face-to-face in confrontation, arms crossed, goggles on their foreheads, leather jackets, with their respective fighter planes parked behind them on opposite sides. Tense standoff composition. 768x768 square composition. [style suffix]
+
+13. dogfight-win.png (768x768, transparent)
+A WW2 pilot in an open cockpit pumping their fist in celebration, plane banking victoriously through clear skies, a small victory mark being painted on the fuselage. Jubilant mood. 768x768 square composition. [style suffix]
+
+14. dogfight-lose.png (768x768, transparent)
+A WW2 fighter plane with a smoking engine limping back to base, trailing a thin line of dark smoke, pilot visible hunched in the cockpit. Overcast grey sky. Somber and tense mood. 768x768 square composition. [style suffix]
+
+
+=========================
+SHOP & ITEMS (11)
+=========================
+
+15. shop-hangar.png (1920x1080)
+Interior of a WW2 aircraft hangar converted into a supply depot, wooden crates stacked high, propeller planes partially visible, a quartermaster at a desk with a ledger. Warm overhead industrial lighting, dust motes in light beams. 1920x1080 landscape composition. [style suffix]
+
+16. item-plane.png (512x512, transparent)
+A brand new WW2 fighter plane being rolled out of a hangar by ground crew, propeller gleaming, freshly painted. Pride and excitement in the composition. Transparent/plain background. 512x512 square composition. [style suffix]
+
+17. item-planes.png (512x512, transparent)
+Two WW2 fighter planes parked wing-to-wing on a tarmac, ground crew performing final checks, a "ready for action" feel. Transparent/plain background. 512x512 square composition. [style suffix]
+
+18. item-dig.png (512x512, transparent)
+A WW2 soldier operating a hand pump on a fuel barrel in a muddy field, fuel splashing into a jerry can. Gritty and industrious. Transparent/plain background. 512x512 square composition. [style suffix]
+
+19. item-insurance.png (512x512, transparent)
+A WW2 fighter plane inside a protective sandbag revetment with camouflage netting draped over it. Safe and protected feeling. Transparent/plain background. 512x512 square composition. [style suffix]
+
+20. item-cheapbomb.png (512x512, transparent)
+A small finned WW2 aerial bomb being loaded under the wing of a fighter plane by a ground crew member. The bomb looks modest in size. Transparent/plain background. 512x512 square composition. [style suffix]
+
+21. item-priceybomb.png (512x512, transparent)
+A large, imposing WW2 aerial bomb with shark teeth nose art painted on it, sitting on a bomb cart, dwarfing the ground crew member next to it. Intimidating. Transparent/plain background. 512x512 square composition. [style suffix]
+
+22. item-donation.png (512x512, transparent)
+Two WW2 pilots sharing supplies, one handing a fuel canister to another across a wooden fence between airfields. Camaraderie and generosity. Transparent/plain background. 512x512 square composition. [style suffix]
+
+23. item-mercenary.png (512x512, transparent)
+A rugged, battle-scarred WW2 freelance pilot leaning against a heavily-decorated fighter plane covered in victory marks, arms crossed, cigar in mouth, mercenary attitude. Transparent/plain background. 512x512 square composition. [style suffix]
+
+24. item-antiaircraft.png (512x512, transparent)
+A WW2 anti-aircraft gun emplacement with sandbag fortification, the barrel pointed skyward, manned by a determined crew. Transparent/plain background. 512x512 square composition. [style suffix]
+
+25. item-oiltycoon.png (512x512, transparent)
+A WW2-era oil derrick and small refinery complex with storage tanks, pumping away with black gold, set against a dusty landscape. Wealth and industry feeling. Transparent/plain background. 512x512 square composition. [style suffix]
+
+
+========================
+BOMB SEQUENCE (2)
+========================
+
+26. bomb-hit.png (768x768, transparent)
+A dramatic aerial explosion on a WW2 airfield, debris and smoke billowing upward, viewed from a banking bomber plane above. Intense oranges and blacks. Dynamic downward-angle composition. 768x768 square composition. [style suffix]
+
+27. bomb-miss.png (768x768, transparent)
+A bomb crater in an empty grass field next to a WW2 airfield, smoke clearing, the intended target (a plane) visible unharmed in the distance. "Close call" mood. Transparent/plain background. 768x768 square composition. [style suffix]
+
+
+===================
+GAME OVER (2)
+===================
+
+28. victory.png (768x768, transparent)
+A triumphant WW2 ace pilot standing on the wing of their fighter plane, arms raised in victory, crowds of ground crew cheering below, medals pinned on chest. Golden light, confetti/ticker tape atmosphere. Heroic and celebratory. 768x768 square composition. [style suffix]
+
+29. eliminated.png (768x768, transparent)
+A WW2 parachute descending slowly against a sunset sky, the pilot dangling beneath it, their smoking plane visible falling away in the distance. Bittersweet and poetic rather than grim. 768x768 square composition. [style suffix]
+
+
+============================
+TAX & MAINTENANCE (1)
+============================
+
+30. tax-maintenance.png (512x512, transparent)
+A WW2 aircraft mechanic working on a fighter plane engine with wrenches, oil-stained coveralls, the engine cowling open revealing cylinders and wires. Hardworking maintenance mood. Transparent/plain background. 512x512 square composition. [style suffix]
+
+
+==============================
+UI DECORATIVE ELEMENTS (4)
+==============================
+
+31. ui-border-corner.png (256x256, transparent)
+A single ornate corner bracket design made of riveted metal plates and brass rivets, like the corner of a military equipment case. 90-degree angle, transparent background. Simple and clean. 256x256 square composition. [style suffix]
+
+32. ui-divider.png (1024x128, transparent)
+A horizontal decorative divider featuring a small propeller in the center with wings extending outward into thin ruled lines. Brass and olive tones. Transparent background. Horizontal strip. 1024x128 wide horizontal strip. [style suffix]
+
+33. ui-compass.png (256x256, transparent)
+A vintage WW2 aviation compass rose with cardinal directions, ornate brass needle, and aged paper texture. Circular composition. Transparent background. 256x256 square composition. [style suffix]
+
+34. ui-wings.png (512x256, transparent)
+A classic WW2 aviator pilot wings badge, symmetrical spread wings with a central star/shield emblem. Metallic brass finish with subtle patina. Transparent background. 512x256 wide horizontal composition. [style suffix]

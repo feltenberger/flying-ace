@@ -2,3 +2,6 @@ node_modules
 dist
 *.local
 .env
+.venv
+.gemini
+image_gen/.packages_new
