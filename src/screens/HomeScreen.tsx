@@ -5,6 +5,7 @@ import { loadIndex, loadGame, deleteGame } from '../utils/persistence.ts'
 import type { GameIndexEntry } from '../types/game.ts'
 import { GameScreen } from '../types/game.ts'
 import ConfirmDialog from '../components/ConfirmDialog.tsx'
+import { UI_WINGS, UI_COMPASS } from '../utils/images.ts'
 
 export function HomeScreen() {
   const { dispatch } = useGame()
@@ -53,38 +54,40 @@ export function HomeScreen() {
 
   return (
     <div className="max-w-md mx-auto">
+      <img src={UI_WINGS} alt="" className="decoration-wings mb-4" />
+
       <button
         onClick={handleNewGame}
-        className="w-full py-4 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold rounded-lg text-lg transition-colors mb-6"
+        className="w-full py-4 bg-brass-500 hover:bg-brass-400 text-military-950 font-bold rounded-lg text-lg transition-colors mb-6"
       >
         New Game
       </button>
 
       {inProgress.length > 0 && (
         <div className="mb-6">
-          <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">
+          <h2 className="text-sm font-semibold text-military-400 uppercase tracking-wider mb-3">
             In Progress
           </h2>
           <div className="space-y-2">
             {inProgress.map((entry) => (
               <div
                 key={entry.id}
-                className="bg-slate-800 rounded-lg border border-slate-700 p-4 flex items-center justify-between"
+                className="bg-military-800 rounded-lg border border-military-600 p-4 flex items-center justify-between"
               >
                 <button
                   onClick={() => handleResume(entry.id)}
                   className="flex-1 text-left"
                 >
-                  <div className="font-semibold text-slate-200 text-sm">
+                  <div className="font-semibold text-military-100 text-sm">
                     {entry.playerNames.join(', ')}
                   </div>
-                  <div className="text-xs text-slate-500 mt-0.5">
+                  <div className="text-xs text-military-500 mt-0.5">
                     Turn {entry.turnNumber} &middot; {formatDate(entry.lastPlayedAt)}
                   </div>
                 </button>
                 <button
                   onClick={() => setDeleteId(entry.id)}
-                  className="text-slate-600 hover:text-red-400 px-2 py-1 text-sm transition-colors ml-2 shrink-0"
+                  className="text-military-500 hover:text-danger-400 px-2 py-1 text-sm transition-colors ml-2 shrink-0"
                   aria-label="Delete game"
                 >
                   Delete
@@ -97,27 +100,27 @@ export function HomeScreen() {
 
       {completed.length > 0 && (
         <div>
-          <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">
+          <h2 className="text-sm font-semibold text-military-400 uppercase tracking-wider mb-3">
             Completed
           </h2>
           <div className="space-y-2">
             {completed.map((entry) => (
               <div
                 key={entry.id}
-                className="bg-slate-800/60 rounded-lg border border-slate-700/50 p-4 flex items-center justify-between"
+                className="bg-military-800/60 rounded-lg border border-military-600/50 p-4 flex items-center justify-between"
               >
                 <div className="flex-1">
-                  <div className="font-semibold text-slate-400 text-sm">
+                  <div className="font-semibold text-military-400 text-sm">
                     {entry.playerNames.join(', ')}
                   </div>
-                  <div className="text-xs text-slate-500 mt-0.5">
-                    Winner: <span className="text-amber-400">{entry.winnerName}</span>
+                  <div className="text-xs text-military-500 mt-0.5">
+                    Winner: <span className="text-brass-500">{entry.winnerName}</span>
                     {' '}&middot; {entry.turnNumber} turns &middot; {formatDate(entry.lastPlayedAt)}
                   </div>
                 </div>
                 <button
                   onClick={() => setDeleteId(entry.id)}
-                  className="text-slate-600 hover:text-red-400 px-2 py-1 text-sm transition-colors ml-2 shrink-0"
+                  className="text-military-500 hover:text-danger-400 px-2 py-1 text-sm transition-colors ml-2 shrink-0"
                   aria-label="Delete game"
                 >
                   Delete
@@ -129,9 +132,16 @@ export function HomeScreen() {
       )}
 
       {entries.length === 0 && (
-        <p className="text-center text-slate-500 text-sm mt-4">
-          No saved games yet. Start a new game to get started!
-        </p>
+        <div className="text-center mt-4 relative">
+          <img
+            src={UI_COMPASS}
+            alt=""
+            className="mx-auto w-32 opacity-15 mb-3"
+          />
+          <p className="text-military-500 text-sm">
+            No saved games yet. Start a new game to get started!
+          </p>
+        </div>
       )}
 
       {deleteId && (

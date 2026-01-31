@@ -1,15 +1,136 @@
 @import "tailwindcss";
 
+@theme {
+  --color-military-950: #12140e;
+  --color-military-900: #1a1c14;
+  --color-military-800: #2d3025;
+  --color-military-700: #3a3f2e;
+  --color-military-600: #4a4f3d;
+  --color-military-500: #6b6150;
+  --color-military-400: #8b7f68;
+  --color-military-300: #a89b84;
+  --color-military-200: #d4c9b0;
+  --color-military-100: #e8dcc8;
+
+  --color-brass-500: #c9a84c;
+  --color-brass-400: #d4b85c;
+  --color-brass-600: #a68a3a;
+
+  --color-raf-600: #2b5c8a;
+  --color-raf-500: #367ab0;
+
+  --color-danger-500: #c0392b;
+  --color-danger-400: #d44637;
+
+  --color-ops-500: #5a8a3c;
+  --color-ops-400: #6ba048;
+}
+
 body {
   margin: 0;
-  background-color: #0f172a;
-  color: #f1f5f9;
+  background-color: #12140e;
+  color: #e8dcc8;
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   min-height: 100vh;
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(74, 79, 61, 0.06) 10px,
+      rgba(74, 79, 61, 0.06) 11px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 10px,
+      rgba(74, 79, 61, 0.06) 10px,
+      rgba(74, 79, 61, 0.06) 11px
+    );
 }
 
 #root {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+}
+
+.font-stencil {
+  font-family: 'Black Ops One', cursive;
+}
+
+/* ── Background scene overlay ────────────────────────────
+   Darkened background image container. Set the image via
+   inline style: style={{ '--bg-scene-url': url(...) }}
+   ──────────────────────────────────────────────────────── */
+.bg-scene {
+  position: relative;
+}
+.bg-scene::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(18, 20, 14, 0.80),
+      rgba(18, 20, 14, 0.70)
+    ),
+    var(--bg-scene-url) center / cover no-repeat;
+  z-index: 0;
+  pointer-events: none;
+}
+.bg-scene > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Spot illustration (poster art) ──────────────────── */
+.spot-illustration {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 160px;
+  height: auto;
+  filter: sepia(0.15) saturate(0.9);
+}
+@media (min-width: 640px) {
+  .spot-illustration {
+    max-width: 224px;
+  }
+}
+
+/* ── Small inline thumbnail ──────────────────────────── */
+.spot-illustration-sm {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  filter: sepia(0.15) saturate(0.9);
+  flex-shrink: 0;
+}
+@media (min-width: 640px) {
+  .spot-illustration-sm {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+/* ── Decorative elements ─────────────────────────────── */
+.decoration-wings {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 120px;
+  height: auto;
+  opacity: 0.25;
+  filter: sepia(0.2);
+}
+.decoration-divider {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 200px;
+  height: auto;
+  opacity: 0.2;
+  filter: sepia(0.2);
 }

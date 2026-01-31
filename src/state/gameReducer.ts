@@ -495,6 +495,8 @@ export function gameReducer(state: GameState, action: Action): GameState {
 
         // ── 8. Mercenary ──
         case ShopItemId.Mercenary: {
+          // Need at least 3 alive players: hirer, mercenary, and a target
+          if (s.players.filter((p) => p.alive).length < 3) return state;
           s = {
             ...s,
             phase: TurnPhase.MercenaryTarget,

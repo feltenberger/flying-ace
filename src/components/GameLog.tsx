@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useGame } from '../state/gameContext.tsx';
+import { UI_DIVIDER } from '../utils/images.ts';
 
 export default function GameLog() {
   const { state } = useGame();
@@ -17,7 +18,7 @@ export default function GameLog() {
     <div className="w-full">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 text-sm font-semibold text-slate-400 hover:text-slate-200 transition-colors mb-1"
+        className="flex items-center gap-2 text-sm font-semibold text-military-400 hover:text-military-200 transition-colors mb-1"
       >
         <span
           className={`inline-block transition-transform ${open ? 'rotate-90' : ''}`}
@@ -25,7 +26,7 @@ export default function GameLog() {
           &#9654;
         </span>
         Game Log
-        <span className="text-xs font-normal text-slate-500">
+        <span className="text-xs font-normal text-military-500">
           ({state.log.length} entries)
         </span>
       </button>
@@ -33,10 +34,11 @@ export default function GameLog() {
       {open && (
         <div
           ref={scrollRef}
-          className="rounded-lg border border-slate-600 bg-slate-800 max-h-60 overflow-y-auto p-2"
+          className="rounded-lg border border-military-600 bg-military-800 max-h-60 overflow-y-auto p-2"
         >
+          <img src={UI_DIVIDER} alt="" className="decoration-divider mb-2" />
           {state.log.length === 0 ? (
-            <p className="text-xs text-slate-500 text-center py-2">
+            <p className="text-xs text-military-500 text-center py-2">
               No log entries yet.
             </p>
           ) : (
@@ -44,15 +46,15 @@ export default function GameLog() {
               {state.log.map((entry, i) => (
                 <div
                   key={i}
-                  className="flex items-start gap-2 text-xs px-1 py-0.5 rounded hover:bg-slate-700/50"
+                  className="flex items-start gap-2 text-xs px-1 py-0.5 rounded hover:bg-military-700/50"
                 >
-                  <span className="flex-shrink-0 text-slate-500 font-mono w-6 text-right">
+                  <span className="flex-shrink-0 text-military-500 font-mono w-6 text-right">
                     {entry.turn}
                   </span>
-                  <span className="flex-shrink-0 font-semibold text-amber-400 min-w-[4rem]">
+                  <span className="flex-shrink-0 font-semibold text-brass-500 min-w-[4rem]">
                     {entry.playerName}
                   </span>
-                  <span className="text-slate-300">{entry.message}</span>
+                  <span className="text-military-300">{entry.message}</span>
                 </div>
               ))}
             </div>

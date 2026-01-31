@@ -8,6 +8,24 @@ import { deleteGame } from '../utils/persistence.ts'
 import GameLog from '../components/GameLog.tsx'
 import ConfirmDialog from '../components/ConfirmDialog.tsx'
 import RulesOverlay from '../components/RulesOverlay.tsx'
+import {
+  getRollResultImage,
+  DOGFIGHT_CHALLENGE,
+  DOGFIGHT_WIN,
+  DOGFIGHT_LOSE,
+  SHOP_ITEM_IMAGES,
+  SHOP_HANGAR,
+  ITEM_CHEAPBOMB,
+  ITEM_PRICEYBOMB,
+  ITEM_DONATION,
+  ITEM_MERCENARY,
+  ITEM_DIG,
+  ITEM_OILTYCOON,
+  BOMB_HIT,
+  BOMB_MISS,
+  TAX_MAINTENANCE,
+  UI_WINGS,
+} from '../utils/images.ts'
 
 // ── Scoreboard ──────────────────────────────────────────
 
@@ -16,12 +34,12 @@ function Scoreboard() {
   const current = state.players[state.currentPlayerIndex]
 
   return (
-    <div className="bg-slate-800 rounded-lg p-4 mb-4">
+    <div className="bg-military-800 rounded-lg p-4 mb-4">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">
+        <h3 className="text-sm font-semibold text-military-400 uppercase tracking-wider">
           Scoreboard
         </h3>
-        <span className="text-xs text-slate-500">Turn {state.turnNumber}</span>
+        <span className="text-xs text-military-500">Turn {state.turnNumber}</span>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
         {state.players.map((p) => (
@@ -29,24 +47,24 @@ function Scoreboard() {
             key={p.id}
             className={`rounded px-3 py-2 text-sm ${
               p.id === current.id
-                ? 'bg-sky-900/50 border border-sky-700'
+                ? 'bg-brass-500/10 border border-brass-500/40'
                 : p.alive
-                  ? 'bg-slate-700/50 border border-slate-700'
-                  : 'bg-slate-900/50 border border-slate-800 opacity-50'
+                  ? 'bg-military-700/50 border border-military-700'
+                  : 'bg-military-950/50 border border-military-800 opacity-50'
             }`}
           >
-            <div className={`font-semibold truncate ${p.id === current.id ? 'text-sky-300' : p.alive ? 'text-slate-200' : 'text-slate-500 line-through'}`}>
+            <div className={`font-semibold truncate ${p.id === current.id ? 'text-brass-500' : p.alive ? 'text-military-100' : 'text-military-500 line-through'}`}>
               {p.name}
             </div>
             {p.alive ? (
-              <div className="text-xs text-slate-400 mt-0.5">
+              <div className="text-xs text-military-400 mt-0.5">
                 {p.planes} plane{p.planes !== 1 ? 's' : ''} / {p.fuel} fuel
-                {p.insuranceTurnsLeft > 0 && <span className="text-emerald-400 ml-1">[Ins:{p.insuranceTurnsLeft}]</span>}
-                {p.hasAntiAircraft && <span className="text-orange-400 ml-1">[AA]</span>}
-                {p.hasOilTycoon && <span className="text-yellow-400 ml-1">[Oil]</span>}
+                {p.insuranceTurnsLeft > 0 && <span className="text-ops-500 ml-1">[Ins:{p.insuranceTurnsLeft}]</span>}
+                {p.hasAntiAircraft && <span className="text-brass-500 ml-1">[AA]</span>}
+                {p.hasOilTycoon && <span className="text-brass-400 ml-1">[Oil]</span>}
               </div>
             ) : (
-              <div className="text-xs text-red-400/60 mt-0.5">Eliminated</div>
+              <div className="text-xs text-danger-500/60 mt-0.5">Eliminated</div>
             )}
           </div>
         ))}
@@ -65,7 +83,7 @@ function RollPhase() {
     <PhaseCard title={`${player.name}'s Turn`}>
       <button
         onClick={() => dispatch({ type: 'ROLL_DIE', roll: rollDie() })}
-        className="w-full py-4 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold rounded-lg text-xl transition-colors"
+        className="w-full py-4 bg-brass-500 hover:bg-brass-400 text-military-950 font-bold rounded-lg text-xl transition-colors"
       >
         Roll Die
       </button>
@@ -89,12 +107,12 @@ function RollResultPhase() {
   }
 
   const rollColors: Record<number, string> = {
-    1: 'text-red-400',
-    2: 'text-orange-400',
-    3: 'text-emerald-400',
-    4: 'text-emerald-400',
-    5: 'text-emerald-400',
-    6: 'text-amber-400',
+    1: 'text-danger-500',
+    2: 'text-brass-400',
+    3: 'text-ops-500',
+    4: 'text-ops-500',
+    5: 'text-ops-500',
+    6: 'text-brass-500',
   }
 
   function handleContinue() {
@@ -117,14 +135,15 @@ function RollResultPhase() {
       className="flex flex-col items-center justify-center min-h-[50vh] cursor-pointer select-none"
       onClick={handleContinue}
     >
-      <div className="text-8xl font-black text-amber-400 mb-4">{roll}</div>
+      <img src={getRollResultImage(roll)} alt="" className="spot-illustration mb-4" />
+      <div className="text-8xl font-black text-brass-500 mb-4">{roll}</div>
       <div className={`text-2xl font-bold mb-2 ${rollColors[roll]}`}>
         {rollLabels[roll]}
       </div>
-      <p className="text-slate-300 text-lg mb-8 text-center max-w-sm">
+      <p className="text-military-300 text-lg mb-8 text-center max-w-sm">
         {state.rollResult}
       </p>
-      <span className="text-slate-500 text-sm">Tap anywhere or press any key to continue</span>
+      <span className="text-military-500 text-sm">Tap anywhere or press any key to continue</span>
     </div>
   )
 }
@@ -138,7 +157,8 @@ function DogFightPhase() {
 
   return (
     <PhaseCard title="Dog Fight!">
-      <p className="text-slate-300 mb-4">
+      <img src={DOGFIGHT_CHALLENGE} alt="" className="spot-illustration mb-4" />
+      <p className="text-military-300 mb-4">
         {player.name}, choose an opponent to fight:
       </p>
       <div className="space-y-2">
@@ -146,10 +166,10 @@ function DogFightPhase() {
           <button
             key={p.id}
             onClick={() => dispatch({ type: 'DOG_FIGHT_PICK', defenderId: p.id })}
-            className="w-full py-3 bg-slate-700 hover:bg-slate-600 text-slate-100 rounded transition-colors text-left px-4"
+            className="w-full py-3 bg-military-700 hover:bg-military-600 text-military-100 rounded transition-colors text-left px-4"
           >
             <span className="font-semibold">{p.name}</span>
-            <span className="text-slate-400 text-sm ml-2">
+            <span className="text-military-400 text-sm ml-2">
               ({p.planes} planes, {p.fuel} fuel)
             </span>
           </button>
@@ -179,34 +199,39 @@ function DogFightResultPhase() {
   return (
     <PhaseCard title="Dog Fight!">
       <div className="text-center mb-4">
-        <p className="text-lg text-slate-200">
-          <span className="text-sky-400 font-bold">{attacker.name}</span>
+        <p className="text-lg text-military-200">
+          <span className="text-raf-500 font-bold">{attacker.name}</span>
           {' vs '}
-          <span className="text-red-400 font-bold">{defender.name}</span>
+          <span className="text-danger-500 font-bold">{defender.name}</span>
         </p>
       </div>
 
       {!hasRolled ? (
         <button
           onClick={handleFight}
-          className="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg transition-colors"
+          className="w-full py-3 bg-danger-500 hover:bg-danger-400 text-white font-bold rounded-lg transition-colors"
         >
           Roll to Fight!
         </button>
       ) : (
         <div className="text-center">
-          <div className="text-5xl font-bold text-amber-400 mb-3">{df.attackerRoll}</div>
-          <p className="text-lg font-bold mb-2 text-slate-200">
+          <img
+            src={attackerWon ? DOGFIGHT_WIN : DOGFIGHT_LOSE}
+            alt=""
+            className="spot-illustration mb-3"
+          />
+          <div className="text-5xl font-bold text-brass-500 mb-3">{df.attackerRoll}</div>
+          <p className="text-lg font-bold mb-2 text-military-200">
             {attacker.name} rolled a {df.attackerRoll}.
           </p>
-          <p className={`text-sm mb-4 ${attackerWon ? 'text-emerald-400' : 'text-red-400'}`}>
+          <p className={`text-sm mb-4 ${attackerWon ? 'text-ops-500' : 'text-danger-500'}`}>
             {attackerWon
               ? `A ${df.attackerRoll} is a winning roll, so ${defender.name} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel.`
               : `A ${df.attackerRoll} is a losing roll, so ${attacker.name} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel.`}
           </p>
           <button
             onClick={() => dispatch({ type: 'DOG_FIGHT_ACKNOWLEDGE' })}
-            className="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded transition-colors"
+            className="px-6 py-2 bg-military-700 hover:bg-military-600 text-military-200 rounded transition-colors"
           >
             Continue
           </button>
@@ -238,15 +263,18 @@ function ShopPhase() {
         return !player.hasAntiAircraft && player.antiAircraftCooldown === 0
       case 'oil_tycoon':
         return !player.hasOilTycoon
+      case 'mercenary':
+        // Need at least 3 alive players: hirer, mercenary, and a target
+        return state.players.filter((p) => p.alive).length >= 3
       default:
         return true
     }
   }
 
   return (
-    <PhaseCard title="Shop">
-      <p className="text-slate-400 text-sm mb-4">
-        {player.name} has <span className="text-amber-400 font-bold">{player.fuel}</span> fuel.
+    <PhaseCard title="Shop" headerImage={SHOP_HANGAR}>
+      <p className="text-military-400 text-sm mb-4">
+        {player.name} has <span className="text-brass-500 font-bold">{player.fuel}</span> fuel.
         Buy one item or skip.
       </p>
       <div className="space-y-2 mb-4">
@@ -259,27 +287,36 @@ function ShopPhase() {
               disabled={!available}
               className={`w-full text-left px-4 py-3 rounded transition-colors ${
                 available
-                  ? 'bg-slate-700 hover:bg-slate-600 text-slate-100'
-                  : 'bg-slate-800/50 text-slate-600 cursor-not-allowed'
+                  ? 'bg-military-700 hover:bg-military-600 text-military-100'
+                  : 'bg-military-800/50 text-military-600 cursor-not-allowed'
               }`}
             >
-              <div className="flex justify-between items-center">
-                <div>
-                  <span className="text-xs text-slate-500 mr-2">#{item.number}</span>
-                  <span className="font-semibold">{item.name}</span>
+              <div className="flex items-center gap-3">
+                <img
+                  src={SHOP_ITEM_IMAGES[item.id]}
+                  alt=""
+                  className="spot-illustration-sm"
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <span className="text-xs text-military-500 mr-2">#{item.number}</span>
+                      <span className="font-semibold">{item.name}</span>
+                    </div>
+                    <span className={`text-sm font-mono ${available ? 'text-brass-500' : 'text-military-600'}`}>
+                      {item.cost === 'variable' ? 'var' : `${item.cost}f`}
+                    </span>
+                  </div>
+                  <p className="text-xs text-military-500 mt-1">{item.description}</p>
                 </div>
-                <span className={`text-sm font-mono ${available ? 'text-amber-400' : 'text-slate-600'}`}>
-                  {item.cost === 'variable' ? 'var' : `${item.cost}f`}
-                </span>
               </div>
-              <p className="text-xs text-slate-500 mt-1">{item.description}</p>
             </button>
           )
         })}
       </div>
       <button
         onClick={() => dispatch({ type: 'SKIP_SHOP' })}
-        className="w-full py-3 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded transition-colors"
+        className="w-full py-3 bg-military-700 hover:bg-military-600 text-military-300 rounded transition-colors"
       >
         Skip Shop
       </button>
@@ -296,16 +333,17 @@ function CheapBombTargetPhase() {
 
   return (
     <PhaseCard title="Cheap Bomb">
-      <p className="text-slate-300 mb-4">Choose a target:</p>
+      <img src={ITEM_CHEAPBOMB} alt="" className="spot-illustration mb-4" />
+      <p className="text-military-300 mb-4">Choose a target:</p>
       <div className="space-y-2">
         {targets.map((t) => (
           <button
             key={t.id}
             onClick={() => dispatch({ type: 'CHEAP_BOMB_TARGET', targetId: t.id })}
-            className="w-full py-3 bg-slate-700 hover:bg-slate-600 text-slate-100 rounded transition-colors px-4 text-left"
+            className="w-full py-3 bg-military-700 hover:bg-military-600 text-military-100 rounded transition-colors px-4 text-left"
           >
             <span className="font-semibold">{t.name}</span>
-            <span className="text-slate-400 text-sm ml-2">
+            <span className="text-military-400 text-sm ml-2">
               ({t.planes} planes{t.hasAntiAircraft ? ', AA' : ''}{t.insuranceTurnsLeft > 0 ? ', Ins' : ''})
             </span>
           </button>
@@ -322,13 +360,14 @@ function CheapBombRollPhase() {
 
   return (
     <PhaseCard title="Cheap Bomb">
-      <p className="text-slate-300 mb-4">
-        Bombing <span className="text-red-400 font-bold">{target.name}</span>.
+      <img src={ITEM_CHEAPBOMB} alt="" className="spot-illustration mb-4" />
+      <p className="text-military-300 mb-4">
+        Bombing <span className="text-danger-500 font-bold">{target.name}</span>.
         Roll 4-6 to hit!
       </p>
       <button
         onClick={() => dispatch({ type: 'CHEAP_BOMB_ROLL', roll: rollDie() })}
-        className="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg transition-colors"
+        className="w-full py-3 bg-danger-500 hover:bg-danger-400 text-white font-bold rounded-lg transition-colors"
       >
         Drop Bomb
       </button>
@@ -344,13 +383,18 @@ function CheapBombResultPhase() {
   return (
     <PhaseCard title="Cheap Bomb Result">
       <div className="text-center">
-        <div className="text-5xl font-bold text-amber-400 mb-3">{bomb.roll}</div>
-        <p className={`text-lg font-bold mb-4 ${bomb.hit ? 'text-red-400' : 'text-emerald-400'}`}>
+        <img
+          src={bomb.hit ? BOMB_HIT : BOMB_MISS}
+          alt=""
+          className="spot-illustration mb-3"
+        />
+        <div className="text-5xl font-bold text-brass-500 mb-3">{bomb.roll}</div>
+        <p className={`text-lg font-bold mb-4 ${bomb.hit ? 'text-danger-500' : 'text-ops-500'}`}>
           {bomb.hit ? `Hit! ${target.name} takes damage!` : 'Miss!'}
         </p>
         <button
           onClick={() => dispatch({ type: 'CHEAP_BOMB_ACKNOWLEDGE' })}
-          className="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded transition-colors"
+          className="px-6 py-2 bg-military-700 hover:bg-military-600 text-military-200 rounded transition-colors"
         >
           Continue
         </button>
@@ -368,7 +412,8 @@ function PriceyBombTargetPhase() {
 
   return (
     <PhaseCard title="Pricey Bomb">
-      <p className="text-slate-300 mb-4">
+      <img src={ITEM_PRICEYBOMB} alt="" className="spot-illustration mb-4" />
+      <p className="text-military-300 mb-4">
         Guaranteed hit! Choose a target:
       </p>
       <div className="space-y-2">
@@ -376,10 +421,10 @@ function PriceyBombTargetPhase() {
           <button
             key={t.id}
             onClick={() => dispatch({ type: 'PRICEY_BOMB_TARGET', targetId: t.id })}
-            className="w-full py-3 bg-slate-700 hover:bg-slate-600 text-slate-100 rounded transition-colors px-4 text-left"
+            className="w-full py-3 bg-military-700 hover:bg-military-600 text-military-100 rounded transition-colors px-4 text-left"
           >
             <span className="font-semibold">{t.name}</span>
-            <span className="text-slate-400 text-sm ml-2">
+            <span className="text-military-400 text-sm ml-2">
               ({t.planes} planes{t.hasAntiAircraft ? ', AA' : ''})
             </span>
           </button>
@@ -397,12 +442,13 @@ function PriceyBombResultPhase() {
   return (
     <PhaseCard title="Pricey Bomb Result">
       <div className="text-center">
-        <p className="text-lg text-red-400 font-bold mb-4">
+        <img src={BOMB_HIT} alt="" className="spot-illustration mb-3" />
+        <p className="text-lg text-danger-500 font-bold mb-4">
           Direct hit on {target.name}!
         </p>
         <button
           onClick={() => dispatch({ type: 'PRICEY_BOMB_ACKNOWLEDGE' })}
-          className="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded transition-colors"
+          className="px-6 py-2 bg-military-700 hover:bg-military-600 text-military-200 rounded transition-colors"
         >
           Continue
         </button>
@@ -420,7 +466,8 @@ function DonationTargetPhase() {
 
   return (
     <PhaseCard title="Donation">
-      <p className="text-slate-300 mb-4">
+      <img src={ITEM_DONATION} alt="" className="spot-illustration mb-4" />
+      <p className="text-military-300 mb-4">
         Choose who to donate fuel to (costs amount + 2 fee):
       </p>
       <div className="space-y-2">
@@ -428,10 +475,10 @@ function DonationTargetPhase() {
           <button
             key={t.id}
             onClick={() => dispatch({ type: 'DONATION_TARGET', targetId: t.id })}
-            className="w-full py-3 bg-slate-700 hover:bg-slate-600 text-slate-100 rounded transition-colors px-4 text-left"
+            className="w-full py-3 bg-military-700 hover:bg-military-600 text-military-100 rounded transition-colors px-4 text-left"
           >
             <span className="font-semibold">{t.name}</span>
-            <span className="text-slate-400 text-sm ml-2">({t.fuel} fuel)</span>
+            <span className="text-military-400 text-sm ml-2">({t.fuel} fuel)</span>
           </button>
         ))}
       </div>
@@ -455,28 +502,29 @@ function DonationAmountPhase() {
 
   return (
     <PhaseCard title="Donation">
-      <p className="text-slate-300 mb-4">
-        Donating to <span className="text-sky-400 font-bold">{recipient.name}</span>.
+      <img src={ITEM_DONATION} alt="" className="spot-illustration mb-4" />
+      <p className="text-military-300 mb-4">
+        Donating to <span className="text-raf-500 font-bold">{recipient.name}</span>.
         You have {player.fuel} fuel (2 fuel fee applies).
       </p>
       <div className="flex items-center gap-3 mb-4">
-        <label className="text-slate-400 text-sm">Amount:</label>
+        <label className="text-military-400 text-sm">Amount:</label>
         <input
           type="number"
           min={1}
           max={maxDonation}
           value={amount}
           onChange={(e) => setAmount(Math.max(1, Math.min(maxDonation, parseInt(e.target.value) || 1)))}
-          className="w-24 bg-slate-700 border border-slate-600 rounded px-3 py-2 text-slate-100 text-center focus:outline-none focus:border-sky-500"
+          className="w-24 bg-military-700 border border-military-600 rounded px-3 py-2 text-military-100 text-center focus:outline-none focus:border-raf-500"
         />
-        <span className="text-slate-500 text-sm">
+        <span className="text-military-500 text-sm">
           (total cost: {amount + 2})
         </span>
       </div>
       <button
         onClick={handleDonate}
         disabled={amount < 1 || amount > maxDonation}
-        className="w-full py-3 bg-sky-600 hover:bg-sky-500 disabled:bg-slate-600 disabled:text-slate-500 text-white font-bold rounded transition-colors"
+        className="w-full py-3 bg-raf-600 hover:bg-raf-500 disabled:bg-military-700 disabled:text-military-500 text-white font-bold rounded transition-colors"
       >
         Donate {amount} Fuel
       </button>
@@ -492,12 +540,13 @@ function DonationResultPhase() {
   return (
     <PhaseCard title="Donation Complete">
       <div className="text-center">
-        <p className="text-lg text-emerald-400 font-bold mb-4">
+        <img src={ITEM_DONATION} alt="" className="spot-illustration mb-3" />
+        <p className="text-lg text-ops-500 font-bold mb-4">
           Donated {donation.amount} fuel to {recipient.name}!
         </p>
         <button
           onClick={() => dispatch({ type: 'DONATION_ACKNOWLEDGE' })}
-          className="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded transition-colors"
+          className="px-6 py-2 bg-military-700 hover:bg-military-600 text-military-200 rounded transition-colors"
         >
           Continue
         </button>
@@ -515,16 +564,17 @@ function MercenaryTargetPhase() {
 
   return (
     <PhaseCard title="Hire Mercenary">
-      <p className="text-slate-300 mb-4">Choose a player to hire:</p>
+      <img src={ITEM_MERCENARY} alt="" className="spot-illustration mb-4" />
+      <p className="text-military-300 mb-4">Choose a player to hire:</p>
       <div className="space-y-2">
         {candidates.map((p) => (
           <button
             key={p.id}
             onClick={() => dispatch({ type: 'MERCENARY_TARGET', mercenaryId: p.id })}
-            className="w-full py-3 bg-slate-700 hover:bg-slate-600 text-slate-100 rounded transition-colors px-4 text-left"
+            className="w-full py-3 bg-military-700 hover:bg-military-600 text-military-100 rounded transition-colors px-4 text-left"
           >
             <span className="font-semibold">{p.name}</span>
-            <span className="text-slate-400 text-sm ml-2">
+            <span className="text-military-400 text-sm ml-2">
               ({p.planes} planes, {p.fuel} fuel)
             </span>
           </button>
@@ -544,25 +594,26 @@ function MercenaryOfferPhase() {
 
   return (
     <PhaseCard title="Mercenary Offer">
-      <p className="text-slate-300 mb-4">
-        Offer fuel to <span className="text-sky-400 font-bold">{mercenary.name}</span> to fight on your behalf.
+      <img src={ITEM_MERCENARY} alt="" className="spot-illustration mb-4" />
+      <p className="text-military-300 mb-4">
+        Offer fuel to <span className="text-raf-500 font-bold">{mercenary.name}</span> to fight on your behalf.
       </p>
       <div className="flex items-center gap-3 mb-4">
-        <label className="text-slate-400 text-sm">Offer:</label>
+        <label className="text-military-400 text-sm">Offer:</label>
         <input
           type="number"
           min={1}
           max={maxOffer}
           value={amount}
           onChange={(e) => setAmount(Math.max(1, Math.min(maxOffer, parseInt(e.target.value) || 1)))}
-          className="w-24 bg-slate-700 border border-slate-600 rounded px-3 py-2 text-slate-100 text-center focus:outline-none focus:border-sky-500"
+          className="w-24 bg-military-700 border border-military-600 rounded px-3 py-2 text-military-100 text-center focus:outline-none focus:border-raf-500"
         />
-        <span className="text-slate-500 text-sm">fuel (1-60)</span>
+        <span className="text-military-500 text-sm">fuel (1-60)</span>
       </div>
       <button
         onClick={() => dispatch({ type: 'MERCENARY_OFFER', amount })}
         disabled={amount < 1 || amount > maxOffer}
-        className="w-full py-3 bg-amber-500 hover:bg-amber-400 disabled:bg-slate-600 disabled:text-slate-500 text-slate-900 font-bold rounded transition-colors"
+        className="w-full py-3 bg-brass-500 hover:bg-brass-400 disabled:bg-military-700 disabled:text-military-500 text-military-950 font-bold rounded transition-colors"
       >
         Send Offer
       </button>
@@ -580,13 +631,13 @@ function MercenaryHandoverPhase() {
       className="flex flex-col items-center justify-center min-h-[40vh] cursor-pointer select-none"
       onClick={() => dispatch({ type: 'MERCENARY_HANDOVER_COMPLETE' })}
     >
-      <p className="text-slate-500 text-sm uppercase tracking-widest mb-4">
-        Pass the device to
+      <p className="text-military-500 text-sm uppercase tracking-widest mb-4">
+        Next pilot, report for duty
       </p>
-      <h2 className="text-4xl font-extrabold text-amber-400 mb-2">
+      <h2 className="font-stencil text-4xl text-brass-500 mb-2">
         {mercenary.name}
       </h2>
-      <p className="text-slate-400 text-sm mt-1 mb-6">
+      <p className="text-military-400 text-sm mt-1 mb-6">
         You have been offered {merc.offeredFuel} fuel as a mercenary
       </p>
       <button
@@ -594,7 +645,7 @@ function MercenaryHandoverPhase() {
           e.stopPropagation()
           dispatch({ type: 'MERCENARY_HANDOVER_COMPLETE' })
         }}
-        className="px-8 py-3 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-lg transition-colors"
+        className="px-8 py-3 bg-raf-600 hover:bg-raf-500 text-white font-bold rounded-lg transition-colors"
       >
         Ready
       </button>
@@ -609,21 +660,22 @@ function MercenaryResponsePhase() {
 
   return (
     <PhaseCard title="Mercenary Offer">
-      <p className="text-slate-300 mb-4">
-        <span className="text-sky-400 font-bold">{hirer.name}</span> is offering you{' '}
-        <span className="text-amber-400 font-bold">{merc.offeredFuel} fuel</span> to fight
+      <img src={ITEM_MERCENARY} alt="" className="spot-illustration mb-4" />
+      <p className="text-military-300 mb-4">
+        <span className="text-raf-500 font-bold">{hirer.name}</span> is offering you{' '}
+        <span className="text-brass-500 font-bold">{merc.offeredFuel} fuel</span> to fight
         as their mercenary.
       </p>
       <div className="flex gap-3">
         <button
           onClick={() => dispatch({ type: 'MERCENARY_RESPOND', accepted: true })}
-          className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded transition-colors"
+          className="flex-1 py-3 bg-ops-500 hover:bg-ops-400 text-white font-bold rounded transition-colors"
         >
           Accept
         </button>
         <button
           onClick={() => dispatch({ type: 'MERCENARY_RESPOND', accepted: false })}
-          className="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded transition-colors"
+          className="flex-1 py-3 bg-danger-500 hover:bg-danger-400 text-white font-bold rounded transition-colors"
         >
           Decline
         </button>
@@ -643,7 +695,8 @@ function MercenaryFightTargetPhase() {
 
   return (
     <PhaseCard title="Mercenary - Choose Target">
-      <p className="text-slate-300 mb-4">
+      <img src={DOGFIGHT_CHALLENGE} alt="" className="spot-illustration mb-4" />
+      <p className="text-military-300 mb-4">
         {hirer.name}, choose who {mercenary.name} will fight:
       </p>
       <div className="space-y-2">
@@ -651,10 +704,10 @@ function MercenaryFightTargetPhase() {
           <button
             key={t.id}
             onClick={() => dispatch({ type: 'MERCENARY_FIGHT_TARGET', targetId: t.id })}
-            className="w-full py-3 bg-slate-700 hover:bg-slate-600 text-slate-100 rounded transition-colors px-4 text-left"
+            className="w-full py-3 bg-military-700 hover:bg-military-600 text-military-100 rounded transition-colors px-4 text-left"
           >
             <span className="font-semibold">{t.name}</span>
-            <span className="text-slate-400 text-sm ml-2">
+            <span className="text-military-400 text-sm ml-2">
               ({t.planes} planes)
             </span>
           </button>
@@ -672,12 +725,13 @@ function MercenaryFightRollPhase() {
 
   return (
     <PhaseCard title="Mercenary - Number of Fights">
-      <p className="text-slate-300 mb-4">
+      <img src={DOGFIGHT_CHALLENGE} alt="" className="spot-illustration mb-4" />
+      <p className="text-military-300 mb-4">
         {mercenary.name} vs {target.name}. Roll to determine number of fights!
       </p>
       <button
         onClick={() => dispatch({ type: 'MERCENARY_FIGHT_COUNT_ROLL', roll: rollDie() })}
-        className="w-full py-3 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold rounded-lg transition-colors"
+        className="w-full py-3 bg-brass-500 hover:bg-brass-400 text-military-950 font-bold rounded-lg transition-colors"
       >
         Roll for Fights
       </button>
@@ -693,10 +747,11 @@ function MercenaryFightPhase() {
 
   return (
     <PhaseCard title={`Mercenary Fight ${merc.fightsCompleted + 1}/${merc.fightCount}`}>
-      <p className="text-slate-300 mb-4">
-        <span className="text-sky-400 font-bold">{mercenary.name}</span>
+      <img src={DOGFIGHT_CHALLENGE} alt="" className="spot-illustration mb-4" />
+      <p className="text-military-300 mb-4">
+        <span className="text-raf-500 font-bold">{mercenary.name}</span>
         {' vs '}
-        <span className="text-red-400 font-bold">{target.name}</span>
+        <span className="text-danger-500 font-bold">{target.name}</span>
       </p>
       <button
         onClick={() =>
@@ -705,7 +760,7 @@ function MercenaryFightPhase() {
             attackerRoll: rollDie(),
           })
         }
-        className="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg transition-colors"
+        className="w-full py-3 bg-danger-500 hover:bg-danger-400 text-white font-bold rounded-lg transition-colors"
       >
         Roll to Fight!
       </button>
@@ -724,18 +779,23 @@ function MercenaryFightResultPhase() {
   return (
     <PhaseCard title={`Fight ${merc.fightsCompleted}/${merc.fightCount} Result`}>
       <div className="text-center">
-        <div className="text-5xl font-bold text-amber-400 mb-3">{fight.attackerRoll}</div>
-        <p className="text-lg font-bold mb-2 text-slate-200">
+        <img
+          src={attackerWon ? DOGFIGHT_WIN : DOGFIGHT_LOSE}
+          alt=""
+          className="spot-illustration mb-3"
+        />
+        <div className="text-5xl font-bold text-brass-500 mb-3">{fight.attackerRoll}</div>
+        <p className="text-lg font-bold mb-2 text-military-200">
           {mercenary.name} rolled a {fight.attackerRoll}.
         </p>
-        <p className={`text-sm mb-4 ${attackerWon ? 'text-emerald-400' : 'text-red-400'}`}>
+        <p className={`text-sm mb-4 ${attackerWon ? 'text-ops-500' : 'text-danger-500'}`}>
           {attackerWon
             ? `A ${fight.attackerRoll} is a winning roll, so ${target.name} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel.`
             : `A ${fight.attackerRoll} is a losing roll, so ${mercenary.name} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel.`}
         </p>
         <button
           onClick={() => dispatch({ type: 'MERCENARY_FIGHT_ACKNOWLEDGE' })}
-          className="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded transition-colors"
+          className="px-6 py-2 bg-military-700 hover:bg-military-600 text-military-200 rounded transition-colors"
         >
           {merc.fightsCompleted < merc.fightCount! && mercenary.alive && target.alive
             ? 'Next Fight'
@@ -754,18 +814,19 @@ function MercenaryCompletePhase() {
   return (
     <PhaseCard title="Mercenary Complete">
       <div className="text-center">
+        <img src={ITEM_MERCENARY} alt="" className="spot-illustration mb-3" />
         {merc.accepted === false ? (
-          <p className="text-slate-300 mb-4">
+          <p className="text-military-300 mb-4">
             {mercenary.name} declined the offer.
           </p>
         ) : (
-          <p className="text-slate-300 mb-4">
+          <p className="text-military-300 mb-4">
             Mercenary contract complete. {merc.fightsCompleted} fight(s) resolved.
           </p>
         )}
         <button
           onClick={() => dispatch({ type: 'MERCENARY_COMPLETE_ACKNOWLEDGE' })}
-          className="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded transition-colors"
+          className="px-6 py-2 bg-military-700 hover:bg-military-600 text-military-200 rounded transition-colors"
         >
           Continue
         </button>
@@ -781,10 +842,11 @@ function DigForFuelRollPhase() {
 
   return (
     <PhaseCard title="Dig for Fuel">
-      <p className="text-slate-300 mb-4">Roll to see how much fuel you find!</p>
+      <img src={ITEM_DIG} alt="" className="spot-illustration mb-4" />
+      <p className="text-military-300 mb-4">Roll to see how much fuel you find!</p>
       <button
         onClick={() => dispatch({ type: 'DIG_FOR_FUEL_ROLL', roll: rollDie() })}
-        className="w-full py-3 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold rounded-lg transition-colors"
+        className="w-full py-3 bg-brass-500 hover:bg-brass-400 text-military-950 font-bold rounded-lg transition-colors"
       >
         Dig!
       </button>
@@ -800,13 +862,14 @@ function DigForFuelResultPhase() {
   return (
     <PhaseCard title="Dig for Fuel">
       <div className="text-center">
-        <div className="text-5xl font-bold text-amber-400 mb-3">{roll}</div>
-        <p className="text-lg text-emerald-400 font-bold mb-4">
+        <img src={ITEM_DIG} alt="" className="spot-illustration mb-3" />
+        <div className="text-5xl font-bold text-brass-500 mb-3">{roll}</div>
+        <p className="text-lg text-ops-500 font-bold mb-4">
           Found {fuelGained} fuel!
         </p>
         <button
           onClick={() => dispatch({ type: 'DIG_FOR_FUEL_ACKNOWLEDGE' })}
-          className="px-6 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded transition-colors"
+          className="px-6 py-2 bg-military-700 hover:bg-military-600 text-military-200 rounded transition-colors"
         >
           Continue
         </button>
@@ -824,25 +887,26 @@ function OilTycoonRepairPhase() {
 
   return (
     <PhaseCard title="Oil Tycoon Damaged!">
-      <p className="text-slate-300 mb-2">
+      <img src={ITEM_OILTYCOON} alt="" className="spot-illustration mb-4" />
+      <p className="text-military-300 mb-2">
         Your Oil Tycoon has been destroyed. You have{' '}
-        <span className="text-amber-400 font-bold">{player.oilTycoonRepairTurnsLeft}</span> turn(s)
+        <span className="text-brass-500 font-bold">{player.oilTycoonRepairTurnsLeft}</span> turn(s)
         left to repair it.
       </p>
-      <p className="text-slate-400 text-sm mb-4">
+      <p className="text-military-400 text-sm mb-4">
         Repair cost: {OIL_TYCOON_REPAIR_COST} fuel. You have {player.fuel} fuel.
       </p>
       <div className="flex gap-3">
         <button
           onClick={() => dispatch({ type: 'OIL_TYCOON_REPAIR' })}
           disabled={!canAfford}
-          className="flex-1 py-3 bg-amber-500 hover:bg-amber-400 disabled:bg-slate-600 disabled:text-slate-500 text-slate-900 font-bold rounded transition-colors"
+          className="flex-1 py-3 bg-brass-500 hover:bg-brass-400 disabled:bg-military-700 disabled:text-military-500 text-military-950 font-bold rounded transition-colors"
         >
           Repair ({OIL_TYCOON_REPAIR_COST}f)
         </button>
         <button
           onClick={() => dispatch({ type: 'OIL_TYCOON_SKIP_REPAIR' })}
-          className="flex-1 py-3 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded transition-colors"
+          className="flex-1 py-3 bg-military-700 hover:bg-military-600 text-military-300 rounded transition-colors"
         >
           Skip
         </button>
@@ -861,32 +925,33 @@ function TaxPhase() {
 
   return (
     <PhaseCard title="Fuel Tax">
-      <div className="bg-slate-700/50 rounded p-4 mb-4">
+      <img src={TAX_MAINTENANCE} alt="" className="spot-illustration mb-4" />
+      <div className="bg-military-700/50 rounded p-4 mb-4">
         <div className="flex justify-between text-sm mb-1">
-          <span className="text-slate-400">Planes:</span>
-          <span className="text-slate-200">{player.planes}</span>
+          <span className="text-military-400">Planes:</span>
+          <span className="text-military-200">{player.planes}</span>
         </div>
         <div className="flex justify-between text-sm mb-1">
-          <span className="text-slate-400">Tax per plane:</span>
-          <span className="text-slate-200">{FUEL_TAX_PER_PLANE}</span>
+          <span className="text-military-400">Tax per plane:</span>
+          <span className="text-military-200">{FUEL_TAX_PER_PLANE}</span>
         </div>
-        <div className="border-t border-slate-600 mt-2 pt-2 flex justify-between font-bold">
-          <span className="text-slate-300">Total tax:</span>
-          <span className={canAfford ? 'text-amber-400' : 'text-red-400'}>{taxOwed} fuel</span>
+        <div className="border-t border-military-600 mt-2 pt-2 flex justify-between font-bold">
+          <span className="text-military-300">Total tax:</span>
+          <span className={canAfford ? 'text-brass-500' : 'text-danger-500'}>{taxOwed} fuel</span>
         </div>
         <div className="flex justify-between text-sm mt-1">
-          <span className="text-slate-400">Your fuel:</span>
-          <span className="text-slate-200">{player.fuel}</span>
+          <span className="text-military-400">Your fuel:</span>
+          <span className="text-military-200">{player.fuel}</span>
         </div>
       </div>
       {!canAfford && (
-        <p className="text-red-400 text-sm mb-3">
+        <p className="text-danger-500 text-sm mb-3">
           Not enough fuel! You will lose a plane.
         </p>
       )}
       <button
         onClick={() => dispatch({ type: 'PAY_TAX' })}
-        className="w-full py-3 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold rounded transition-colors"
+        className="w-full py-3 bg-brass-500 hover:bg-brass-400 text-military-950 font-bold rounded transition-colors"
       >
         {canAfford ? 'Pay Tax' : 'Pay What You Can'}
       </button>
@@ -902,16 +967,17 @@ function TurnEndPhase() {
 
   return (
     <PhaseCard title="Turn Complete">
-      <div className="bg-slate-700/50 rounded p-4 mb-4">
-        <p className="text-slate-300 text-center">
+      <div className="bg-military-700/50 rounded p-4 mb-4">
+        <p className="text-military-300 text-center">
           {player.name} ends the turn with{' '}
-          <span className="text-amber-400 font-bold">{player.planes}</span> plane(s) and{' '}
-          <span className="text-amber-400 font-bold">{player.fuel}</span> fuel.
+          <span className="text-brass-500 font-bold">{player.planes}</span> plane(s) and{' '}
+          <span className="text-brass-500 font-bold">{player.fuel}</span> fuel.
         </p>
       </div>
+      <img src={UI_WINGS} alt="" className="decoration-wings mb-4" />
       <button
         onClick={() => dispatch({ type: 'END_TURN' })}
-        className="w-full py-3 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-lg transition-colors"
+        className="w-full py-3 bg-raf-600 hover:bg-raf-500 text-white font-bold rounded-lg transition-colors"
       >
         End Turn
       </button>
@@ -921,11 +987,21 @@ function TurnEndPhase() {
 
 // ── Shared Phase Card ───────────────────────────────────
 
-function PhaseCard({ title, children }: { title: string; children: React.ReactNode }) {
+function PhaseCard({ title, headerImage, children }: { title: string; headerImage?: string; children: React.ReactNode }) {
   return (
-    <div className="bg-slate-800 rounded-lg p-6 shadow-lg">
-      <h3 className="text-lg font-bold text-slate-100 mb-4">{title}</h3>
-      {children}
+    <div className="bg-military-800 rounded-lg shadow-lg overflow-hidden">
+      {headerImage && (
+        <div
+          className="h-24 bg-cover bg-center relative"
+          style={{ backgroundImage: `url(${headerImage})` }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-b from-military-800/40 to-military-800" />
+        </div>
+      )}
+      <div className="p-6">
+        <h3 className="text-lg font-bold text-military-100 mb-4">{title}</h3>
+        {children}
+      </div>
     </div>
   )
 }
@@ -1025,29 +1101,29 @@ function InGameMenu() {
       <div className="flex justify-end gap-2 mb-2 relative">
         <button
           onClick={() => setShowRules(true)}
-          className="text-slate-400 hover:text-slate-200 text-sm px-3 py-1 rounded border border-slate-700 hover:border-slate-500 transition-colors"
+          className="text-military-400 hover:text-military-200 text-sm px-3 py-1 rounded border border-military-600 hover:border-military-500 transition-colors"
         >
           Rules
         </button>
         <button
           onClick={() => setMenuOpen((v) => !v)}
-          className="text-slate-400 hover:text-slate-200 text-sm px-3 py-1 rounded border border-slate-700 hover:border-slate-500 transition-colors"
+          className="text-military-400 hover:text-military-200 text-sm px-3 py-1 rounded border border-military-600 hover:border-military-500 transition-colors"
         >
           Menu
         </button>
         {menuOpen && (
           <>
             <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
-            <div className="absolute right-0 top-full mt-1 z-50 bg-slate-800 border border-slate-600 rounded-lg shadow-xl min-w-[10rem]">
+            <div className="absolute right-0 top-full mt-1 z-50 bg-military-800 border border-military-600 rounded-lg shadow-xl min-w-[10rem]">
               <button
                 onClick={handleSaveExit}
-                className="w-full text-left px-4 py-2.5 text-sm text-slate-200 hover:bg-slate-700 rounded-t-lg transition-colors"
+                className="w-full text-left px-4 py-2.5 text-sm text-military-200 hover:bg-military-700 rounded-t-lg transition-colors"
               >
                 Save &amp; Exit
               </button>
               <button
                 onClick={handleReset}
-                className="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-slate-700 rounded-b-lg transition-colors"
+                className="w-full text-left px-4 py-2.5 text-sm text-danger-500 hover:bg-military-700 rounded-b-lg transition-colors"
               >
                 Reset Game
               </button>

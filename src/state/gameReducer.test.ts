@@ -835,6 +835,34 @@ describe('Mercenary', () => {
     expect(s.players[2].planes).toBe(charliePlanes2 - 1); // target lost plane
     expect(s.players[2].fuel).toBe(charlieFuel2 - 10); // target lost fuel
   });
+
+  it('54a. BUY_ITEM Mercenary rejected in 2-player game', () => {
+    let s = startedGame({ phase: TurnPhase.Shop });
+    s = withPlayer(s, 0, { fuel: 100 });
+    const s1 = gameReducer(s, { type: 'BUY_ITEM', itemId: ShopItemId.Mercenary });
+    // Should be rejected: no phase change, no mercenary state
+    expect(s1.phase).toBe(TurnPhase.Shop);
+    expect(s1.mercenary).toBeUndefined();
+  });
+
+  it('54b. BUY_ITEM Mercenary rejected when only 2 players alive in 3-player game', () => {
+    let s = threePlayerGame({ phase: TurnPhase.Shop });
+    s = withPlayer(s, 0, { fuel: 100 });
+    s = withPlayer(s, 2, { planes: 0, alive: false }); // Charlie eliminated
+    const s1 = gameReducer(s, { type: 'BUY_ITEM', itemId: ShopItemId.Mercenary });
+    // Should be rejected: only 2 alive players
+    expect(s1.phase).toBe(TurnPhase.Shop);
+    expect(s1.mercenary).toBeUndefined();
+  });
+
+  it('54c. BUY_ITEM Mercenary allowed with 3+ alive players', () => {
+    let s = threePlayerGame({ phase: TurnPhase.Shop });
+    s = withPlayer(s, 0, { fuel: 100 });
+    const s1 = gameReducer(s, { type: 'BUY_ITEM', itemId: ShopItemId.Mercenary });
+    expect(s1.phase).toBe(TurnPhase.MercenaryTarget);
+    expect(s1.mercenary).toBeDefined();
+    expect(s1.mercenary!.hirerId).toBe(s.players[0].id);
+  });
 });
 
 // ─────────────────────────────────────────────────────────

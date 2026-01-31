@@ -20,20 +20,20 @@ export default function ConfirmDialog({
       />
 
       {/* Dialog */}
-      <div className="relative z-10 rounded-xl bg-slate-800 border border-slate-600 shadow-2xl shadow-black/50 p-6 w-full max-w-sm">
-        <h3 className="text-lg font-bold text-slate-100 mb-2">{title}</h3>
-        <p className="text-sm text-slate-300 mb-5 leading-relaxed">{message}</p>
+      <div className="relative z-10 rounded-xl bg-military-800 border border-military-600 shadow-2xl shadow-black/50 p-6 w-full max-w-sm">
+        <h3 className="text-lg font-bold text-military-100 mb-2">{title}</h3>
+        <p className="text-sm text-military-300 mb-5 leading-relaxed">{message}</p>
 
         <div className="flex gap-3 justify-end">
           <button
             onClick={onCancel}
-            className="rounded-lg border border-slate-500 bg-slate-700 px-4 py-2 text-sm font-semibold text-slate-300 transition-colors hover:bg-slate-600 hover:text-slate-100 active:bg-slate-500"
+            className="rounded-lg border border-military-600 bg-military-700 px-4 py-2 text-sm font-semibold text-military-300 transition-colors hover:bg-military-600 hover:text-military-100 active:bg-military-500"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
-            className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-bold text-slate-900 transition-colors hover:bg-amber-400 active:bg-amber-600"
+            className="rounded-lg bg-brass-500 px-4 py-2 text-sm font-bold text-military-950 transition-colors hover:bg-brass-400 active:bg-brass-600"
           >
             Confirm
           </button>

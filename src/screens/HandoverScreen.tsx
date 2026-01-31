@@ -1,9 +1,11 @@
 import { useEffect, useCallback } from 'react'
 import { useGame } from '../state/gameContext.tsx'
+import { BG_COCKPIT, PILOT_READY, PILOT_SALUTE } from '../utils/images.ts'
 
 export function HandoverScreen() {
   const { state, dispatch } = useGame()
   const player = state.players[state.currentPlayerIndex]
+  const pilotImage = state.turnNumber % 2 === 0 ? PILOT_READY : PILOT_SALUTE
 
   const proceed = useCallback(() => {
     dispatch({ type: 'HANDOVER_COMPLETE' })
@@ -22,16 +24,18 @@ export function HandoverScreen() {
 
   return (
     <div
-      className="flex flex-col items-center justify-center min-h-[60vh] cursor-pointer select-none"
+      className="flex flex-col items-center justify-center min-h-[60vh] cursor-pointer select-none bg-scene rounded-lg"
+      style={{ '--bg-scene-url': `url(${BG_COCKPIT})` } as React.CSSProperties}
       onClick={proceed}
     >
-      <p className="text-slate-500 text-sm uppercase tracking-widest mb-4">
-        Pass the device to
+      <p className="text-military-500 text-sm uppercase tracking-widest mb-4">
+        Next pilot, report for duty
       </p>
-      <h2 className="text-5xl font-extrabold text-amber-400 mb-2">
+      <img src={pilotImage} alt="" className="spot-illustration mb-4" />
+      <h2 className="font-stencil text-5xl text-brass-500 mb-2">
         {player.name}
       </h2>
-      <p className="text-slate-400 text-sm mt-1 mb-8">
+      <p className="text-military-400 text-sm mt-1 mb-8">
         Turn {state.turnNumber}
       </p>
       <button
@@ -39,11 +43,11 @@ export function HandoverScreen() {
           e.stopPropagation()
           proceed()
         }}
-        className="px-8 py-3 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-lg transition-colors text-lg"
+        className="px-8 py-3 bg-raf-600 hover:bg-raf-500 text-white font-bold rounded-lg transition-colors text-lg"
       >
         Ready
       </button>
-      <p className="text-slate-600 text-xs mt-6">
+      <p className="text-military-600 text-xs mt-6">
         Press Space, Enter, or tap anywhere
       </p>
     </div>
