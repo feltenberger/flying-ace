@@ -124,7 +124,6 @@ def main():
     parser = argparse.ArgumentParser(description="Make background transparent using flood fill.")
     parser.add_argument("input", help="Input image filename")
     parser.add_argument("output", help="Output image filename")
-    parser.add_argument("color", nargs='?', help="Ignored (uses corners)") 
     parser.add_argument("--tolerance", type=int, default=30, help="Solid matching tolerance (default 30)")
     parser.add_argument("--feather", type=int, default=0, help="Soft edge feather range (default 0)")
 
