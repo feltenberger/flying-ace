@@ -26,26 +26,7 @@ def main():
 
     print(f"Generating image with prompt: '{args.prompt}' using model '{args.model}'...")
 
-    # Strategy 1: Try generate_images (Imagen style)
-    try:
-        response = client.models.generate_images(
-            model=args.model,
-            prompt=args.prompt,
-            config=types.GenerateImagesConfig(
-                number_of_images=1,
-            )
-        )
-        
-        if response.generated_images:
-            image = response.generated_images[0].image
-            image.save(args.output)
-            print(f"Success (generate_images)! Saved to {args.output}")
-            return
-    except Exception as e_imagen:
-        print(f"Standard image generation failed: {e_imagen}")
-        print("Attempting generate_content (multimodal style)...")
-
-    # Strategy 2: Try generate_content (Gemini style)
+    # Strategy 1: Try generate_content (Gemini/Multimodal style) - PREFERRED for Nano/Gemini
     try:
         response = client.models.generate_content(
             model=args.model,
@@ -64,13 +45,32 @@ def main():
                     print(f"Success (generate_content)! Saved to {args.output}")
                     return
         
-        print("No image data found in generate_content response.")
+        print("No image data found in generate_content response. Trying standard generation...")
         # Debug: print text content if any
         if response.text:
              print(f"Model returned text instead: {response.text}")
 
     except Exception as e_content:
         print(f"Multimodal generation failed: {e_content}")
+        print("Attempting generate_images (Imagen style)...")
+
+    # Strategy 2: Try generate_images (Imagen style) - Fallback
+    try:
+        response = client.models.generate_images(
+            model=args.model,
+            prompt=args.prompt,
+            config=types.GenerateImagesConfig(
+                number_of_images=1,
+            )
+        )
+        
+        if response.generated_images:
+            image = response.generated_images[0].image
+            image.save(args.output)
+            print(f"Success (generate_images)! Saved to {args.output}")
+            return
+    except Exception as e_imagen:
+        print(f"Standard image generation failed: {e_imagen}")
 
 if __name__ == "__main__":
     main()
