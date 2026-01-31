@@ -11,7 +11,7 @@ def main():
     parser = argparse.ArgumentParser(description="Generate an image using Google Gen AI (Imagen).")
     parser.add_argument("output", help="Output filename (e.g., image.png)")
     parser.add_argument("prompt", help="Prompt for the image")
-    parser.add_argument("--model", default="imagen-4.0-generate-001", help="Model name (default: imagen-4.0-generate-001)")
+    parser.add_argument("--model", default="nano-banana-pro-preview", help="Model name (default: nano-banana-pro-preview)")
 
     args = parser.parse_args()
 
