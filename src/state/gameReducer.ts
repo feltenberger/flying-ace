@@ -17,6 +17,7 @@ import {
   OIL_TYCOON_REPAIR_COST,
   OIL_TYCOON_REPAIR_WINDOW,
   OIL_TYCOON_HITS_TO_DESTROY,
+  DOGFIGHT_FUEL_PENALTY,
   SCHEMA_VERSION,
 } from '../types/game.ts';
 import { ShopItemId } from '../types/shop.ts';
@@ -342,7 +343,7 @@ export function gameReducer(state: GameState, action: Action): GameState {
     case 'DOG_FIGHT_ROLL': {
       if (state.phase !== TurnPhase.DogFightResult) return state;
 
-      const { attackerRoll, defenderRoll } = action;
+      const { attackerRoll } = action;
       const df = state.dogFight!;
       const loserId = attackerRoll <= 3 ? df.attackerId : df.defenderId;
 
@@ -351,7 +352,6 @@ export function gameReducer(state: GameState, action: Action): GameState {
         dogFight: {
           ...df,
           attackerRoll,
-          defenderRoll,
           loserId,
         },
       };
@@ -363,11 +363,17 @@ export function gameReducer(state: GameState, action: Action): GameState {
       s = addLog(
         s,
         attacker.name,
-        `Dog fight: ${attacker.name} rolled ${attackerRoll}, ${defender.name} rolled ${defenderRoll}. ${loserName} loses!`,
+        `Dog fight vs ${defender.name}: rolled ${attackerRoll}. ${loserName} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel!`,
       );
 
+      // Loser loses a plane
       const result = losePlane(s, loserId, 'dogfight');
       s = result.state;
+
+      // Loser also loses fuel
+      const loser = getPlayer(s, loserId);
+      s = updatePlayer(s, loserId, { fuel: Math.max(0, loser.fuel - DOGFIGHT_FUEL_PENALTY) });
+
       s = checkWinner(s);
       return s;
     }
@@ -795,7 +801,7 @@ export function gameReducer(state: GameState, action: Action): GameState {
     case 'MERCENARY_FIGHT_ROLL': {
       if (state.phase !== TurnPhase.MercenaryFight) return state;
 
-      const { attackerRoll, defenderRoll } = action;
+      const { attackerRoll } = action;
       const merc = state.mercenary!;
       const fight = merc.currentFight!;
       const loserId = attackerRoll <= 3 ? fight.attackerId : fight.defenderId;
@@ -807,7 +813,6 @@ export function gameReducer(state: GameState, action: Action): GameState {
           currentFight: {
             ...fight,
             attackerRoll,
-            defenderRoll,
             loserId,
           },
           fightsCompleted: merc.fightsCompleted + 1,
@@ -821,11 +826,17 @@ export function gameReducer(state: GameState, action: Action): GameState {
       s = addLog(
         s,
         mercenary.name,
-        `Mercenary fight ${merc.fightsCompleted + 1}/${merc.fightCount}: ${mercenary.name} rolled ${attackerRoll}, ${target.name} rolled ${defenderRoll}. ${loserName} loses!`,
+        `Mercenary fight ${merc.fightsCompleted + 1}/${merc.fightCount}: ${mercenary.name} rolled ${attackerRoll}. ${loserName} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel!`,
       );
 
+      // Loser loses a plane
       const result = losePlane(s, loserId, 'dogfight');
       s = result.state;
+
+      // Loser also loses fuel
+      const loser = getPlayer(s, loserId);
+      s = updatePlayer(s, loserId, { fuel: Math.max(0, loser.fuel - DOGFIGHT_FUEL_PENALTY) });
+
       s = checkWinner(s);
       s = { ...s, phase: TurnPhase.MercenaryFightResult };
       return s;

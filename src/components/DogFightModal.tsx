@@ -1,8 +1,7 @@
 import { useGame } from '../state/gameContext.tsx';
-import { TurnPhase } from '../types/game.ts';
+import { TurnPhase, DOGFIGHT_FUEL_PENALTY } from '../types/game.ts';
 import { rollDie } from '../utils/dice.ts';
 import PlayerPicker from './PlayerPicker.tsx';
-import DieRoll from './DieRoll.tsx';
 
 export default function DogFightModal() {
   const { state, dispatch } = useGame();
@@ -31,7 +30,7 @@ export default function DogFightModal() {
     );
   }
 
-  // Phase: Show result (rolls happen when entering this phase)
+  // Phase: Show result (roll happens when entering this phase)
   if (phase === TurnPhase.DogFightResult && dogFight) {
     const attacker = players.find((p) => p.id === dogFight.attackerId)!;
     const defender = players.find((p) => p.id === dogFight.defenderId)!;
@@ -39,8 +38,7 @@ export default function DogFightModal() {
 
     const handleRoll = () => {
       const attackerRoll = rollDie();
-      const defenderRoll = rollDie();
-      dispatch({ type: 'DOG_FIGHT_ROLL', attackerRoll, defenderRoll });
+      dispatch({ type: 'DOG_FIGHT_ROLL', attackerRoll });
     };
 
     if (!hasRolled) {
@@ -56,43 +54,27 @@ export default function DogFightModal() {
             onClick={handleRoll}
             className="rounded-lg bg-red-600 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-red-500 active:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400/50"
           >
-            Roll for Fight!
+            Roll to Fight!
           </button>
         </div>
       );
     }
 
-    // Rolls are in
-    const loser = players.find((p) => p.id === dogFight.loserId)!;
+    // Roll is in
     const attackerWon = dogFight.loserId !== dogFight.attackerId;
 
     return (
       <div className="rounded-xl bg-slate-800 border border-slate-600 p-6 w-full max-w-md mx-auto text-center">
         <h2 className="text-xl font-bold text-red-400 mb-4">Dog Fight Result</h2>
 
-        <div className="flex items-center justify-center gap-6 mb-4">
-          <div className="flex flex-col items-center gap-1">
-            <span className={`text-sm font-semibold ${attackerWon ? 'text-emerald-400' : 'text-red-400'}`}>
-              {attacker.name}
-            </span>
-            <DieRoll value={dogFight.attackerRoll!} />
-          </div>
-
-          <span className="text-slate-500 font-bold text-lg">vs</span>
-
-          <div className="flex flex-col items-center gap-1">
-            <span className={`text-sm font-semibold ${!attackerWon ? 'text-emerald-400' : 'text-red-400'}`}>
-              {defender.name}
-            </span>
-            <DieRoll value={dogFight.defenderRoll!} />
-          </div>
-        </div>
-
-        <p className="text-slate-100 mb-1">
-          <span className="text-red-400 font-bold">{loser.name}</span> loses a plane!
+        <div className="text-5xl font-bold text-amber-400 mb-3">{dogFight.attackerRoll}</div>
+        <p className="text-lg font-bold mb-2 text-slate-200">
+          {attacker.name} rolled a {dogFight.attackerRoll}.
         </p>
-        <p className="text-xs text-slate-400 mb-4">
-          Roll 1-3: attacker loses. Roll 4-6: defender loses.
+        <p className={`text-sm mb-4 ${attackerWon ? 'text-emerald-400' : 'text-red-400'}`}>
+          {attackerWon
+            ? `A ${dogFight.attackerRoll} is a winning roll, so ${defender.name} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel.`
+            : `A ${dogFight.attackerRoll} is a losing roll, so ${attacker.name} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel.`}
         </p>
 
         <button

@@ -43,7 +43,7 @@ export default function RulesOverlay({ onClose }: RulesOverlayProps) {
           <Section title="Die Roll">
             <ul className="space-y-1">
               <li><Roll n="1" /> &mdash; Lose a plane</li>
-              <li><Roll n="2" /> &mdash; Dog fight: pick an opponent, both roll, 1-3 attacker loses, 4-6 defender loses</li>
+              <li><Roll n="2" /> &mdash; Dog fight: pick an opponent, then roll. 1-3 you lose, 4-6 they lose. The loser loses a plane and 10 fuel.</li>
               <li><Roll n="3-5" /> &mdash; Gain roll &times; planes fuel</li>
               <li><Roll n="6" /> &mdash; Jackpot! Gain 10 &times; planes fuel</li>
             </ul>
@@ -58,7 +58,7 @@ export default function RulesOverlay({ onClose }: RulesOverlayProps) {
               <Item name="Cheap Bomb" cost="5f">Pick a target. Roll 4-6 to hit (lose a plane). If they have an Oil Tycoon, the bomb damages it instead.</Item>
               <Item name="Pricey Bomb" cost="12f">Pick a target. Guaranteed hit. Overrides Insurance. If they have an Oil Tycoon, it damages that instead.</Item>
               <Item name="Donation" cost="var">Give fuel to another player. Costs amount + 2 fuel fee.</Item>
-              <Item name="Mercenary" cost="var">Hire another player to dog fight a third. Offer 1-60 fuel. They can accept or decline. Number of fights decided by die roll (6 = 10).</Item>
+              <Item name="Mercenary" cost="var">Hire another player to dog fight a third. Offer 1-60 fuel. They can accept or decline. Number of fights decided by die roll (6 = 10). Each fight loser loses a plane and 10 fuel.</Item>
               <Item name="Anti-Aircraft" cost="12f">Absorbs one hit (any type, including Pricey Bombs), then is destroyed. 2-turn cooldown before repurchase. Max 1.</Item>
               <Item name="Oil Tycoon" cost="100f">Produces 25 fuel per turn. Destroyed after 3 bomb hits. You have 2 turns to repair it for 50 fuel or lose it permanently.</Item>
             </div>

@@ -76,7 +76,6 @@ export interface DogFightState {
   attackerId: string;
   defenderId: string;
   attackerRoll?: number;
-  defenderRoll?: number;
   loserId?: string;
 }
 
@@ -152,7 +151,7 @@ export type Action =
   | { type: 'ROLL_ACKNOWLEDGE' }
   // Dog fight
   | { type: 'DOG_FIGHT_PICK'; defenderId: string }
-  | { type: 'DOG_FIGHT_ROLL'; attackerRoll: number; defenderRoll: number }
+  | { type: 'DOG_FIGHT_ROLL'; attackerRoll: number }
   | { type: 'DOG_FIGHT_ACKNOWLEDGE' }
   // Shop
   | { type: 'SKIP_SHOP' }
@@ -178,7 +177,7 @@ export type Action =
   | { type: 'MERCENARY_RESPOND'; accepted: boolean }
   | { type: 'MERCENARY_FIGHT_TARGET'; targetId: string }
   | { type: 'MERCENARY_FIGHT_COUNT_ROLL'; roll: number }
-  | { type: 'MERCENARY_FIGHT_ROLL'; attackerRoll: number; defenderRoll: number }
+  | { type: 'MERCENARY_FIGHT_ROLL'; attackerRoll: number }
   | { type: 'MERCENARY_FIGHT_ACKNOWLEDGE' }
   | { type: 'MERCENARY_COMPLETE_ACKNOWLEDGE' }
   // Oil Tycoon repair
@@ -202,4 +201,5 @@ export const OIL_TYCOON_INCOME = 25;
 export const OIL_TYCOON_REPAIR_COST = 50;
 export const OIL_TYCOON_REPAIR_WINDOW = 2;
 export const OIL_TYCOON_HITS_TO_DESTROY = 3;
+export const DOGFIGHT_FUEL_PENALTY = 10;
 export const SCHEMA_VERSION = 1;

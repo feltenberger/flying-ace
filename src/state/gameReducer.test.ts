@@ -186,8 +186,9 @@ describe('Dog Fight', () => {
     expect(s.dogFight!.defenderId).toBe(s0.players[1].id);
   });
 
-  it('12. DOG_FIGHT_ROLL with attackerRoll 1-3: attacker loses plane', () => {
+  it('12. DOG_FIGHT_ROLL with attackerRoll 1-3: attacker loses plane and 10 fuel', () => {
     let s = dogFightState();
+    const attackerFuelBefore = s.players[0].fuel;
     s = gameReducer(s, {
       type: 'DOG_FIGHT_PICK',
       defenderId: s.players[1].id,
@@ -195,15 +196,16 @@ describe('Dog Fight', () => {
     s = gameReducer(s, {
       type: 'DOG_FIGHT_ROLL',
       attackerRoll: 2,
-      defenderRoll: 5,
     });
     expect(s.dogFight!.loserId).toBe(s.players[0].id);
     expect(s.players[0].planes).toBe(STARTING_PLANES - 1);
+    expect(s.players[0].fuel).toBe(attackerFuelBefore - 10);
     expect(s.players[1].planes).toBe(STARTING_PLANES);
   });
 
-  it('13. DOG_FIGHT_ROLL with attackerRoll 4-6: defender loses plane', () => {
+  it('13. DOG_FIGHT_ROLL with attackerRoll 4-6: defender loses plane and 10 fuel', () => {
     let s = dogFightState();
+    const defenderFuelBefore = s.players[1].fuel;
     s = gameReducer(s, {
       type: 'DOG_FIGHT_PICK',
       defenderId: s.players[1].id,
@@ -211,11 +213,11 @@ describe('Dog Fight', () => {
     s = gameReducer(s, {
       type: 'DOG_FIGHT_ROLL',
       attackerRoll: 5,
-      defenderRoll: 2,
     });
     expect(s.dogFight!.loserId).toBe(s.players[1].id);
     expect(s.players[0].planes).toBe(STARTING_PLANES);
     expect(s.players[1].planes).toBe(STARTING_PLANES - 1);
+    expect(s.players[1].fuel).toBe(defenderFuelBefore - 10);
   });
 
   it('14. DOG_FIGHT_ACKNOWLEDGE clears dogFight and transitions to Shop', () => {
@@ -227,7 +229,6 @@ describe('Dog Fight', () => {
     s = gameReducer(s, {
       type: 'DOG_FIGHT_ROLL',
       attackerRoll: 5,
-      defenderRoll: 2,
     });
     s = gameReducer(s, { type: 'DOG_FIGHT_ACKNOWLEDGE' });
     expect(s.dogFight).toBeUndefined();
@@ -364,11 +365,10 @@ describe('Shop - Insurance', () => {
       type: 'DOG_FIGHT_PICK',
       defenderId: s.players[1].id,
     });
-    // Attacker rolls low (1-3) => attacker (player 0) loses - but insurance blocks
+    // Attacker rolls low (1-3) => attacker (player 0) loses - but insurance blocks plane loss
     s = gameReducer(s, {
       type: 'DOG_FIGHT_ROLL',
       attackerRoll: 1,
-      defenderRoll: 5,
     });
     expect(s.players[0].planes).toBe(STARTING_PLANES);
   });
@@ -795,7 +795,7 @@ describe('Mercenary', () => {
     expect(s2.mercenary!.fightCount).toBe(10);
   });
 
-  it('53. MERCENARY_FIGHT_ROLL: loser loses plane', () => {
+  it('53. MERCENARY_FIGHT_ROLL: loser loses plane and 10 fuel', () => {
     let s = mercSetup();
     s = gameReducer(s, { type: 'MERCENARY_OFFER', amount: 25 });
     s = gameReducer(s, { type: 'MERCENARY_HANDOVER_COMPLETE' });
@@ -807,15 +807,16 @@ describe('Mercenary', () => {
     s = gameReducer(s, { type: 'MERCENARY_FIGHT_COUNT_ROLL', roll: 3 }); // 3 fights
 
     const bobPlanes = s.players[1].planes;
+    const bobFuel = s.players[1].fuel;
     const charliePlanes = s.players[2].planes;
 
     // Mercenary (Bob) rolls 2 => loses (attacker roll 1-3 => attacker loses)
     s = gameReducer(s, {
       type: 'MERCENARY_FIGHT_ROLL',
       attackerRoll: 2,
-      defenderRoll: 5,
     });
-    expect(s.players[1].planes).toBe(bobPlanes - 1); // mercenary lost
+    expect(s.players[1].planes).toBe(bobPlanes - 1); // mercenary lost plane
+    expect(s.players[1].fuel).toBe(bobFuel - 10); // mercenary lost fuel
     expect(s.players[2].planes).toBe(charliePlanes); // target unaffected
 
     // Acknowledge and next fight
@@ -823,15 +824,16 @@ describe('Mercenary', () => {
 
     const bobPlanes2 = s.players[1].planes;
     const charliePlanes2 = s.players[2].planes;
+    const charlieFuel2 = s.players[2].fuel;
 
     // Mercenary (Bob) rolls 5 => defender (Charlie) loses
     s = gameReducer(s, {
       type: 'MERCENARY_FIGHT_ROLL',
       attackerRoll: 5,
-      defenderRoll: 2,
     });
     expect(s.players[1].planes).toBe(bobPlanes2); // mercenary unaffected
-    expect(s.players[2].planes).toBe(charliePlanes2 - 1); // target lost
+    expect(s.players[2].planes).toBe(charliePlanes2 - 1); // target lost plane
+    expect(s.players[2].fuel).toBe(charlieFuel2 - 10); // target lost fuel
   });
 });
 

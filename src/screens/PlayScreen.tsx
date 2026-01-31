@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useGame } from '../state/gameContext.tsx'
-import { TurnPhase, FUEL_TAX_PER_PLANE, OIL_TYCOON_REPAIR_COST } from '../types/game.ts'
+import { TurnPhase, FUEL_TAX_PER_PLANE, OIL_TYCOON_REPAIR_COST, DOGFIGHT_FUEL_PENALTY } from '../types/game.ts'
 import { SHOP_CATALOG } from '../types/shop.ts'
 import type { ShopItemId } from '../types/shop.ts'
 import { rollDie } from '../utils/dice.ts'
@@ -171,9 +171,10 @@ function DogFightResultPhase() {
     dispatch({
       type: 'DOG_FIGHT_ROLL',
       attackerRoll: rollDie(),
-      defenderRoll: rollDie(),
     })
   }
+
+  const attackerWon = hasRolled && df.loserId !== df.attackerId
 
   return (
     <PhaseCard title="Dog Fight!">
@@ -190,22 +191,18 @@ function DogFightResultPhase() {
           onClick={handleFight}
           className="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg transition-colors"
         >
-          Fight!
+          Roll to Fight!
         </button>
       ) : (
         <div className="text-center">
-          <div className="flex justify-center gap-8 mb-4">
-            <div>
-              <div className="text-sm text-slate-400">{attacker.name}</div>
-              <div className="text-4xl font-bold text-sky-400">{df.attackerRoll}</div>
-            </div>
-            <div>
-              <div className="text-sm text-slate-400">{defender.name}</div>
-              <div className="text-4xl font-bold text-red-400">{df.defenderRoll}</div>
-            </div>
-          </div>
-          <p className="text-slate-300 mb-4">
-            {df.loserId === df.attackerId ? attacker.name : defender.name} loses a plane!
+          <div className="text-5xl font-bold text-amber-400 mb-3">{df.attackerRoll}</div>
+          <p className="text-lg font-bold mb-2 text-slate-200">
+            {attacker.name} rolled a {df.attackerRoll}.
+          </p>
+          <p className={`text-sm mb-4 ${attackerWon ? 'text-emerald-400' : 'text-red-400'}`}>
+            {attackerWon
+              ? `A ${df.attackerRoll} is a winning roll, so ${defender.name} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel.`
+              : `A ${df.attackerRoll} is a losing roll, so ${attacker.name} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel.`}
           </p>
           <button
             onClick={() => dispatch({ type: 'DOG_FIGHT_ACKNOWLEDGE' })}
@@ -706,12 +703,11 @@ function MercenaryFightPhase() {
           dispatch({
             type: 'MERCENARY_FIGHT_ROLL',
             attackerRoll: rollDie(),
-            defenderRoll: rollDie(),
           })
         }
         className="w-full py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg transition-colors"
       >
-        Fight!
+        Roll to Fight!
       </button>
     </PhaseCard>
   )
@@ -723,23 +719,19 @@ function MercenaryFightResultPhase() {
   const fight = merc.currentFight!
   const mercenary = state.players.find((p) => p.id === fight.attackerId)!
   const target = state.players.find((p) => p.id === fight.defenderId)!
-  const loser = fight.loserId === fight.attackerId ? mercenary : target
+  const attackerWon = fight.loserId !== fight.attackerId
 
   return (
     <PhaseCard title={`Fight ${merc.fightsCompleted}/${merc.fightCount} Result`}>
       <div className="text-center">
-        <div className="flex justify-center gap-8 mb-4">
-          <div>
-            <div className="text-sm text-slate-400">{mercenary.name}</div>
-            <div className="text-4xl font-bold text-sky-400">{fight.attackerRoll}</div>
-          </div>
-          <div>
-            <div className="text-sm text-slate-400">{target.name}</div>
-            <div className="text-4xl font-bold text-red-400">{fight.defenderRoll}</div>
-          </div>
-        </div>
-        <p className="text-slate-300 mb-4">
-          {loser.name} loses a plane!
+        <div className="text-5xl font-bold text-amber-400 mb-3">{fight.attackerRoll}</div>
+        <p className="text-lg font-bold mb-2 text-slate-200">
+          {mercenary.name} rolled a {fight.attackerRoll}.
+        </p>
+        <p className={`text-sm mb-4 ${attackerWon ? 'text-emerald-400' : 'text-red-400'}`}>
+          {attackerWon
+            ? `A ${fight.attackerRoll} is a winning roll, so ${target.name} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel.`
+            : `A ${fight.attackerRoll} is a losing roll, so ${mercenary.name} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel.`}
         </p>
         <button
           onClick={() => dispatch({ type: 'MERCENARY_FIGHT_ACKNOWLEDGE' })}

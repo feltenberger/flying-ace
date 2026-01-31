@@ -27,12 +27,12 @@
 Depending on what you roll, follow these instructions:
 
 * **\[ 1 \]** One of your planes is shot down.  
-* **\[ 2 \]** Have a **Dog Fight**.  
-  * *Dog Fight Rules:*  
-    * A) Pick someone to fight against.  
-    * B) Roll the dice.  
-      * If you roll **1-3**: You lose a plane. *(Note: faint scribble implies maybe \-10 Fuel too, but it is unclear).*  
-      * If you roll **4-6**: They lose a plane.  
+* **\[ 2 \]** Have a **Dog Fight**.
+  * *Dog Fight Rules:*
+    * A) Pick someone to fight against.
+    * B) Roll the die (only the attacker rolls).
+      * If you roll **1-3**: You lose a plane **and 10 Fuel**.
+      * If you roll **4-6**: They lose a plane **and 10 Fuel**.  
 * **\[ 3, 4, or 5 \]** Take **\[\# roll\] x \[\# planes you have\]**.  
   * *Example:* If you rolled a 5 and have 2 planes, take 10 Fuel.  
 * **\[ 6 \]** You get **10 x \[\# planes\]**.
@@ -61,7 +61,7 @@ Depending on what you roll, follow these instructions:
 | **\#5** | **Cheap Bomb** | Deploy immediately. Pick a player. Roll a die: • **1-3:** It doesn't hit. • **4-6:** It hits (they lose a plane). | **5 Fuel** |
 | **\#6** | **Pricey Bomb** | Pick 1 player to destroy 1 plane. It is **guaranteed** to destroy 1 plane. Deploy immediately after purchase. ***Note: This OVERRIDES Insurance.*** | **12 Fuel** |
 | **\#7** | **Donation** | Give another player the fuel you want to give away. You must pay **2 extra fuel** for the donation fee. | **Price \+ 2** |
-| **\#8** | **Mercenary** | Pick a player. Offer them **1-60 Fuel** (you choose amount). If the other player agrees to the price, they are your Mercenary. You pick another player that the mercenary must Dog Fight. The number of fights is decided by a dice roll after the agreement. For each Dog Fight, the loser of that instance of the Dog Fight loses one plane. | **Variable** |
+| **\#8** | **Mercenary** | Pick a player. Offer them **1-60 Fuel** (you choose amount). If the other player agrees to the price, they are your Mercenary. You pick another player that the mercenary must Dog Fight. The number of fights is decided by a dice roll after the agreement. For each Dog Fight, the loser loses one plane **and 10 Fuel**. | **Variable** |
 | **\#9** | **Anti-Aircraft** | Absorbs damage that would wreck a plane, then is destroyed. Max 1 per player. Cooldown after purchase before you can buy another: 2 turns. | **12 Fuel** |
 | **\#10** | **Oil Tycoon** | Produces **25 Fuel** every turn. • Can be destroyed by 3 bombs (unless blocked by Anti-Aircraft). • Repair destroyed tycoon for **50 Fuel**. If not repaired in 2 turns, you lose it. | **100 Fuel** |
 |  |  |  |  |

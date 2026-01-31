@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { useGame } from '../state/gameContext.tsx';
-import { TurnPhase } from '../types/game.ts';
+import { TurnPhase, DOGFIGHT_FUEL_PENALTY } from '../types/game.ts';
 import { rollDie } from '../utils/dice.ts';
 import PlayerPicker from './PlayerPicker.tsx';
-import DieRoll from './DieRoll.tsx';
 
 export default function MercenaryModal() {
   const { state, dispatch } = useGame();
@@ -167,12 +166,11 @@ export default function MercenaryModal() {
         <button
           onClick={() => {
             const attackerRoll = rollDie();
-            const defenderRoll = rollDie();
-            dispatch({ type: 'MERCENARY_FIGHT_ROLL', attackerRoll, defenderRoll });
+            dispatch({ type: 'MERCENARY_FIGHT_ROLL', attackerRoll });
           }}
           className="rounded-lg bg-red-600 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-red-500 active:bg-red-700"
         >
-          Roll!
+          Roll to Fight!
         </button>
       </div>
     );
@@ -181,7 +179,6 @@ export default function MercenaryModal() {
   // ── Phase: Fight result ────────────────────────────────
   if (phase === TurnPhase.MercenaryFightResult && mercenary.currentFight && mercenaryPlayer && targetPlayer) {
     const fight = mercenary.currentFight;
-    const loser = players.find((p) => p.id === fight.loserId)!;
     const attackerWon = fight.loserId !== fight.attackerId;
 
     return (
@@ -190,24 +187,14 @@ export default function MercenaryModal() {
           Fight {mercenary.fightsCompleted} of {mercenary.fightCount}
         </h2>
 
-        <div className="flex items-center justify-center gap-6 mb-4">
-          <div className="flex flex-col items-center gap-1">
-            <span className={`text-sm font-semibold ${attackerWon ? 'text-emerald-400' : 'text-red-400'}`}>
-              {mercenaryPlayer.name}
-            </span>
-            <DieRoll value={fight.attackerRoll!} />
-          </div>
-          <span className="text-slate-500 font-bold text-lg">vs</span>
-          <div className="flex flex-col items-center gap-1">
-            <span className={`text-sm font-semibold ${!attackerWon ? 'text-emerald-400' : 'text-red-400'}`}>
-              {targetPlayer.name}
-            </span>
-            <DieRoll value={fight.defenderRoll!} />
-          </div>
-        </div>
-
-        <p className="text-slate-100 mb-4">
-          <span className="text-red-400 font-bold">{loser.name}</span> loses a plane!
+        <div className="text-5xl font-bold text-amber-400 mb-3">{fight.attackerRoll}</div>
+        <p className="text-lg font-bold mb-2 text-slate-200">
+          {mercenaryPlayer.name} rolled a {fight.attackerRoll}.
+        </p>
+        <p className={`text-sm mb-4 ${attackerWon ? 'text-emerald-400' : 'text-red-400'}`}>
+          {attackerWon
+            ? `A ${fight.attackerRoll} is a winning roll, so ${targetPlayer.name} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel.`
+            : `A ${fight.attackerRoll} is a losing roll, so ${mercenaryPlayer.name} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel.`}
         </p>
 
         <button
