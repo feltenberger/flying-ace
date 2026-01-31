@@ -8,24 +8,7 @@ import { deleteGame } from '../utils/persistence.ts'
 import GameLog from '../components/GameLog.tsx'
 import ConfirmDialog from '../components/ConfirmDialog.tsx'
 import RulesOverlay from '../components/RulesOverlay.tsx'
-import {
-  getRollResultImage,
-  DOGFIGHT_CHALLENGE,
-  DOGFIGHT_WIN,
-  DOGFIGHT_LOSE,
-  SHOP_ITEM_IMAGES,
-  SHOP_HANGAR,
-  ITEM_CHEAPBOMB,
-  ITEM_PRICEYBOMB,
-  ITEM_DONATION,
-  ITEM_MERCENARY,
-  ITEM_DIG,
-  ITEM_OILTYCOON,
-  BOMB_HIT,
-  BOMB_MISS,
-  TAX_MAINTENANCE,
-  UI_WINGS,
-} from '../utils/images.ts'
+import { useImages } from '../utils/images.ts'
 
 // ── Scoreboard ──────────────────────────────────────────
 
@@ -95,6 +78,7 @@ function RollPhase() {
 
 function RollResultPhase() {
   const { state, dispatch } = useGame()
+  const images = useImages()
   const roll = state.lastRoll!
 
   const rollLabels: Record<number, string> = {
@@ -135,7 +119,7 @@ function RollResultPhase() {
       className="flex flex-col items-center justify-center min-h-[50vh] cursor-pointer select-none"
       onClick={handleContinue}
     >
-      <img src={getRollResultImage(roll)} alt="" className="spot-illustration mb-4" />
+      <img src={images.getRollResultImage(roll)} alt="" className="spot-illustration mb-4" />
       <div className="text-8xl font-black text-brass-500 mb-4">{roll}</div>
       <div className={`text-2xl font-bold mb-2 ${rollColors[roll]}`}>
         {rollLabels[roll]}
@@ -152,12 +136,13 @@ function RollResultPhase() {
 
 function DogFightPhase() {
   const { state, dispatch } = useGame()
+  const images = useImages()
   const player = state.players[state.currentPlayerIndex]
   const opponents = state.players.filter((p) => p.alive && p.id !== player.id)
 
   return (
     <PhaseCard title="Dog Fight!">
-      <img src={DOGFIGHT_CHALLENGE} alt="" className="spot-illustration mb-4" />
+      <img src={images.dogfightChallenge} alt="" className="spot-illustration mb-4" />
       <p className="text-military-300 mb-4">
         {player.name}, choose an opponent to fight:
       </p>
@@ -181,6 +166,7 @@ function DogFightPhase() {
 
 function DogFightResultPhase() {
   const { state, dispatch } = useGame()
+  const images = useImages()
   const df = state.dogFight!
   const attacker = state.players.find((p) => p.id === df.attackerId)!
   const defender = state.players.find((p) => p.id === df.defenderId)!
@@ -216,7 +202,7 @@ function DogFightResultPhase() {
       ) : (
         <div className="text-center">
           <img
-            src={attackerWon ? DOGFIGHT_WIN : DOGFIGHT_LOSE}
+            src={attackerWon ? images.dogfightWin : images.dogfightLose}
             alt=""
             className="spot-illustration mb-3"
           />
@@ -245,6 +231,7 @@ function DogFightResultPhase() {
 
 function ShopPhase() {
   const { state, dispatch } = useGame()
+  const images = useImages()
   const player = state.players[state.currentPlayerIndex]
 
   function canAfford(cost: number | 'variable'): boolean {
@@ -272,7 +259,7 @@ function ShopPhase() {
   }
 
   return (
-    <PhaseCard title="Shop" headerImage={SHOP_HANGAR}>
+    <PhaseCard title="Shop" headerImage={images.shopHangar}>
       <p className="text-military-400 text-sm mb-4">
         {player.name} has <span className="text-brass-500 font-bold">{player.fuel}</span> fuel.
         Buy one item or skip.
@@ -293,7 +280,7 @@ function ShopPhase() {
             >
               <div className="flex items-center gap-3">
                 <img
-                  src={SHOP_ITEM_IMAGES[item.id]}
+                  src={images.shopItemImages[item.id]}
                   alt=""
                   className="spot-illustration-sm"
                 />
@@ -328,12 +315,13 @@ function ShopPhase() {
 
 function CheapBombTargetPhase() {
   const { state, dispatch } = useGame()
+  const images = useImages()
   const player = state.players[state.currentPlayerIndex]
   const targets = state.players.filter((p) => p.alive && p.id !== player.id)
 
   return (
     <PhaseCard title="Cheap Bomb">
-      <img src={ITEM_CHEAPBOMB} alt="" className="spot-illustration mb-4" />
+      <img src={images.itemCheapbomb} alt="" className="spot-illustration mb-4" />
       <p className="text-military-300 mb-4">Choose a target:</p>
       <div className="space-y-2">
         {targets.map((t) => (
@@ -355,12 +343,13 @@ function CheapBombTargetPhase() {
 
 function CheapBombRollPhase() {
   const { state, dispatch } = useGame()
+  const images = useImages()
   const bomb = state.bomb!
   const target = state.players.find((p) => p.id === bomb.targetId)!
 
   return (
     <PhaseCard title="Cheap Bomb">
-      <img src={ITEM_CHEAPBOMB} alt="" className="spot-illustration mb-4" />
+      <img src={images.itemCheapbomb} alt="" className="spot-illustration mb-4" />
       <p className="text-military-300 mb-4">
         Bombing <span className="text-danger-500 font-bold">{target.name}</span>.
         Roll 4-6 to hit!
@@ -377,6 +366,7 @@ function CheapBombRollPhase() {
 
 function CheapBombResultPhase() {
   const { state, dispatch } = useGame()
+  const images = useImages()
   const bomb = state.bomb!
   const target = state.players.find((p) => p.id === bomb.targetId)!
 
@@ -384,7 +374,7 @@ function CheapBombResultPhase() {
     <PhaseCard title="Cheap Bomb Result">
       <div className="text-center">
         <img
-          src={bomb.hit ? BOMB_HIT : BOMB_MISS}
+          src={bomb.hit ? images.bombHit : images.bombMiss}
           alt=""
           className="spot-illustration mb-3"
         />
@@ -407,12 +397,13 @@ function CheapBombResultPhase() {
 
 function PriceyBombTargetPhase() {
   const { state, dispatch } = useGame()
+  const images = useImages()
   const player = state.players[state.currentPlayerIndex]
   const targets = state.players.filter((p) => p.alive && p.id !== player.id)
 
   return (
     <PhaseCard title="Pricey Bomb">
-      <img src={ITEM_PRICEYBOMB} alt="" className="spot-illustration mb-4" />
+      <img src={images.itemPriceybomb} alt="" className="spot-illustration mb-4" />
       <p className="text-military-300 mb-4">
         Guaranteed hit! Choose a target:
       </p>
@@ -436,13 +427,14 @@ function PriceyBombTargetPhase() {
 
 function PriceyBombResultPhase() {
   const { state, dispatch } = useGame()
+  const images = useImages()
   const bomb = state.bomb!
   const target = state.players.find((p) => p.id === bomb.targetId)!
 
   return (
     <PhaseCard title="Pricey Bomb Result">
       <div className="text-center">
-        <img src={BOMB_HIT} alt="" className="spot-illustration mb-3" />
+        <img src={images.bombHit} alt="" className="spot-illustration mb-3" />
         <p className="text-lg text-danger-500 font-bold mb-4">
           Direct hit on {target.name}!
         </p>
@@ -461,12 +453,13 @@ function PriceyBombResultPhase() {
 
 function DonationTargetPhase() {
   const { state, dispatch } = useGame()
+  const images = useImages()
   const player = state.players[state.currentPlayerIndex]
   const targets = state.players.filter((p) => p.alive && p.id !== player.id)
 
   return (
     <PhaseCard title="Donation">
-      <img src={ITEM_DONATION} alt="" className="spot-illustration mb-4" />
+      <img src={images.itemDonation} alt="" className="spot-illustration mb-4" />
       <p className="text-military-300 mb-4">
         Choose who to donate fuel to (costs amount + 2 fee):
       </p>
@@ -488,6 +481,7 @@ function DonationTargetPhase() {
 
 function DonationAmountPhase() {
   const { state, dispatch } = useGame()
+  const images = useImages()
   const player = state.players[state.currentPlayerIndex]
   const donation = state.donation!
   const recipient = state.players.find((p) => p.id === donation.recipientId)!
@@ -502,7 +496,7 @@ function DonationAmountPhase() {
 
   return (
     <PhaseCard title="Donation">
-      <img src={ITEM_DONATION} alt="" className="spot-illustration mb-4" />
+      <img src={images.itemDonation} alt="" className="spot-illustration mb-4" />
       <p className="text-military-300 mb-4">
         Donating to <span className="text-raf-500 font-bold">{recipient.name}</span>.
         You have {player.fuel} fuel (2 fuel fee applies).
@@ -534,13 +528,14 @@ function DonationAmountPhase() {
 
 function DonationResultPhase() {
   const { state, dispatch } = useGame()
+  const images = useImages()
   const donation = state.donation!
   const recipient = state.players.find((p) => p.id === donation.recipientId)!
 
   return (
     <PhaseCard title="Donation Complete">
       <div className="text-center">
-        <img src={ITEM_DONATION} alt="" className="spot-illustration mb-3" />
+        <img src={images.itemDonation} alt="" className="spot-illustration mb-3" />
         <p className="text-lg text-ops-500 font-bold mb-4">
           Donated {donation.amount} fuel to {recipient.name}!
         </p>
@@ -559,12 +554,13 @@ function DonationResultPhase() {
 
 function MercenaryTargetPhase() {
   const { state, dispatch } = useGame()
+  const images = useImages()
   const player = state.players[state.currentPlayerIndex]
   const candidates = state.players.filter((p) => p.alive && p.id !== player.id)
 
   return (
     <PhaseCard title="Hire Mercenary">
-      <img src={ITEM_MERCENARY} alt="" className="spot-illustration mb-4" />
+      <img src={images.itemMercenary} alt="" className="spot-illustration mb-4" />
       <p className="text-military-300 mb-4">Choose a player to hire:</p>
       <div className="space-y-2">
         {candidates.map((p) => (
@@ -586,6 +582,7 @@ function MercenaryTargetPhase() {
 
 function MercenaryOfferPhase() {
   const { state, dispatch } = useGame()
+  const images = useImages()
   const player = state.players[state.currentPlayerIndex]
   const merc = state.mercenary!
   const mercenary = state.players.find((p) => p.id === merc.mercenaryId)!
@@ -594,7 +591,7 @@ function MercenaryOfferPhase() {
 
   return (
     <PhaseCard title="Mercenary Offer">
-      <img src={ITEM_MERCENARY} alt="" className="spot-illustration mb-4" />
+      <img src={images.itemMercenary} alt="" className="spot-illustration mb-4" />
       <p className="text-military-300 mb-4">
         Offer fuel to <span className="text-raf-500 font-bold">{mercenary.name}</span> to fight on your behalf.
       </p>
@@ -655,12 +652,13 @@ function MercenaryHandoverPhase() {
 
 function MercenaryResponsePhase() {
   const { state, dispatch } = useGame()
+  const images = useImages()
   const merc = state.mercenary!
   const hirer = state.players.find((p) => p.id === merc.hirerId)!
 
   return (
     <PhaseCard title="Mercenary Offer">
-      <img src={ITEM_MERCENARY} alt="" className="spot-illustration mb-4" />
+      <img src={images.itemMercenary} alt="" className="spot-illustration mb-4" />
       <p className="text-military-300 mb-4">
         <span className="text-raf-500 font-bold">{hirer.name}</span> is offering you{' '}
         <span className="text-brass-500 font-bold">{merc.offeredFuel} fuel</span> to fight
@@ -686,6 +684,7 @@ function MercenaryResponsePhase() {
 
 function MercenaryFightTargetPhase() {
   const { state, dispatch } = useGame()
+  const images = useImages()
   const merc = state.mercenary!
   const hirer = state.players.find((p) => p.id === merc.hirerId)!
   const mercenary = state.players.find((p) => p.id === merc.mercenaryId)!
@@ -695,7 +694,7 @@ function MercenaryFightTargetPhase() {
 
   return (
     <PhaseCard title="Mercenary - Choose Target">
-      <img src={DOGFIGHT_CHALLENGE} alt="" className="spot-illustration mb-4" />
+      <img src={images.dogfightChallenge} alt="" className="spot-illustration mb-4" />
       <p className="text-military-300 mb-4">
         {hirer.name}, choose who {mercenary.name} will fight:
       </p>
@@ -719,13 +718,14 @@ function MercenaryFightTargetPhase() {
 
 function MercenaryFightRollPhase() {
   const { state, dispatch } = useGame()
+  const images = useImages()
   const merc = state.mercenary!
   const mercenary = state.players.find((p) => p.id === merc.mercenaryId)!
   const target = state.players.find((p) => p.id === merc.targetId)!
 
   return (
     <PhaseCard title="Mercenary - Number of Fights">
-      <img src={DOGFIGHT_CHALLENGE} alt="" className="spot-illustration mb-4" />
+      <img src={images.dogfightChallenge} alt="" className="spot-illustration mb-4" />
       <p className="text-military-300 mb-4">
         {mercenary.name} vs {target.name}. Roll to determine number of fights!
       </p>
@@ -741,13 +741,14 @@ function MercenaryFightRollPhase() {
 
 function MercenaryFightPhase() {
   const { state, dispatch } = useGame()
+  const images = useImages()
   const merc = state.mercenary!
   const mercenary = state.players.find((p) => p.id === merc.mercenaryId)!
   const target = state.players.find((p) => p.id === merc.targetId)!
 
   return (
     <PhaseCard title={`Mercenary Fight ${merc.fightsCompleted + 1}/${merc.fightCount}`}>
-      <img src={DOGFIGHT_CHALLENGE} alt="" className="spot-illustration mb-4" />
+      <img src={images.dogfightChallenge} alt="" className="spot-illustration mb-4" />
       <p className="text-military-300 mb-4">
         <span className="text-raf-500 font-bold">{mercenary.name}</span>
         {' vs '}
@@ -770,6 +771,7 @@ function MercenaryFightPhase() {
 
 function MercenaryFightResultPhase() {
   const { state, dispatch } = useGame()
+  const images = useImages()
   const merc = state.mercenary!
   const fight = merc.currentFight!
   const mercenary = state.players.find((p) => p.id === fight.attackerId)!
@@ -780,7 +782,7 @@ function MercenaryFightResultPhase() {
     <PhaseCard title={`Fight ${merc.fightsCompleted}/${merc.fightCount} Result`}>
       <div className="text-center">
         <img
-          src={attackerWon ? DOGFIGHT_WIN : DOGFIGHT_LOSE}
+          src={attackerWon ? images.dogfightWin : images.dogfightLose}
           alt=""
           className="spot-illustration mb-3"
         />
@@ -808,13 +810,14 @@ function MercenaryFightResultPhase() {
 
 function MercenaryCompletePhase() {
   const { state, dispatch } = useGame()
+  const images = useImages()
   const merc = state.mercenary!
   const mercenary = state.players.find((p) => p.id === merc.mercenaryId)!
 
   return (
     <PhaseCard title="Mercenary Complete">
       <div className="text-center">
-        <img src={ITEM_MERCENARY} alt="" className="spot-illustration mb-3" />
+        <img src={images.itemMercenary} alt="" className="spot-illustration mb-3" />
         {merc.accepted === false ? (
           <p className="text-military-300 mb-4">
             {mercenary.name} declined the offer.
@@ -839,10 +842,11 @@ function MercenaryCompletePhase() {
 
 function DigForFuelRollPhase() {
   const { dispatch } = useGame()
+  const images = useImages()
 
   return (
     <PhaseCard title="Dig for Fuel">
-      <img src={ITEM_DIG} alt="" className="spot-illustration mb-4" />
+      <img src={images.itemDig} alt="" className="spot-illustration mb-4" />
       <p className="text-military-300 mb-4">Roll to see how much fuel you find!</p>
       <button
         onClick={() => dispatch({ type: 'DIG_FOR_FUEL_ROLL', roll: rollDie() })}
@@ -856,13 +860,14 @@ function DigForFuelRollPhase() {
 
 function DigForFuelResultPhase() {
   const { state, dispatch } = useGame()
+  const images = useImages()
   const roll = state.digForFuelRoll!
   const fuelGained = roll === 6 ? 10 : roll
 
   return (
     <PhaseCard title="Dig for Fuel">
       <div className="text-center">
-        <img src={ITEM_DIG} alt="" className="spot-illustration mb-3" />
+        <img src={images.itemDig} alt="" className="spot-illustration mb-3" />
         <div className="text-5xl font-bold text-brass-500 mb-3">{roll}</div>
         <p className="text-lg text-ops-500 font-bold mb-4">
           Found {fuelGained} fuel!
@@ -882,12 +887,13 @@ function DigForFuelResultPhase() {
 
 function OilTycoonRepairPhase() {
   const { state, dispatch } = useGame()
+  const images = useImages()
   const player = state.players[state.currentPlayerIndex]
   const canAfford = player.fuel >= OIL_TYCOON_REPAIR_COST
 
   return (
     <PhaseCard title="Oil Tycoon Damaged!">
-      <img src={ITEM_OILTYCOON} alt="" className="spot-illustration mb-4" />
+      <img src={images.itemOiltycoon} alt="" className="spot-illustration mb-4" />
       <p className="text-military-300 mb-2">
         Your Oil Tycoon has been destroyed. You have{' '}
         <span className="text-brass-500 font-bold">{player.oilTycoonRepairTurnsLeft}</span> turn(s)
@@ -919,13 +925,14 @@ function OilTycoonRepairPhase() {
 
 function TaxPhase() {
   const { state, dispatch } = useGame()
+  const images = useImages()
   const player = state.players[state.currentPlayerIndex]
   const taxOwed = FUEL_TAX_PER_PLANE * player.planes
   const canAfford = player.fuel >= taxOwed
 
   return (
     <PhaseCard title="Fuel Tax">
-      <img src={TAX_MAINTENANCE} alt="" className="spot-illustration mb-4" />
+      <img src={images.taxMaintenance} alt="" className="spot-illustration mb-4" />
       <div className="bg-military-700/50 rounded p-4 mb-4">
         <div className="flex justify-between text-sm mb-1">
           <span className="text-military-400">Planes:</span>
@@ -963,6 +970,7 @@ function TaxPhase() {
 
 function TurnEndPhase() {
   const { state, dispatch } = useGame()
+  const images = useImages()
   const player = state.players[state.currentPlayerIndex]
 
   return (
@@ -974,7 +982,7 @@ function TurnEndPhase() {
           <span className="text-brass-500 font-bold">{player.fuel}</span> fuel.
         </p>
       </div>
-      <img src={UI_WINGS} alt="" className="decoration-wings mb-4" />
+      <img src={images.uiWings} alt="" className="decoration-wings mb-4" />
       <button
         onClick={() => dispatch({ type: 'END_TURN' })}
         className="w-full py-3 bg-raf-600 hover:bg-raf-500 text-white font-bold rounded-lg transition-colors"

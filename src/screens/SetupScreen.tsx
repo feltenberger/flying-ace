@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useGame } from '../state/gameContext.tsx'
 import { generateGameId } from '../utils/persistence.ts'
-import { BG_BRIEFING, UI_WINGS } from '../utils/images.ts'
+import { useImages } from '../utils/images.ts'
 
 export function SetupScreen() {
   const { dispatch } = useGame()
+  const images = useImages()
   const [names, setNames] = useState<string[]>(['', ''])
 
   const canStart = names.filter((n) => n.trim().length > 0).length >= 2
@@ -39,9 +40,9 @@ export function SetupScreen() {
   return (
     <div
       className="max-w-md mx-auto bg-scene rounded-lg"
-      style={{ '--bg-scene-url': `url(${BG_BRIEFING})` } as React.CSSProperties}
+      style={{ '--bg-scene-url': `url(${images.bgBriefing})` } as React.CSSProperties}
     >
-      <img src={UI_WINGS} alt="" className="decoration-wings mb-4 pt-4" />
+      <img src={images.uiWings} alt="" className="decoration-wings mb-4 pt-4" />
 
       <div className="bg-military-800/80 rounded-lg p-6 shadow-lg">
         <h2 className="text-2xl font-bold text-military-100 mb-2">New Game</h2>

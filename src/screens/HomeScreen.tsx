@@ -5,10 +5,11 @@ import { loadIndex, loadGame, deleteGame } from '../utils/persistence.ts'
 import type { GameIndexEntry } from '../types/game.ts'
 import { GameScreen } from '../types/game.ts'
 import ConfirmDialog from '../components/ConfirmDialog.tsx'
-import { SPLASH_HOME, UI_COMPASS } from '../utils/images.ts'
+import { useImages } from '../utils/images.ts'
 
 export function HomeScreen() {
   const { dispatch } = useGame()
+  const images = useImages()
   const [entries, setEntries] = useState<GameIndexEntry[]>([])
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
@@ -56,7 +57,7 @@ export function HomeScreen() {
     <div className="max-w-md mx-auto">
       <div className="rounded-lg overflow-hidden mb-6 border border-military-600 shadow-lg">
         <img
-          src={SPLASH_HOME}
+          src={images.splashHome}
           alt=""
           className="w-full h-auto block"
         />
@@ -140,7 +141,7 @@ export function HomeScreen() {
       {entries.length === 0 && (
         <div className="text-center mt-4 relative">
           <img
-            src={UI_COMPASS}
+            src={images.uiCompass}
             alt=""
             className="mx-auto w-32 opacity-15 mb-3"
           />

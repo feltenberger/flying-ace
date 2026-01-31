@@ -1,4 +1,4 @@
-import { SHOP_ITEM_IMAGES } from '../utils/images.ts'
+import { useImages } from '../utils/images.ts'
 import { ShopItemId } from '../types/shop.ts'
 
 interface RulesOverlayProps {
@@ -6,6 +6,8 @@ interface RulesOverlayProps {
 }
 
 export default function RulesOverlay({ onClose }: RulesOverlayProps) {
+  const images = useImages()
+
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4">
       <div
@@ -54,16 +56,16 @@ export default function RulesOverlay({ onClose }: RulesOverlayProps) {
 
           <Section title="Shop Items">
             <div className="space-y-2">
-              <Item name="1 Plane" cost="10f" image={SHOP_ITEM_IMAGES[ShopItemId.Plane]}>Gain 1 plane.</Item>
-              <Item name="2-Plane Pack" cost="15f" image={SHOP_ITEM_IMAGES[ShopItemId.TwoPlanePack]}>Gain 2 planes.</Item>
-              <Item name="Dig for Fuel" cost="1f" image={SHOP_ITEM_IMAGES[ShopItemId.DigForFuel]}>Roll a die and gain that much fuel (6 = 10).</Item>
-              <Item name="Insurance" cost="10f" image={SHOP_ITEM_IMAGES[ShopItemId.Insurance]}>Protects against plane loss for 3 turns (die rolls, dog fights, tax). Does NOT block Pricey Bombs. One purchase per game.</Item>
-              <Item name="Cheap Bomb" cost="5f" image={SHOP_ITEM_IMAGES[ShopItemId.CheapBomb]}>Pick a target. Roll 4-6 to hit (lose a plane). If they have an Oil Tycoon, the bomb damages it instead.</Item>
-              <Item name="Pricey Bomb" cost="12f" image={SHOP_ITEM_IMAGES[ShopItemId.PriceyBomb]}>Pick a target. Guaranteed hit. Overrides Insurance. If they have an Oil Tycoon, it damages that instead.</Item>
-              <Item name="Donation" cost="var" image={SHOP_ITEM_IMAGES[ShopItemId.Donation]}>Give fuel to another player. Costs amount + 2 fuel fee.</Item>
-              <Item name="Mercenary" cost="var" image={SHOP_ITEM_IMAGES[ShopItemId.Mercenary]}>Hire another player to dog fight a third. Offer 1-60 fuel. They can accept or decline. Number of fights decided by die roll (6 = 10). Each fight loser loses a plane and 10 fuel.</Item>
-              <Item name="Anti-Aircraft" cost="12f" image={SHOP_ITEM_IMAGES[ShopItemId.AntiAircraft]}>Absorbs one hit (any type, including Pricey Bombs), then is destroyed. 2-turn cooldown before repurchase. Max 1.</Item>
-              <Item name="Oil Tycoon" cost="100f" image={SHOP_ITEM_IMAGES[ShopItemId.OilTycoon]}>Produces 25 fuel per turn. Destroyed after 3 bomb hits. You have 2 turns to repair it for 50 fuel or lose it permanently.</Item>
+              <Item name="1 Plane" cost="10f" image={images.shopItemImages[ShopItemId.Plane]}>Gain 1 plane.</Item>
+              <Item name="2-Plane Pack" cost="15f" image={images.shopItemImages[ShopItemId.TwoPlanePack]}>Gain 2 planes.</Item>
+              <Item name="Dig for Fuel" cost="1f" image={images.shopItemImages[ShopItemId.DigForFuel]}>Roll a die and gain that much fuel (6 = 10).</Item>
+              <Item name="Insurance" cost="10f" image={images.shopItemImages[ShopItemId.Insurance]}>Protects against plane loss for 3 turns (die rolls, dog fights, tax). Does NOT block Pricey Bombs. One purchase per game.</Item>
+              <Item name="Cheap Bomb" cost="5f" image={images.shopItemImages[ShopItemId.CheapBomb]}>Pick a target. Roll 4-6 to hit (lose a plane). If they have an Oil Tycoon, the bomb damages it instead.</Item>
+              <Item name="Pricey Bomb" cost="12f" image={images.shopItemImages[ShopItemId.PriceyBomb]}>Pick a target. Guaranteed hit. Overrides Insurance. If they have an Oil Tycoon, it damages that instead.</Item>
+              <Item name="Donation" cost="var" image={images.shopItemImages[ShopItemId.Donation]}>Give fuel to another player. Costs amount + 2 fuel fee.</Item>
+              <Item name="Mercenary" cost="var" image={images.shopItemImages[ShopItemId.Mercenary]}>Hire another player to dog fight a third. Offer 1-60 fuel. They can accept or decline. Number of fights decided by die roll (6 = 10). Each fight loser loses a plane and 10 fuel.</Item>
+              <Item name="Anti-Aircraft" cost="12f" image={images.shopItemImages[ShopItemId.AntiAircraft]}>Absorbs one hit (any type, including Pricey Bombs), then is destroyed. 2-turn cooldown before repurchase. Max 1.</Item>
+              <Item name="Oil Tycoon" cost="100f" image={images.shopItemImages[ShopItemId.OilTycoon]}>Produces 25 fuel per turn. Destroyed after 3 bomb hits. You have 2 turns to repair it for 50 fuel or lose it permanently.</Item>
             </div>
           </Section>
 

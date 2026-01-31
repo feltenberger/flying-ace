@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { useGame } from '../state/gameContext.tsx';
-import { UI_DIVIDER } from '../utils/images.ts';
+import { useImages } from '../utils/images.ts';
 
 export default function GameLog() {
   const { state } = useGame();
+  const images = useImages();
   const [open, setOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -36,7 +37,7 @@ export default function GameLog() {
           ref={scrollRef}
           className="rounded-lg border border-military-600 bg-military-800 max-h-60 overflow-y-auto p-2"
         >
-          <img src={UI_DIVIDER} alt="" className="decoration-divider mb-2" />
+          <img src={images.uiDivider} alt="" className="decoration-divider mb-2" />
           {state.log.length === 0 ? (
             <p className="text-xs text-military-500 text-center py-2">
               No log entries yet.

@@ -1,90 +1,200 @@
+import { createContext, useContext, useState, useMemo, useCallback, createElement } from 'react'
 import type { ShopItemId } from '../types/shop.ts'
 
-// ── Background images ────────────────────────────────────
-export const BG_MAP = '/images/bg-map.png'
-export const BG_BRIEFING = '/images/bg-briefing.png'
-export const BG_COCKPIT = '/images/bg-cockpit.png'
+// ── Available image sets ────────────────────────────────
+export const IMAGE_SETS: string[] = ['default']
 
-// ── Title / branding ─────────────────────────────────────
-export const TITLE_LOGO = '/images/title-logo.png'
-export const TITLE_BANNER = '/images/title-banner.png'
+const STORAGE_KEY = 'flying-ace-image-set'
 
-// ── Pilot portraits ──────────────────────────────────────
-export const PILOT_READY = '/images/pilot-ready.png'
-export const PILOT_SALUTE = '/images/pilot-salute.png'
+// ── Images object type ──────────────────────────────────
 
-// ── Roll result images ───────────────────────────────────
-export const ROLL_SHOTDOWN = '/images/roll-shotdown.png'
-export const ROLL_DOGFIGHT = '/images/roll-dogfight.png'
-export const ROLL_FUEL = '/images/roll-fuel.png'
-export const ROLL_JACKPOT = '/images/roll-jackpot.png'
-
-// ── Dogfight images ──────────────────────────────────────
-export const DOGFIGHT_CHALLENGE = '/images/dogfight-challenge.png'
-export const DOGFIGHT_WIN = '/images/dogfight-win.png'
-export const DOGFIGHT_LOSE = '/images/dogfight-lose.png'
-
-// ── Shop / hangar ────────────────────────────────────────
-export const SHOP_HANGAR = '/images/shop-hangar.png'
-
-// ── Item images ──────────────────────────────────────────
-export const ITEM_PLANE = '/images/item-plane.png'
-export const ITEM_PLANES = '/images/item-planes.png'
-export const ITEM_DIG = '/images/item-dig.png'
-export const ITEM_INSURANCE = '/images/item-insurance.png'
-export const ITEM_CHEAPBOMB = '/images/item-cheapbomb.png'
-export const ITEM_PRICEYBOMB = '/images/item-priceybomb.png'
-export const ITEM_DONATION = '/images/item-donation.png'
-export const ITEM_MERCENARY = '/images/item-mercenary.png'
-export const ITEM_ANTIAIRCRAFT = '/images/item-antiaircraft.png'
-export const ITEM_OILTYCOON = '/images/item-oiltycoon.png'
-
-// ── Bomb result images ───────────────────────────────────
-export const BOMB_HIT = '/images/bomb-hit.png'
-export const BOMB_MISS = '/images/bomb-miss.png'
-
-// ── End-game images ──────────────────────────────────────
-export const VICTORY = '/images/victory.png'
-export const ELIMINATED = '/images/eliminated.png'
-
-// ── Tax ──────────────────────────────────────────────────
-export const TAX_MAINTENANCE = '/images/tax-maintenance.png'
-
-// ── Splash ───────────────────────────────────────────
-export const SPLASH_HOME = '/images/splash-home.png'
-
-// ── UI decorations ───────────────────────────────────────
-export const UI_BORDER_CORNER = '/images/ui-border-corner.png'
-export const UI_DIVIDER = '/images/ui-divider.png'
-export const UI_COMPASS = '/images/ui-compass.png'
-export const UI_WINGS = '/images/ui-wings.png'
-
-// ── Shop item → image mapping ────────────────────────────
-
-export const SHOP_ITEM_IMAGES: Record<ShopItemId, string> = {
-  plane: ITEM_PLANE,
-  two_plane_pack: ITEM_PLANES,
-  dig_for_fuel: ITEM_DIG,
-  insurance: ITEM_INSURANCE,
-  cheap_bomb: ITEM_CHEAPBOMB,
-  pricey_bomb: ITEM_PRICEYBOMB,
-  donation: ITEM_DONATION,
-  mercenary: ITEM_MERCENARY,
-  anti_aircraft: ITEM_ANTIAIRCRAFT,
-  oil_tycoon: ITEM_OILTYCOON,
+export interface GameImages {
+  bgMap: string
+  bgBriefing: string
+  bgCockpit: string
+  titleLogo: string
+  titleBanner: string
+  pilotReady: string
+  pilotSalute: string
+  rollShotdown: string
+  rollDogfight: string
+  rollFuel: string
+  rollJackpot: string
+  dogfightChallenge: string
+  dogfightWin: string
+  dogfightLose: string
+  shopHangar: string
+  itemPlane: string
+  itemPlanes: string
+  itemDig: string
+  itemInsurance: string
+  itemCheapbomb: string
+  itemPriceybomb: string
+  itemDonation: string
+  itemMercenary: string
+  itemAntiaircraft: string
+  itemOiltycoon: string
+  bombHit: string
+  bombMiss: string
+  victory: string
+  eliminated: string
+  taxMaintenance: string
+  splashHome: string
+  uiBorderCorner: string
+  uiDivider: string
+  uiCompass: string
+  uiWings: string
+  shopItemImages: Record<ShopItemId, string>
+  getRollResultImage: (roll: number) => string
 }
 
-// ── Roll result → image mapping ──────────────────────────
+// ── Path builder ────────────────────────────────────────
 
-const ROLL_RESULT_IMAGES: Record<number, string> = {
-  1: ROLL_SHOTDOWN,
-  2: ROLL_DOGFIGHT,
-  3: ROLL_FUEL,
-  4: ROLL_FUEL,
-  5: ROLL_FUEL,
-  6: ROLL_JACKPOT,
+export function buildImages(setName: string): GameImages {
+  const p = (file: string) => `/images/${setName}/${file}`
+
+  const bgMap = p('bg-map.png')
+  const bgBriefing = p('bg-briefing.png')
+  const bgCockpit = p('bg-cockpit.png')
+  const titleLogo = p('title-logo.png')
+  const titleBanner = p('title-banner.png')
+  const pilotReady = p('pilot-ready.png')
+  const pilotSalute = p('pilot-salute.png')
+  const rollShotdown = p('roll-shotdown.png')
+  const rollDogfight = p('roll-dogfight.png')
+  const rollFuel = p('roll-fuel.png')
+  const rollJackpot = p('roll-jackpot.png')
+  const dogfightChallenge = p('dogfight-challenge.png')
+  const dogfightWin = p('dogfight-win.png')
+  const dogfightLose = p('dogfight-lose.png')
+  const shopHangar = p('shop-hangar.png')
+  const itemPlane = p('item-plane.png')
+  const itemPlanes = p('item-planes.png')
+  const itemDig = p('item-dig.png')
+  const itemInsurance = p('item-insurance.png')
+  const itemCheapbomb = p('item-cheapbomb.png')
+  const itemPriceybomb = p('item-priceybomb.png')
+  const itemDonation = p('item-donation.png')
+  const itemMercenary = p('item-mercenary.png')
+  const itemAntiaircraft = p('item-antiaircraft.png')
+  const itemOiltycoon = p('item-oiltycoon.png')
+  const bombHit = p('bomb-hit.png')
+  const bombMiss = p('bomb-miss.png')
+  const victory = p('victory.png')
+  const eliminated = p('eliminated.png')
+  const taxMaintenance = p('tax-maintenance.png')
+  const splashHome = p('splash-home.png')
+  const uiBorderCorner = p('ui-border-corner.png')
+  const uiDivider = p('ui-divider.png')
+  const uiCompass = p('ui-compass.png')
+  const uiWings = p('ui-wings.png')
+
+  const shopItemImages: Record<ShopItemId, string> = {
+    plane: itemPlane,
+    two_plane_pack: itemPlanes,
+    dig_for_fuel: itemDig,
+    insurance: itemInsurance,
+    cheap_bomb: itemCheapbomb,
+    pricey_bomb: itemPriceybomb,
+    donation: itemDonation,
+    mercenary: itemMercenary,
+    anti_aircraft: itemAntiaircraft,
+    oil_tycoon: itemOiltycoon,
+  }
+
+  const rollResultImages: Record<number, string> = {
+    1: rollShotdown,
+    2: rollDogfight,
+    3: rollFuel,
+    4: rollFuel,
+    5: rollFuel,
+    6: rollJackpot,
+  }
+
+  function getRollResultImage(roll: number): string {
+    return rollResultImages[roll] ?? rollFuel
+  }
+
+  return {
+    bgMap,
+    bgBriefing,
+    bgCockpit,
+    titleLogo,
+    titleBanner,
+    pilotReady,
+    pilotSalute,
+    rollShotdown,
+    rollDogfight,
+    rollFuel,
+    rollJackpot,
+    dogfightChallenge,
+    dogfightWin,
+    dogfightLose,
+    shopHangar,
+    itemPlane,
+    itemPlanes,
+    itemDig,
+    itemInsurance,
+    itemCheapbomb,
+    itemPriceybomb,
+    itemDonation,
+    itemMercenary,
+    itemAntiaircraft,
+    itemOiltycoon,
+    bombHit,
+    bombMiss,
+    victory,
+    eliminated,
+    taxMaintenance,
+    splashHome,
+    uiBorderCorner,
+    uiDivider,
+    uiCompass,
+    uiWings,
+    shopItemImages,
+    getRollResultImage,
+  }
 }
 
-export function getRollResultImage(roll: number): string {
-  return ROLL_RESULT_IMAGES[roll] ?? ROLL_FUEL
+// ── Context ─────────────────────────────────────────────
+
+interface ImageSetContextValue {
+  imageSet: string
+  setImageSet: (name: string) => void
+}
+
+export const ImageSetContext = createContext<ImageSetContextValue | null>(null)
+
+export function ImageSetProvider({ children }: { children: React.ReactNode }) {
+  const [imageSet, setImageSetRaw] = useState(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY)
+      if (stored && IMAGE_SETS.includes(stored)) return stored
+    } catch { /* ignore */ }
+    return 'default'
+  })
+
+  const setImageSet = useCallback((name: string) => {
+    setImageSetRaw(name)
+    try {
+      localStorage.setItem(STORAGE_KEY, name)
+    } catch { /* ignore */ }
+  }, [])
+
+  const value = useMemo(() => ({ imageSet, setImageSet }), [imageSet, setImageSet])
+
+  return createElement(ImageSetContext.Provider, { value }, children)
+}
+
+// ── Hooks ───────────────────────────────────────────────
+
+export function useImageSet(): { imageSet: string; setImageSet: (name: string) => void } {
+  const ctx = useContext(ImageSetContext)
+  if (!ctx) throw new Error('useImageSet must be used within an ImageSetProvider')
+  return ctx
+}
+
+export function useImages(): GameImages {
+  const { imageSet } = useImageSet()
+  return useMemo(() => buildImages(imageSet), [imageSet])
 }

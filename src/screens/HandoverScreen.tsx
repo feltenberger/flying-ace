@@ -1,11 +1,12 @@
 import { useEffect, useCallback } from 'react'
 import { useGame } from '../state/gameContext.tsx'
-import { BG_COCKPIT, PILOT_READY, PILOT_SALUTE } from '../utils/images.ts'
+import { useImages } from '../utils/images.ts'
 
 export function HandoverScreen() {
   const { state, dispatch } = useGame()
+  const images = useImages()
   const player = state.players[state.currentPlayerIndex]
-  const pilotImage = state.turnNumber % 2 === 0 ? PILOT_READY : PILOT_SALUTE
+  const pilotImage = state.turnNumber % 2 === 0 ? images.pilotReady : images.pilotSalute
 
   const proceed = useCallback(() => {
     dispatch({ type: 'HANDOVER_COMPLETE' })
@@ -25,7 +26,7 @@ export function HandoverScreen() {
   return (
     <div
       className="flex flex-col items-center justify-center min-h-[60vh] cursor-pointer select-none bg-scene rounded-lg"
-      style={{ '--bg-scene-url': `url(${BG_COCKPIT})` } as React.CSSProperties}
+      style={{ '--bg-scene-url': `url(${images.bgCockpit})` } as React.CSSProperties}
       onClick={proceed}
     >
       <p className="text-military-500 text-sm uppercase tracking-widest mb-4">

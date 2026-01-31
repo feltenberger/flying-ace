@@ -1,6 +1,6 @@
 import { useGame } from '../state/gameContext.tsx';
 import type { Player } from '../types/game.ts';
-import { UI_WINGS } from '../utils/images.ts';
+import { useImages } from '../utils/images.ts';
 
 function StatusIcons({ player }: { player: Player }) {
   return (
@@ -79,6 +79,7 @@ function PlayerCard({
 
 export default function Scoreboard() {
   const { state } = useGame();
+  const images = useImages();
   const currentPlayerId = state.players[state.currentPlayerIndex]?.id;
 
   return (
@@ -86,7 +87,7 @@ export default function Scoreboard() {
       <h3 className="text-xs font-semibold uppercase tracking-wider text-military-400 mb-1">
         Players
       </h3>
-      <img src={UI_WINGS} alt="" className="decoration-wings mb-2" style={{ maxWidth: '80px', opacity: 0.18 }} />
+      <img src={images.uiWings} alt="" className="decoration-wings mb-2" style={{ maxWidth: '80px', opacity: 0.18 }} />
       <div className="flex flex-wrap gap-2">
         {state.players.map((player) => (
           <PlayerCard

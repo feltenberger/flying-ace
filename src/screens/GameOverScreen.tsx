@@ -1,9 +1,10 @@
 import { useGame } from '../state/gameContext.tsx'
 import GameLog from '../components/GameLog.tsx'
-import { VICTORY, ELIMINATED, UI_WINGS } from '../utils/images.ts'
+import { useImages } from '../utils/images.ts'
 
 export function GameOverScreen() {
   const { state, dispatch } = useGame()
+  const images = useImages()
   const winner = state.players.find((p) => p.id === state.winnerId)
 
   function handlePlayAgain() {
@@ -14,7 +15,7 @@ export function GameOverScreen() {
     <div className="max-w-md mx-auto">
       {/* Victory banner */}
       <div className="bg-military-800 rounded-lg p-8 shadow-lg text-center mb-6">
-        <img src={VICTORY} alt="" className="spot-illustration mb-4" />
+        <img src={images.victory} alt="" className="spot-illustration mb-4" />
         <p className="font-stencil text-military-400 text-sm uppercase tracking-widest mb-3">
           Victory!
         </p>
@@ -24,7 +25,7 @@ export function GameOverScreen() {
         <p className="text-military-300 text-lg">wins the game!</p>
       </div>
 
-      <img src={UI_WINGS} alt="" className="decoration-wings mb-4" />
+      <img src={images.uiWings} alt="" className="decoration-wings mb-4" />
 
       {/* Final standings */}
       <div className="bg-military-800 rounded-lg p-6 shadow-lg mb-6">
@@ -58,7 +59,7 @@ export function GameOverScreen() {
                   </span>
                   <div className="flex items-center gap-2">
                     {!player.alive && player.id !== state.winnerId && (
-                      <img src={ELIMINATED} alt="Eliminated" className="w-5 h-5 object-contain opacity-60" />
+                      <img src={images.eliminated} alt="Eliminated" className="w-5 h-5 object-contain opacity-60" />
                     )}
                     <div>
                       <span
@@ -107,7 +108,7 @@ export function GameOverScreen() {
         </div>
       </div>
 
-      <img src={UI_WINGS} alt="" className="decoration-wings mb-4" />
+      <img src={images.uiWings} alt="" className="decoration-wings mb-4" />
 
       {/* Game Log */}
       <div className="mb-6">
