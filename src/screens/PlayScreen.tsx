@@ -7,6 +7,7 @@ import { rollDie } from '../utils/dice.ts'
 import { deleteGame } from '../utils/persistence.ts'
 import GameLog from '../components/GameLog.tsx'
 import ConfirmDialog from '../components/ConfirmDialog.tsx'
+import RulesOverlay from '../components/RulesOverlay.tsx'
 
 // ── Scoreboard ──────────────────────────────────────────
 
@@ -1005,6 +1006,7 @@ function PhaseRouter() {
 function InGameMenu() {
   const { state, dispatch } = useGame()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [showRules, setShowRules] = useState(false)
   const [showResetConfirm, setShowResetConfirm] = useState(false)
 
   function handleSaveExit() {
@@ -1027,8 +1029,14 @@ function InGameMenu() {
 
   return (
     <>
-      {/* Menu toggle button */}
-      <div className="flex justify-end mb-2 relative">
+      {/* Menu + Rules buttons */}
+      <div className="flex justify-end gap-2 mb-2 relative">
+        <button
+          onClick={() => setShowRules(true)}
+          className="text-slate-400 hover:text-slate-200 text-sm px-3 py-1 rounded border border-slate-700 hover:border-slate-500 transition-colors"
+        >
+          Rules
+        </button>
         <button
           onClick={() => setMenuOpen((v) => !v)}
           className="text-slate-400 hover:text-slate-200 text-sm px-3 py-1 rounded border border-slate-700 hover:border-slate-500 transition-colors"
@@ -1055,6 +1063,9 @@ function InGameMenu() {
           </>
         )}
       </div>
+
+      {/* Rules overlay */}
+      {showRules && <RulesOverlay onClose={() => setShowRules(false)} />}
 
       {/* Reset confirmation dialog */}
       {showResetConfirm && (
