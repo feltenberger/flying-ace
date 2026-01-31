@@ -50,6 +50,9 @@ export const ELIMINATED = '/images/eliminated.png'
 // ── Tax ──────────────────────────────────────────────────
 export const TAX_MAINTENANCE = '/images/tax-maintenance.png'
 
+// ── Splash ───────────────────────────────────────────
+export const SPLASH_HOME = '/images/splash-home.png'
+
 // ── UI decorations ───────────────────────────────────────
 export const UI_BORDER_CORNER = '/images/ui-border-corner.png'
 export const UI_DIVIDER = '/images/ui-divider.png'

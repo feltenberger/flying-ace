@@ -5,7 +5,7 @@ import { loadIndex, loadGame, deleteGame } from '../utils/persistence.ts'
 import type { GameIndexEntry } from '../types/game.ts'
 import { GameScreen } from '../types/game.ts'
 import ConfirmDialog from '../components/ConfirmDialog.tsx'
-import { UI_WINGS, UI_COMPASS } from '../utils/images.ts'
+import { SPLASH_HOME, UI_COMPASS } from '../utils/images.ts'
 
 export function HomeScreen() {
   const { dispatch } = useGame()
@@ -54,7 +54,13 @@ export function HomeScreen() {
 
   return (
     <div className="max-w-md mx-auto">
-      <img src={UI_WINGS} alt="" className="decoration-wings mb-4" />
+      <div className="rounded-lg overflow-hidden mb-6 border border-military-600 shadow-lg">
+        <img
+          src={SPLASH_HOME}
+          alt=""
+          className="w-full h-auto block"
+        />
+      </div>
 
       <button
         onClick={handleNewGame}
