@@ -267,24 +267,18 @@ export function gameReducer(state: GameState, action: Action): GameState {
         s = {
           ...s,
           rollResult: result.description,
-          phase: TurnPhase.Shop,
+          phase: TurnPhase.RollResult,
         };
-        // Check for elimination -> win
         s = checkWinner(s);
-        if (s.winnerId) return s;
-        // If current player was eliminated, skip to turn end
-        if (!getPlayer(s, player.id).alive) {
-          s = { ...s, phase: TurnPhase.TurnEnd };
-        }
         return s;
       }
 
       if (roll === 2) {
-        // Dog fight — pick an opponent
+        // Dog fight — show result first, then pick opponent
         s = {
           ...s,
-          rollResult: 'Dog fight! Pick an opponent.',
-          phase: TurnPhase.DogFight,
+          rollResult: 'Dog fight! You must pick an opponent.',
+          phase: TurnPhase.RollResult,
           dogFight: {
             attackerId: player.id,
             defenderId: '',
@@ -300,9 +294,31 @@ export function gameReducer(state: GameState, action: Action): GameState {
       s = {
         ...s,
         rollResult: `Gained ${fuelGain} fuel!`,
-        phase: TurnPhase.Shop,
+        phase: TurnPhase.RollResult,
       };
       return s;
+    }
+
+    case 'ROLL_ACKNOWLEDGE': {
+      if (state.phase !== TurnPhase.RollResult) return state;
+
+      // If game already won (e.g. roll of 1 eliminated last opponent), stay
+      if (state.winnerId) return state;
+
+      const player = currentPlayer(state);
+
+      // If current player was eliminated by roll of 1, skip to turn end
+      if (!player.alive) {
+        return { ...state, phase: TurnPhase.TurnEnd };
+      }
+
+      // Roll of 2: proceed to dog fight
+      if (state.lastRoll === 2) {
+        return { ...state, phase: TurnPhase.DogFight };
+      }
+
+      // All other rolls: proceed to shop
+      return { ...state, phase: TurnPhase.Shop };
     }
 
     // ─── Dog Fight ─────────────────────────────────────

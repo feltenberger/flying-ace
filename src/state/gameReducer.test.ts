@@ -93,23 +93,29 @@ describe('Core Game Flow', () => {
 describe('Die Roll', () => {
   it('4. Roll 1: player loses a plane', () => {
     const s0 = startedGame();
-    const s = gameReducer(s0, { type: 'ROLL_DIE', roll: 1 });
+    let s = gameReducer(s0, { type: 'ROLL_DIE', roll: 1 });
     expect(s.players[0].planes).toBe(STARTING_PLANES - 1);
+    expect(s.phase).toBe(TurnPhase.RollResult);
+    s = gameReducer(s, { type: 'ROLL_ACKNOWLEDGE' });
     expect(s.phase).toBe(TurnPhase.Shop);
   });
 
-  it('5. Roll 2: transitions to DogFight phase', () => {
+  it('5. Roll 2: transitions to DogFight phase via RollResult', () => {
     const s0 = startedGame();
-    const s = gameReducer(s0, { type: 'ROLL_DIE', roll: 2 });
-    expect(s.phase).toBe(TurnPhase.DogFight);
+    let s = gameReducer(s0, { type: 'ROLL_DIE', roll: 2 });
+    expect(s.phase).toBe(TurnPhase.RollResult);
     expect(s.dogFight).toBeDefined();
     expect(s.dogFight!.attackerId).toBe(s.players[0].id);
+    s = gameReducer(s, { type: 'ROLL_ACKNOWLEDGE' });
+    expect(s.phase).toBe(TurnPhase.DogFight);
   });
 
   it('6. Roll 3: gains 3 x planes fuel', () => {
     const s0 = startedGame();
-    const s = gameReducer(s0, { type: 'ROLL_DIE', roll: 3 });
+    let s = gameReducer(s0, { type: 'ROLL_DIE', roll: 3 });
     expect(s.players[0].fuel).toBe(STARTING_FUEL + 3 * STARTING_PLANES);
+    expect(s.phase).toBe(TurnPhase.RollResult);
+    s = gameReducer(s, { type: 'ROLL_ACKNOWLEDGE' });
     expect(s.phase).toBe(TurnPhase.Shop);
   });
 
@@ -145,7 +151,8 @@ describe('Die Roll', () => {
 describe('Dog Fight', () => {
   function dogFightState(): GameState {
     let s = startedGame();
-    s = gameReducer(s, { type: 'ROLL_DIE', roll: 2 }); // enters DogFight phase
+    s = gameReducer(s, { type: 'ROLL_DIE', roll: 2 });
+    s = gameReducer(s, { type: 'ROLL_ACKNOWLEDGE' }); // enters DogFight phase
     return s;
   }
 

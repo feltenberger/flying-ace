@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useGame } from '../state/gameContext.tsx'
 import { TurnPhase, FUEL_TAX_PER_PLANE, OIL_TYCOON_REPAIR_COST } from '../types/game.ts'
 import { SHOP_CATALOG } from '../types/shop.ts'
@@ -57,26 +57,71 @@ function RollPhase() {
   const { state, dispatch } = useGame()
   const player = state.players[state.currentPlayerIndex]
 
-  function handleRoll() {
-    dispatch({ type: 'ROLL_DIE', roll: rollDie() })
-  }
-
   return (
     <PhaseCard title={`${player.name}'s Turn`}>
-      {state.lastRoll == null ? (
-        <button
-          onClick={handleRoll}
-          className="w-full py-4 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold rounded-lg text-xl transition-colors"
-        >
-          Roll Die
-        </button>
-      ) : (
-        <div className="text-center">
-          <div className="text-6xl font-bold text-amber-400 mb-3">{state.lastRoll}</div>
-          <p className="text-slate-300 mb-4">{state.rollResult}</p>
-        </div>
-      )}
+      <button
+        onClick={() => dispatch({ type: 'ROLL_DIE', roll: rollDie() })}
+        className="w-full py-4 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold rounded-lg text-xl transition-colors"
+      >
+        Roll Die
+      </button>
     </PhaseCard>
+  )
+}
+
+// ── Phase: Roll Result Splash ───────────────────────────
+
+function RollResultPhase() {
+  const { state, dispatch } = useGame()
+  const roll = state.lastRoll!
+
+  const rollLabels: Record<number, string> = {
+    1: 'Plane shot down!',
+    2: 'Dog Fight!',
+    3: 'Fuel bonus!',
+    4: 'Fuel bonus!',
+    5: 'Fuel bonus!',
+    6: 'Jackpot!',
+  }
+
+  const rollColors: Record<number, string> = {
+    1: 'text-red-400',
+    2: 'text-orange-400',
+    3: 'text-emerald-400',
+    4: 'text-emerald-400',
+    5: 'text-emerald-400',
+    6: 'text-amber-400',
+  }
+
+  function handleContinue() {
+    dispatch({ type: 'ROLL_ACKNOWLEDGE' })
+  }
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault()
+        handleContinue()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  })
+
+  return (
+    <div
+      className="flex flex-col items-center justify-center min-h-[50vh] cursor-pointer select-none"
+      onClick={handleContinue}
+    >
+      <div className="text-8xl font-black text-amber-400 mb-4">{roll}</div>
+      <div className={`text-2xl font-bold mb-2 ${rollColors[roll]}`}>
+        {rollLabels[roll]}
+      </div>
+      <p className="text-slate-300 text-lg mb-8 text-center max-w-sm">
+        {state.rollResult}
+      </p>
+      <span className="text-slate-500 text-sm">Tap anywhere or press any key to continue</span>
+    </div>
   )
 }
 
@@ -897,6 +942,8 @@ function PhaseRouter() {
   switch (state.phase) {
     case TurnPhase.Roll:
       return <RollPhase />
+    case TurnPhase.RollResult:
+      return <RollResultPhase />
     case TurnPhase.DogFight:
       return <DogFightPhase />
     case TurnPhase.DogFightResult:

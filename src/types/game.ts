@@ -13,6 +13,7 @@ export type GameScreen = (typeof GameScreen)[keyof typeof GameScreen];
 
 export const TurnPhase = {
   Roll: 'roll',
+  RollResult: 'roll_result',
   DogFight: 'dog_fight',
   DogFightResult: 'dog_fight_result',
   Shop: 'shop',
@@ -134,6 +135,7 @@ export type Action =
   | { type: 'START_GAME'; playerNames: string[] }
   | { type: 'HANDOVER_COMPLETE' }
   | { type: 'ROLL_DIE'; roll: number }
+  | { type: 'ROLL_ACKNOWLEDGE' }
   // Dog fight
   | { type: 'DOG_FIGHT_PICK'; defenderId: string }
   | { type: 'DOG_FIGHT_ROLL'; attackerRoll: number; defenderRoll: number }
