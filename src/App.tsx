@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { GameProvider, useGame } from './state/gameContext.tsx'
 import { GameScreen } from './types/game.ts'
 import { HomeScreen } from './screens/HomeScreen.tsx'
@@ -6,6 +7,7 @@ import { HandoverScreen } from './screens/HandoverScreen.tsx'
 import { PlayScreen } from './screens/PlayScreen.tsx'
 import { GameOverScreen } from './screens/GameOverScreen.tsx'
 import { ImageSetProvider, useImages } from './utils/images.ts'
+import SettingsOverlay from './components/SettingsOverlay.tsx'
 
 function Router() {
   const { state } = useGame()
@@ -25,6 +27,7 @@ function Router() {
 
 function AppShell() {
   const images = useImages()
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
   return (
     <div
@@ -41,6 +44,15 @@ function AppShell() {
       <main className="flex-1 p-4">
         <Router />
       </main>
+      <div className="fixed bottom-3 left-0 right-0 z-30 flex justify-center pointer-events-none">
+        <button
+          onClick={() => setSettingsOpen(o => !o)}
+          className="pointer-events-auto text-xs tracking-widest uppercase text-military-400 hover:text-brass-500 transition-colors"
+        >
+          Settings
+        </button>
+      </div>
+      {settingsOpen && <SettingsOverlay onClose={() => setSettingsOpen(false)} />}
     </div>
   )
 }
