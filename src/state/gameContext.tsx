@@ -9,7 +9,7 @@ import {
 import type { GameState, Action } from '../types/game.ts';
 import { GameScreen } from '../types/game.ts';
 import { gameReducer, createInitialState } from './gameReducer.ts';
-import { saveGame, loadGame } from '../utils/persistence.ts';
+import { saveGame, clearOldSave } from '../utils/persistence.ts';
 
 interface GameContextValue {
   state: GameState;
@@ -19,17 +19,20 @@ interface GameContextValue {
 const GameContext = createContext<GameContextValue | null>(null);
 
 function initState(): GameState {
-  const saved = loadGame();
-  if (saved) return saved;
+  clearOldSave();
   return createInitialState();
 }
 
 export function GameProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(gameReducer, undefined, initState);
 
-  // Auto-save on every state change (except setup screen)
+  // Auto-save when in an active game (has gameId, not on Home or Setup)
   useEffect(() => {
-    if (state.screen !== GameScreen.Setup) {
+    if (
+      state.gameId &&
+      state.screen !== GameScreen.Home &&
+      state.screen !== GameScreen.Setup
+    ) {
       saveGame(state);
     }
   }, [state]);

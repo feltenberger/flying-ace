@@ -3,6 +3,7 @@ import type { ShopItemId } from './shop.ts';
 // ── Enums (as const objects for erasableSyntaxOnly) ────
 
 export const GameScreen = {
+  Home: 'home',
   Setup: 'setup',
   Handover: 'handover',
   Playing: 'playing',
@@ -113,6 +114,7 @@ export interface DonationState {
 
 export interface GameState {
   schemaVersion: number;
+  gameId: string;
   screen: GameScreen;
   players: Player[];
   currentPlayerIndex: number;
@@ -129,10 +131,22 @@ export interface GameState {
   winnerId?: string;
 }
 
+// ── Game Index Entry (lightweight metadata for lobby) ──
+
+export interface GameIndexEntry {
+  id: string;
+  playerNames: string[];
+  status: 'in_progress' | 'completed';
+  lastPlayedAt: number;
+  turnNumber: number;
+  winnerName?: string;
+}
+
 // ── Actions ────────────────────────────────────────────
 
 export type Action =
-  | { type: 'START_GAME'; playerNames: string[] }
+  | { type: 'START_GAME'; playerNames: string[]; gameId: string }
+  | { type: 'GO_HOME' }
   | { type: 'HANDOVER_COMPLETE' }
   | { type: 'ROLL_DIE'; roll: number }
   | { type: 'ROLL_ACKNOWLEDGE' }

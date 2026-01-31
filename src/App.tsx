@@ -1,5 +1,6 @@
 import { GameProvider, useGame } from './state/gameContext.tsx'
 import { GameScreen } from './types/game.ts'
+import { HomeScreen } from './screens/HomeScreen.tsx'
 import { SetupScreen } from './screens/SetupScreen.tsx'
 import { HandoverScreen } from './screens/HandoverScreen.tsx'
 import { PlayScreen } from './screens/PlayScreen.tsx'
@@ -8,6 +9,8 @@ import { GameOverScreen } from './screens/GameOverScreen.tsx'
 function Router() {
   const { state } = useGame()
   switch (state.screen) {
+    case GameScreen.Home:
+      return <HomeScreen />
     case GameScreen.Setup:
       return <SetupScreen />
     case GameScreen.Handover:

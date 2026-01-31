@@ -4,6 +4,9 @@ import { TurnPhase, FUEL_TAX_PER_PLANE, OIL_TYCOON_REPAIR_COST } from '../types/
 import { SHOP_CATALOG } from '../types/shop.ts'
 import type { ShopItemId } from '../types/shop.ts'
 import { rollDie } from '../utils/dice.ts'
+import { deleteGame } from '../utils/persistence.ts'
+import GameLog from '../components/GameLog.tsx'
+import ConfirmDialog from '../components/ConfirmDialog.tsx'
 
 // ── Scoreboard ──────────────────────────────────────────
 
@@ -997,12 +1000,85 @@ function PhaseRouter() {
   }
 }
 
+// ── In-Game Menu ────────────────────────────────────────
+
+function InGameMenu() {
+  const { state, dispatch } = useGame()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [showResetConfirm, setShowResetConfirm] = useState(false)
+
+  function handleSaveExit() {
+    setMenuOpen(false)
+    dispatch({ type: 'GO_HOME' })
+  }
+
+  function handleReset() {
+    setMenuOpen(false)
+    setShowResetConfirm(true)
+  }
+
+  function confirmReset() {
+    if (state.gameId) {
+      deleteGame(state.gameId)
+    }
+    setShowResetConfirm(false)
+    dispatch({ type: 'GO_HOME' })
+  }
+
+  return (
+    <>
+      {/* Menu toggle button */}
+      <div className="flex justify-end mb-2 relative">
+        <button
+          onClick={() => setMenuOpen((v) => !v)}
+          className="text-slate-400 hover:text-slate-200 text-sm px-3 py-1 rounded border border-slate-700 hover:border-slate-500 transition-colors"
+        >
+          Menu
+        </button>
+        {menuOpen && (
+          <>
+            <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
+            <div className="absolute right-0 top-full mt-1 z-50 bg-slate-800 border border-slate-600 rounded-lg shadow-xl min-w-[10rem]">
+              <button
+                onClick={handleSaveExit}
+                className="w-full text-left px-4 py-2.5 text-sm text-slate-200 hover:bg-slate-700 rounded-t-lg transition-colors"
+              >
+                Save &amp; Exit
+              </button>
+              <button
+                onClick={handleReset}
+                className="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-slate-700 rounded-b-lg transition-colors"
+              >
+                Reset Game
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Reset confirmation dialog */}
+      {showResetConfirm && (
+        <ConfirmDialog
+          title="Reset Game"
+          message="This will permanently delete the current game and return to the lobby. This cannot be undone."
+          onConfirm={confirmReset}
+          onCancel={() => setShowResetConfirm(false)}
+        />
+      )}
+    </>
+  )
+}
+
 // ── Main PlayScreen ─────────────────────────────────────
 
 export function PlayScreen() {
   return (
     <div className="max-w-lg mx-auto">
+      <InGameMenu />
       <Scoreboard />
+      <div className="mb-4">
+        <GameLog />
+      </div>
       <PhaseRouter />
     </div>
   )

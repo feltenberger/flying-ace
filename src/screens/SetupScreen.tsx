@@ -1,16 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useGame } from '../state/gameContext.tsx'
-import { loadGame } from '../utils/persistence.ts'
+import { generateGameId } from '../utils/persistence.ts'
 
 export function SetupScreen() {
   const { dispatch } = useGame()
   const [names, setNames] = useState<string[]>(['', ''])
-  const [hasSave, setHasSave] = useState(false)
-
-  useEffect(() => {
-    const saved = loadGame()
-    setHasSave(saved !== null)
-  }, [])
 
   const canStart = names.filter((n) => n.trim().length > 0).length >= 2
 
@@ -37,14 +31,7 @@ export function SetupScreen() {
       .map((n) => n.trim())
       .filter((n) => n.length > 0)
     if (trimmed.length >= 2) {
-      dispatch({ type: 'START_GAME', playerNames: trimmed })
-    }
-  }
-
-  function handleResume() {
-    const saved = loadGame()
-    if (saved) {
-      dispatch({ type: 'LOAD_STATE', state: saved })
+      dispatch({ type: 'START_GAME', playerNames: trimmed, gameId: generateGameId() })
     }
   }
 
@@ -104,14 +91,12 @@ export function SetupScreen() {
             Start Game
           </button>
 
-          {hasSave && (
-            <button
-              onClick={handleResume}
-              className="w-full py-3 bg-slate-700 hover:bg-slate-600 text-sky-400 font-semibold rounded border border-slate-600 transition-colors"
-            >
-              Resume Saved Game
-            </button>
-          )}
+          <button
+            onClick={() => dispatch({ type: 'GO_HOME' })}
+            className="w-full py-3 bg-slate-700 hover:bg-slate-600 text-slate-300 font-semibold rounded border border-slate-600 transition-colors"
+          >
+            Back
+          </button>
         </div>
       </div>
     </div>

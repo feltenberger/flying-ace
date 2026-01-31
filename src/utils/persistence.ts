@@ -1,19 +1,65 @@
-import type { GameState } from '../types/game.ts';
+import type { GameState, GameIndexEntry } from '../types/game.ts';
 import { SCHEMA_VERSION } from '../types/game.ts';
 
-const STORAGE_KEY = 'flying-ace-save';
+const INDEX_KEY = 'flying-ace-index';
+const GAME_KEY_PREFIX = 'flying-ace-game-';
+const OLD_SAVE_KEY = 'flying-ace-save';
 
-export function saveGame(state: GameState): void {
+// ── Index helpers ───────────────────────────────────────
+
+export function loadIndex(): GameIndexEntry[] {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    const raw = localStorage.getItem(INDEX_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw) as GameIndexEntry[];
+  } catch {
+    return [];
+  }
+}
+
+function saveIndex(index: GameIndexEntry[]): void {
+  try {
+    localStorage.setItem(INDEX_KEY, JSON.stringify(index));
   } catch {
     // localStorage might be full or unavailable
   }
 }
 
-export function loadGame(): GameState | null {
+// ── Game CRUD ───────────────────────────────────────────
+
+export function saveGame(state: GameState): void {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const key = GAME_KEY_PREFIX + state.gameId;
+    localStorage.setItem(key, JSON.stringify(state));
+
+    // Upsert index entry
+    const index = loadIndex();
+    const winner = state.winnerId
+      ? state.players.find((p) => p.id === state.winnerId)
+      : undefined;
+    const entry: GameIndexEntry = {
+      id: state.gameId,
+      playerNames: state.players.map((p) => p.name),
+      status: state.winnerId ? 'completed' : 'in_progress',
+      lastPlayedAt: Date.now(),
+      turnNumber: state.turnNumber,
+      winnerName: winner?.name,
+    };
+    const existing = index.findIndex((e) => e.id === state.gameId);
+    if (existing >= 0) {
+      index[existing] = entry;
+    } else {
+      index.push(entry);
+    }
+    saveIndex(index);
+  } catch {
+    // localStorage might be full or unavailable
+  }
+}
+
+export function loadGame(gameId: string): GameState | null {
+  try {
+    const raw = localStorage.getItem(GAME_KEY_PREFIX + gameId);
     if (!raw) return null;
     const state = JSON.parse(raw) as GameState;
     if (state.schemaVersion !== SCHEMA_VERSION) return null;
@@ -23,9 +69,27 @@ export function loadGame(): GameState | null {
   }
 }
 
-export function clearSave(): void {
+export function deleteGame(gameId: string): void {
   try {
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(GAME_KEY_PREFIX + gameId);
+    const index = loadIndex().filter((e) => e.id !== gameId);
+    saveIndex(index);
+  } catch {
+    // ignore
+  }
+}
+
+// ── ID generation ───────────────────────────────────────
+
+export function generateGameId(): string {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+// ── Legacy cleanup ──────────────────────────────────────
+
+export function clearOldSave(): void {
+  try {
+    localStorage.removeItem(OLD_SAVE_KEY);
   } catch {
     // ignore
   }

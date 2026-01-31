@@ -21,6 +21,7 @@ function startedGame(overrides?: Partial<GameState>): GameState {
   let s = gameReducer(createInitialState(), {
     type: 'START_GAME',
     playerNames: ['Alice', 'Bob'],
+    gameId: 'test-game',
   });
   s = gameReducer(s, { type: 'HANDOVER_COMPLETE' });
   return { ...s, ...overrides };
@@ -45,6 +46,7 @@ function threePlayerGame(overrides?: Partial<GameState>): GameState {
   let s = gameReducer(createInitialState(), {
     type: 'START_GAME',
     playerNames: ['Alice', 'Bob', 'Charlie'],
+    gameId: 'test-game-3p',
   });
   s = gameReducer(s, { type: 'HANDOVER_COMPLETE' });
   return { ...s, ...overrides };
@@ -58,6 +60,7 @@ describe('Core Game Flow', () => {
     const s = gameReducer(createInitialState(), {
       type: 'START_GAME',
       playerNames: ['Alice', 'Bob'],
+      gameId: 'test-1',
     });
     expect(s.players).toHaveLength(2);
     for (const p of s.players) {
@@ -67,12 +70,14 @@ describe('Core Game Flow', () => {
     }
     expect(s.players[0].name).toBe('Alice');
     expect(s.players[1].name).toBe('Bob');
+    expect(s.gameId).toBe('test-1');
   });
 
   it('2. START_GAME transitions to Handover screen', () => {
     const s = gameReducer(createInitialState(), {
       type: 'START_GAME',
       playerNames: ['Alice', 'Bob'],
+      gameId: 'test-2',
     });
     expect(s.screen).toBe(GameScreen.Handover);
   });
@@ -81,9 +86,24 @@ describe('Core Game Flow', () => {
     let s = gameReducer(createInitialState(), {
       type: 'START_GAME',
       playerNames: ['Alice', 'Bob'],
+      gameId: 'test-3',
     });
     s = gameReducer(s, { type: 'HANDOVER_COMPLETE' });
     expect(s.screen).toBe(GameScreen.Playing);
+  });
+
+  it('createInitialState defaults to Home screen', () => {
+    const s = createInitialState();
+    expect(s.screen).toBe(GameScreen.Home);
+    expect(s.gameId).toBe('');
+  });
+
+  it('GO_HOME returns to initial state', () => {
+    const s0 = startedGame();
+    const s = gameReducer(s0, { type: 'GO_HOME' });
+    expect(s.screen).toBe(GameScreen.Home);
+    expect(s.gameId).toBe('');
+    expect(s.players).toHaveLength(0);
   });
 });
 

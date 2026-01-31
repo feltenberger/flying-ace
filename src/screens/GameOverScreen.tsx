@@ -1,13 +1,12 @@
 import { useGame } from '../state/gameContext.tsx'
-import { clearSave } from '../utils/persistence.ts'
+import GameLog from '../components/GameLog.tsx'
 
 export function GameOverScreen() {
   const { state, dispatch } = useGame()
   const winner = state.players.find((p) => p.id === state.winnerId)
 
   function handlePlayAgain() {
-    clearSave()
-    dispatch({ type: 'RESET_GAME' })
+    dispatch({ type: 'GO_HOME' })
   }
 
   return (
@@ -97,6 +96,11 @@ export function GameOverScreen() {
             {state.players.length}
           </p>
         </div>
+      </div>
+
+      {/* Game Log */}
+      <div className="mb-6">
+        <GameLog />
       </div>
 
       {/* Play again button */}

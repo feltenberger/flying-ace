@@ -206,7 +206,8 @@ function fuelForRoll(roll: number): number {
 function initialState(): GameState {
   return {
     schemaVersion: SCHEMA_VERSION,
-    screen: GameScreen.Setup,
+    gameId: '',
+    screen: GameScreen.Home,
     players: [],
     currentPlayerIndex: 0,
     turnNumber: 1,
@@ -226,6 +227,9 @@ export function gameReducer(state: GameState, action: Action): GameState {
     case 'RESET_GAME':
       return initialState();
 
+    case 'GO_HOME':
+      return initialState();
+
     // ─── Setup ─────────────────────────────────────────
     case 'START_GAME': {
       const players = action.playerNames.map((name, i) =>
@@ -233,6 +237,7 @@ export function gameReducer(state: GameState, action: Action): GameState {
       );
       let s: GameState = {
         ...initialState(),
+        gameId: action.gameId,
         screen: GameScreen.Handover,
         players,
         currentPlayerIndex: 0,
