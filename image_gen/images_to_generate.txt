@@ -2,7 +2,7 @@ FLYING ACE — IMAGE GENERATION LIST
 ====================================
 
 Style suffix (append to every prompt):
-"WW2 propaganda poster style, vintage hand-painted illustration, limited color palette of military olive green, brass gold, navy blue, and warm red on aged cream/sepia paper texture, bold graphic lines, slightly weathered and distressed, no text, no letters, no words"
+"WW2 propaganda poster style, vintage hand-painted illustration, limited color palette of military olive green, brass gold, navy blue, and warm red on aged cream/sepia paper texture, bold graphic lines, slightly weathered and distressed, no text, no letters, no words."
 
 Place all generated images in: public/images/
 
@@ -26,10 +26,10 @@ TITLE & BRANDING (2)
 ============================
 
 4. title-logo.png (768x768, transparent)
-A WW2 bomber nose art style emblem: a bold propeller plane viewed head-on with wings spread wide, surrounded by a circular badge with laurel wreaths and stars. Brass gold and olive green tones. Painted with visible brushstrokes like aircraft nose art. Transparent/plain background. 768x768 square composition. [style suffix]
+A WW2 bomber nose art style emblem: a bold propeller plane viewed head-on with wings spread wide, surrounded by a circular badge with laurel wreaths and stars. Brass gold and olive green tones. Painted with visible brushstrokes like aircraft nose art. Background should be a color that matches the general styling and is very plain. 768x768 square composition. [style suffix]
 
 5. title-banner.png (1024x256, transparent)
-A vintage military ribbon banner, unfurled and slightly wavy, with riveted metal texture and worn brass edges. Empty center area for text overlay. Horizontal composition. Transparent/plain background. 1024x256 wide horizontal strip. [style suffix]
+A vintage military ribbon banner, unfurled and slightly wavy, with riveted metal texture and worn brass edges. Empty center area for text overlay. Horizontal composition. Background should be a color that matches the general styling and is very plain. 1024x256 wide horizontal strip. [style suffix]
 
 
 ========================
@@ -37,10 +37,10 @@ HANDOVER SCREEN (2)
 ========================
 
 6. pilot-ready.png (768x768, transparent)
-A confident WW2 fighter pilot from the chest up, wearing a leather flight helmet with raised goggles, a fur-lined bomber jacket, and a white silk scarf. Looking directly at the viewer with a slight smirk. Dramatic lighting from one side. Propaganda poster heroic composition. Transparent/plain background. 768x768 square composition. [style suffix]
+A confident WW2 fighter pilot from the chest up, wearing a leather flight helmet with raised goggles, a fur-lined bomber jacket, and a white silk scarf. Looking directly at the viewer with a slight smirk. Dramatic lighting from one side. Propaganda poster heroic composition. Background should be a color that matches the general styling and is very plain. 768x768 square composition. [style suffix]
 
 7. pilot-salute.png (768x768, transparent)
-A WW2 pilot silhouette standing next to a propeller fighter plane on a runway at dawn, one hand resting on the propeller blade. Dramatic backlit golden sky. Strong graphic silhouette composition. Transparent/plain background. 768x768 square composition. [style suffix]
+A WW2 pilot silhouette standing next to a propeller fighter plane on a runway at dawn, one hand resting on the propeller blade. Dramatic backlit golden sky. Strong graphic silhouette composition. Background should be a color that matches the general styling and is very plain. 768x768 square composition. [style suffix]
 
 
 ========================
