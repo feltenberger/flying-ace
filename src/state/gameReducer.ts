@@ -362,19 +362,30 @@ export function gameReducer(state: GameState, action: Action): GameState {
       const defender = getPlayer(s, df.defenderId);
       const loserName = loserId === df.attackerId ? attacker.name : defender.name;
 
-      s = addLog(
-        s,
-        attacker.name,
-        `Dog fight vs ${defender.name}: rolled ${attackerRoll}. ${loserName} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel!`,
-      );
-
       // Loser loses a plane
       const result = losePlane(s, loserId, 'dogfight');
       s = result.state;
 
-      // Loser also loses fuel
-      const loser = getPlayer(s, loserId);
-      s = updatePlayer(s, loserId, { fuel: Math.max(0, loser.fuel - DOGFIGHT_FUEL_PENALTY) });
+      if (result.blocked) {
+        s = addLog(
+          s,
+          attacker.name,
+          `Dog fight vs ${defender.name}: rolled ${attackerRoll}. ${loserName}'s ${result.blockedBy === 'anti_aircraft' ? 'Anti-Aircraft' : 'Insurance'} absorbed the hit!`,
+        );
+        s = {
+          ...s,
+          dogFight: { ...s.dogFight!, blockedBy: result.blockedBy },
+        };
+      } else {
+        s = addLog(
+          s,
+          attacker.name,
+          `Dog fight vs ${defender.name}: rolled ${attackerRoll}. ${loserName} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel!`,
+        );
+        // Loser also loses fuel (only if not blocked)
+        const loser = getPlayer(s, loserId);
+        s = updatePlayer(s, loserId, { fuel: Math.max(0, loser.fuel - DOGFIGHT_FUEL_PENALTY) });
+      }
 
       s = checkWinner(s);
       return s;
@@ -857,19 +868,33 @@ export function gameReducer(state: GameState, action: Action): GameState {
       const target = getPlayer(s, fight.defenderId);
       const loserName = loserId === fight.attackerId ? mercenary.name : target.name;
 
-      s = addLog(
-        s,
-        mercenary.name,
-        `Mercenary fight ${merc.fightsCompleted + 1}/${merc.fightCount}: ${mercenary.name} rolled ${attackerRoll}. ${loserName} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel!`,
-      );
-
       // Loser loses a plane
       const result = losePlane(s, loserId, 'dogfight');
       s = result.state;
 
-      // Loser also loses fuel
-      const loser = getPlayer(s, loserId);
-      s = updatePlayer(s, loserId, { fuel: Math.max(0, loser.fuel - DOGFIGHT_FUEL_PENALTY) });
+      if (result.blocked) {
+        s = addLog(
+          s,
+          mercenary.name,
+          `Mercenary fight ${merc.fightsCompleted + 1}/${merc.fightCount}: ${mercenary.name} rolled ${attackerRoll}. ${loserName}'s ${result.blockedBy === 'anti_aircraft' ? 'Anti-Aircraft' : 'Insurance'} absorbed the hit!`,
+        );
+        s = {
+          ...s,
+          mercenary: {
+            ...s.mercenary!,
+            currentFight: { ...s.mercenary!.currentFight!, blockedBy: result.blockedBy },
+          },
+        };
+      } else {
+        s = addLog(
+          s,
+          mercenary.name,
+          `Mercenary fight ${merc.fightsCompleted + 1}/${merc.fightCount}: ${mercenary.name} rolled ${attackerRoll}. ${loserName} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel!`,
+        );
+        // Loser also loses fuel (only if not blocked)
+        const loser = getPlayer(s, loserId);
+        s = updatePlayer(s, loserId, { fuel: Math.max(0, loser.fuel - DOGFIGHT_FUEL_PENALTY) });
+      }
 
       s = checkWinner(s);
       s = { ...s, phase: TurnPhase.MercenaryFightResult };

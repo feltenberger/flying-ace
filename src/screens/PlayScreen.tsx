@@ -210,10 +210,12 @@ function DogFightResultPhase() {
           <p className="text-lg font-bold mb-2 text-military-200">
             {attacker.name} rolled a {df.attackerRoll}.
           </p>
-          <p className={`text-sm mb-4 ${attackerWon ? 'text-ops-500' : 'text-danger-500'}`}>
-            {attackerWon
-              ? `A ${df.attackerRoll} is a winning roll, so ${defender.name} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel.`
-              : `A ${df.attackerRoll} is a losing roll, so ${attacker.name} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel.`}
+          <p className={`text-sm mb-4 ${df.blockedBy ? 'text-brass-500' : attackerWon ? 'text-ops-500' : 'text-danger-500'}`}>
+            {df.blockedBy
+              ? `A ${df.attackerRoll} is a ${attackerWon ? 'winning' : 'losing'} roll, but ${attackerWon ? defender.name : attacker.name}'s ${df.blockedBy === 'anti_aircraft' ? 'Anti-Aircraft' : 'Insurance'} absorbed the hit! No plane or fuel lost.`
+              : attackerWon
+                ? `A ${df.attackerRoll} is a winning roll, so ${defender.name} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel.`
+                : `A ${df.attackerRoll} is a losing roll, so ${attacker.name} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel.`}
           </p>
           <button
             onClick={() => dispatch({ type: 'DOG_FIGHT_ACKNOWLEDGE' })}
@@ -845,10 +847,12 @@ function MercenaryFightResultPhase() {
         <p className="text-lg font-bold mb-2 text-military-200">
           {mercenary.name} rolled a {fight.attackerRoll}.
         </p>
-        <p className={`text-sm mb-4 ${attackerWon ? 'text-ops-500' : 'text-danger-500'}`}>
-          {attackerWon
-            ? `A ${fight.attackerRoll} is a winning roll, so ${target.name} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel.`
-            : `A ${fight.attackerRoll} is a losing roll, so ${mercenary.name} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel.`}
+        <p className={`text-sm mb-4 ${fight.blockedBy ? 'text-brass-500' : attackerWon ? 'text-ops-500' : 'text-danger-500'}`}>
+          {fight.blockedBy
+            ? `A ${fight.attackerRoll} is a ${attackerWon ? 'winning' : 'losing'} roll, but ${attackerWon ? target.name : mercenary.name}'s ${fight.blockedBy === 'anti_aircraft' ? 'Anti-Aircraft' : 'Insurance'} absorbed the hit! No plane or fuel lost.`
+            : attackerWon
+              ? `A ${fight.attackerRoll} is a winning roll, so ${target.name} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel.`
+              : `A ${fight.attackerRoll} is a losing roll, so ${mercenary.name} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel.`}
         </p>
         <button
           onClick={() => dispatch({ type: 'MERCENARY_FIGHT_ACKNOWLEDGE' })}

@@ -77,6 +77,7 @@ export interface DogFightState {
   defenderId: string;
   attackerRoll?: number;
   loserId?: string;
+  blockedBy?: 'insurance' | 'anti_aircraft';
 }
 
 // ── Mercenary State ────────────────────────────────────
