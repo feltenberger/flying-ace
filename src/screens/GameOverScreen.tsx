@@ -108,9 +108,9 @@ export function GameOverScreen() {
                       {player.id === state.winnerId && (
                         <span className="text-brass-600 text-xs ml-2">WINNER</span>
                       )}
-                      <span className={`text-[10px] font-mono ml-2 ${player.isCpu ? 'text-raf-500' : 'text-military-600'}`}>
-                        {player.isCpu ? 'CPU' : 'HUM'}
-                      </span>
+                      {player.isCpu && (
+                        <span className="text-[10px] font-mono ml-2 text-raf-500">CPU</span>
+                      )}
                     </div>
                   </div>
                 </div>

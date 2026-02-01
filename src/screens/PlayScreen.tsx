@@ -43,9 +43,9 @@ function Scoreboard() {
                 className={`w-8 h-8 object-contain shrink-0 ${!p.alive ? 'grayscale opacity-40' : ''}`}
               />
               {p.name}
-              <span className={`ml-1.5 text-[10px] font-mono ${p.isCpu ? 'text-raf-500' : 'text-military-600'}`}>
-                {p.isCpu ? 'CPU' : 'HUM'}
-              </span>
+              {p.isCpu && (
+                <span className="ml-1.5 text-[10px] font-mono text-raf-500">CPU</span>
+              )}
             </div>
             {p.alive ? (
               <div className="text-xs text-military-400 mt-0.5">
