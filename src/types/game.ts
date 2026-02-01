@@ -52,6 +52,7 @@ export interface Player {
   planes: number;
   fuel: number;
   alive: boolean;
+  isCpu: boolean;
   // Items / status
   insuranceTurnsLeft: number;
   insuranceUsed: boolean; // can only buy once per game
@@ -146,7 +147,7 @@ export interface GameIndexEntry {
 // ── Actions ────────────────────────────────────────────
 
 export type Action =
-  | { type: 'START_GAME'; playerNames: string[]; gameId: string }
+  | { type: 'START_GAME'; playerNames: string[]; gameId: string; cpuFlags?: boolean[] }
   | { type: 'GO_HOME' }
   | { type: 'HANDOVER_COMPLETE' }
   | { type: 'ROLL_DIE'; roll: number }
@@ -206,4 +207,4 @@ export const OIL_TYCOON_REPAIR_COST = 50;
 export const OIL_TYCOON_REPAIR_WINDOW = 2;
 export const OIL_TYCOON_HITS_TO_DESTROY = 3;
 export const DOGFIGHT_FUEL_PENALTY = 10;
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;

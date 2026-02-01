@@ -24,13 +24,14 @@ import { ShopItemId } from '../types/shop.ts';
 
 // ── Helpers ──────────────────────────────────────────────
 
-function createPlayer(id: string, name: string): Player {
+function createPlayer(id: string, name: string, isCpu: boolean): Player {
   return {
     id,
     name,
     planes: STARTING_PLANES,
     fuel: STARTING_FUEL,
     alive: true,
+    isCpu,
     insuranceTurnsLeft: 0,
     insuranceUsed: false,
     hasAntiAircraft: false,
@@ -236,7 +237,7 @@ export function gameReducer(state: GameState, action: Action): GameState {
     // ─── Setup ─────────────────────────────────────────
     case 'START_GAME': {
       const players = action.playerNames.map((name, i) =>
-        createPlayer(`player-${i}`, name),
+        createPlayer(`player-${i}`, name, action.cpuFlags?.[i] ?? false),
       );
       let s: GameState = {
         ...initialState(),

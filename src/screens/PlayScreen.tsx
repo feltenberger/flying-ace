@@ -4,11 +4,11 @@ import { TurnPhase, FUEL_TAX_PER_PLANE, OIL_TYCOON_REPAIR_COST, DOGFIGHT_FUEL_PE
 import { SHOP_CATALOG } from '../types/shop.ts'
 import type { ShopItemId } from '../types/shop.ts'
 import { rollDie } from '../utils/dice.ts'
-import { deleteGame } from '../utils/persistence.ts'
 import GameLog from '../components/GameLog.tsx'
-import ConfirmDialog from '../components/ConfirmDialog.tsx'
 import RulesOverlay from '../components/RulesOverlay.tsx'
 import { useImages } from '../utils/images.ts'
+import { useCpuAction } from '../cpu/useCpuAction.ts'
+import { describeCpuAction } from '../cpu/cpuStrategy.ts'
 
 // ── Scoreboard ──────────────────────────────────────────
 
@@ -38,6 +38,9 @@ function Scoreboard() {
           >
             <div className={`font-semibold truncate ${p.id === current.id ? 'text-brass-500' : p.alive ? 'text-military-100' : 'text-military-500 line-through'}`}>
               {p.name}
+              <span className={`ml-1.5 text-[10px] font-mono ${p.isCpu ? 'text-raf-500' : 'text-military-600'}`}>
+                {p.isCpu ? 'CPU' : 'HUM'}
+              </span>
             </div>
             {p.alive ? (
               <div className="text-xs text-military-400 mt-0.5">
@@ -60,10 +63,12 @@ function Scoreboard() {
 
 function RollPhase() {
   const { state, dispatch } = useGame()
+  const images = useImages()
   const player = state.players[state.currentPlayerIndex]
 
   return (
     <PhaseCard title={`${player.name}'s Turn`}>
+      <img src={images.diceRoll} alt="" className="spot-illustration mb-4" />
       <button
         onClick={() => dispatch({ type: 'ROLL_DIE', roll: rollDie() })}
         className="w-full py-4 bg-brass-500 hover:bg-brass-400 text-military-950 font-bold rounded-lg text-xl transition-colors"
@@ -1079,10 +1084,66 @@ function PhaseCard({ title, headerImage, children }: { title: string; headerImag
   )
 }
 
+// ── CPU Phase Display ───────────────────────────────────
+
+function CpuPhaseDisplay({ description, onContinue, image }: { description: string; onContinue: () => void; image?: string }) {
+  const images = useImages()
+  return (
+    <PhaseCard title="Computer Player">
+      <img src={image ?? images.pilotReady} alt="" className="spot-illustration mb-4" />
+      <p className="text-military-200 text-lg text-center mb-6">
+        {description}
+      </p>
+      <button
+        onClick={onContinue}
+        className="w-full py-3 bg-raf-600 hover:bg-raf-500 text-white font-bold rounded-lg transition-colors"
+      >
+        Continue
+      </button>
+    </PhaseCard>
+  )
+}
+
 // ── Phase Router ────────────────────────────────────────
 
+// Acknowledge actions just dismiss a result screen — show the normal phase UI
+// so the human can see what happened, then click the existing Continue button.
+const ACKNOWLEDGE_ACTIONS = new Set([
+  'ROLL_ACKNOWLEDGE',
+  'DOG_FIGHT_ACKNOWLEDGE',
+  'CHEAP_BOMB_ACKNOWLEDGE',
+  'PRICEY_BOMB_ACKNOWLEDGE',
+  'DONATION_ACKNOWLEDGE',
+  'DIG_FOR_FUEL_ACKNOWLEDGE',
+  'MERCENARY_FIGHT_ACKNOWLEDGE',
+  'MERCENARY_COMPLETE_ACKNOWLEDGE',
+])
+
+const ROLL_ACTIONS = new Set([
+  'ROLL_DIE',
+  'DOG_FIGHT_ROLL',
+  'CHEAP_BOMB_ROLL',
+  'DIG_FOR_FUEL_ROLL',
+  'MERCENARY_FIGHT_COUNT_ROLL',
+  'MERCENARY_FIGHT_ROLL',
+])
+
 function PhaseRouter() {
-  const { state } = useGame()
+  const { state, dispatch } = useGame()
+  const images = useImages()
+  const cpuAction = useCpuAction(state)
+
+  if (cpuAction && !ACKNOWLEDGE_ACTIONS.has(cpuAction.type)) {
+    const description = describeCpuAction(state, cpuAction)
+    const image = ROLL_ACTIONS.has(cpuAction.type) ? images.diceRoll : undefined
+    return (
+      <CpuPhaseDisplay
+        description={description}
+        onContinue={() => dispatch(cpuAction)}
+        image={image}
+      />
+    )
+  }
 
   switch (state.phase) {
     case TurnPhase.Roll:
@@ -1145,38 +1206,17 @@ function PhaseRouter() {
 // ── In-Game Menu ────────────────────────────────────────
 
 function InGameMenu() {
-  const { state, dispatch } = useGame()
-  const [menuOpen, setMenuOpen] = useState(false)
+  const { dispatch } = useGame()
   const [showRules, setShowRules] = useState(false)
-  const [showResetConfirm, setShowResetConfirm] = useState(false)
-
-  function handleSaveExit() {
-    setMenuOpen(false)
-    dispatch({ type: 'GO_HOME' })
-  }
-
-  function handleReset() {
-    setMenuOpen(false)
-    setShowResetConfirm(true)
-  }
-
-  function confirmReset() {
-    if (state.gameId) {
-      deleteGame(state.gameId)
-    }
-    setShowResetConfirm(false)
-    dispatch({ type: 'GO_HOME' })
-  }
 
   return (
     <>
-      {/* Home + Rules + Menu buttons */}
-      <div className="flex justify-end gap-2 mb-2 relative">
+      <div className="flex justify-end gap-2 mb-2">
         <button
-          onClick={handleSaveExit}
+          onClick={() => dispatch({ type: 'GO_HOME' })}
           className="text-military-400 hover:text-military-200 text-sm px-3 py-1 rounded border border-military-600 hover:border-military-500 transition-colors"
         >
-          Home
+          Save &amp; Go Home
         </button>
         <button
           onClick={() => setShowRules(true)}
@@ -1184,45 +1224,9 @@ function InGameMenu() {
         >
           Rules
         </button>
-        <button
-          onClick={() => setMenuOpen((v) => !v)}
-          className="text-military-400 hover:text-military-200 text-sm px-3 py-1 rounded border border-military-600 hover:border-military-500 transition-colors"
-        >
-          Menu
-        </button>
-        {menuOpen && (
-          <>
-            <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
-            <div className="absolute right-0 top-full mt-1 z-50 bg-military-800 border border-military-600 rounded-lg shadow-xl min-w-[10rem]">
-              <button
-                onClick={handleSaveExit}
-                className="w-full text-left px-4 py-2.5 text-sm text-military-200 hover:bg-military-700 rounded-t-lg transition-colors"
-              >
-                Save &amp; Exit
-              </button>
-              <button
-                onClick={handleReset}
-                className="w-full text-left px-4 py-2.5 text-sm text-danger-500 hover:bg-military-700 rounded-b-lg transition-colors"
-              >
-                Reset Game
-              </button>
-            </div>
-          </>
-        )}
       </div>
 
-      {/* Rules overlay */}
       {showRules && <RulesOverlay onClose={() => setShowRules(false)} />}
-
-      {/* Reset confirmation dialog */}
-      {showResetConfirm && (
-        <ConfirmDialog
-          title="Reset Game"
-          message="This will permanently delete the current game and return to the lobby. This cannot be undone."
-          onConfirm={confirmReset}
-          onCancel={() => setShowResetConfirm(false)}
-        />
-      )}
     </>
   )
 }

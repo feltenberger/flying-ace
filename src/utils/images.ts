@@ -44,6 +44,7 @@ export interface GameImages {
   uiDivider: string
   uiCompass: string
   uiWings: string
+  diceRoll: string
   shopItemImages: Record<ShopItemId, string>
   getRollResultImage: (roll: number) => string
 }
@@ -151,6 +152,7 @@ export function buildImages(setName: string): GameImages {
     uiDivider,
     uiCompass,
     uiWings,
+    diceRoll: '/assets/global/good-luck-dices.png',
     shopItemImages,
     getRollResultImage,
   }
