@@ -1086,11 +1086,11 @@ function PhaseCard({ title, headerImage, children }: { title: string; headerImag
 
 // ── CPU Phase Display ───────────────────────────────────
 
-function CpuPhaseDisplay({ description, onContinue }: { description: string; onContinue: () => void }) {
+function CpuPhaseDisplay({ description, onContinue, image }: { description: string; onContinue: () => void; image?: string }) {
   const images = useImages()
   return (
     <PhaseCard title="Computer Player">
-      <img src={images.pilotReady} alt="" className="spot-illustration mb-4" />
+      <img src={image ?? images.pilotReady} alt="" className="spot-illustration mb-4" />
       <p className="text-military-200 text-lg text-center mb-6">
         {description}
       </p>
@@ -1119,16 +1119,28 @@ const ACKNOWLEDGE_ACTIONS = new Set([
   'MERCENARY_COMPLETE_ACKNOWLEDGE',
 ])
 
+const ROLL_ACTIONS = new Set([
+  'ROLL_DIE',
+  'DOG_FIGHT_ROLL',
+  'CHEAP_BOMB_ROLL',
+  'DIG_FOR_FUEL_ROLL',
+  'MERCENARY_FIGHT_COUNT_ROLL',
+  'MERCENARY_FIGHT_ROLL',
+])
+
 function PhaseRouter() {
   const { state, dispatch } = useGame()
+  const images = useImages()
   const cpuAction = useCpuAction(state)
 
   if (cpuAction && !ACKNOWLEDGE_ACTIONS.has(cpuAction.type)) {
     const description = describeCpuAction(state, cpuAction)
+    const image = ROLL_ACTIONS.has(cpuAction.type) ? images.diceRoll : undefined
     return (
       <CpuPhaseDisplay
         description={description}
         onContinue={() => dispatch(cpuAction)}
+        image={image}
       />
     )
   }
