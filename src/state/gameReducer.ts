@@ -56,6 +56,21 @@ function addLog(state: GameState, playerName: string, message: string): GameStat
   };
 }
 
+function playerStatusSummary(players: Player[]): string {
+  return players
+    .filter((p) => p.alive)
+    .map((p) => {
+      let s = `${p.name}: ${p.planes}P ${p.fuel}F`;
+      const tags: string[] = [];
+      if (p.insuranceTurnsLeft > 0) tags.push('INS');
+      if (p.hasAntiAircraft) tags.push('AA');
+      if (p.hasOilTycoon) tags.push('OIL');
+      if (tags.length > 0) s += ' ' + tags.map((t) => `[${t}]`).join(' ');
+      return s;
+    })
+    .join(' | ');
+}
+
 function getNextAlivePlayerIndex(players: Player[], currentIndex: number): number {
   const count = players.length;
   let idx = (currentIndex + 1) % count;
@@ -251,6 +266,7 @@ export function gameReducer(state: GameState, action: Action): GameState {
         phase: TurnPhase.Roll,
       };
       s = addLog(s, 'Game', `Game started with ${players.length} players: ${action.playerNames.join(', ')}.`);
+      s = addLog(s, 'Game', playerStatusSummary(s.players));
       return s;
     }
 
@@ -1256,6 +1272,7 @@ export function gameReducer(state: GameState, action: Action): GameState {
 
       const nextPlayer = s.players[nextIndex];
       s = addLog(s, 'Game', `${nextPlayer.name}'s turn.`);
+      s = addLog(s, 'Game', playerStatusSummary(s.players));
 
       s = {
         ...s,
