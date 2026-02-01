@@ -1,10 +1,13 @@
+import { useState } from 'react'
 import { useGame } from '../state/gameContext.tsx'
 import GameLog from '../components/GameLog.tsx'
+import RulesOverlay from '../components/RulesOverlay.tsx'
 import { useImages } from '../utils/images.ts'
 
 export function GameOverScreen() {
   const { state, dispatch } = useGame()
   const images = useImages()
+  const [showRules, setShowRules] = useState(false)
   const winner = state.players.find((p) => p.id === state.winnerId)
 
   function handlePlayAgain() {
@@ -13,6 +16,22 @@ export function GameOverScreen() {
 
   return (
     <div className="max-w-md mx-auto">
+      {/* Top nav buttons */}
+      <div className="flex justify-end gap-2 mb-2">
+        <button
+          onClick={() => dispatch({ type: 'GO_HOME' })}
+          className="text-military-400 hover:text-military-200 text-sm px-3 py-1 rounded border border-military-600 hover:border-military-500 transition-colors"
+        >
+          Save &amp; Go Home
+        </button>
+        <button
+          onClick={() => setShowRules(true)}
+          className="text-military-400 hover:text-military-200 text-sm px-3 py-1 rounded border border-military-600 hover:border-military-500 transition-colors"
+        >
+          Rules
+        </button>
+      </div>
+
       {/* Victory banner */}
       <div className="bg-military-800 rounded-lg p-8 shadow-lg text-center mb-6">
         <img src={images.victory} alt="" className="spot-illustration mb-4" />
@@ -125,6 +144,8 @@ export function GameOverScreen() {
       >
         Play Again
       </button>
+
+      {showRules && <RulesOverlay onClose={() => setShowRules(false)} />}
     </div>
   )
 }
