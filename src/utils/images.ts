@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useMemo, useCallback, createElemen
 import type { ShopItemId } from '../types/shop.ts'
 
 // ── Available image sets ────────────────────────────────
-export const IMAGE_SETS: string[] = ['default', 'v2', 'v3']
+export const IMAGE_SETS: string[] = ['default', 'v3']
 
 const STORAGE_KEY = 'flying-ace-image-set'
 
