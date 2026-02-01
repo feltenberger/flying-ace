@@ -235,7 +235,7 @@ function ShopPhase() {
   const player = state.players[state.currentPlayerIndex]
 
   function canAfford(cost: number | 'variable'): boolean {
-    if (cost === 'variable') return true
+    if (cost === 'variable') return player.fuel > 0
     return player.fuel >= cost
   }
 
