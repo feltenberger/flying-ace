@@ -95,7 +95,7 @@ function losePlane(
   state: GameState,
   playerId: string,
   hitType: HitType,
-): { state: GameState; blocked: boolean; description: string } {
+): { state: GameState; blocked: boolean; blockedBy?: 'insurance' | 'anti_aircraft'; description: string } {
   const player = getPlayer(state, playerId);
 
   // 1. Check Anti-Aircraft — blocks ALL hit types including pricey_bomb
@@ -108,6 +108,7 @@ function losePlane(
     return {
       state: s,
       blocked: true,
+      blockedBy: 'anti_aircraft',
       description: `${player.name}'s Anti-Aircraft absorbed the hit!`,
     };
   }
@@ -118,6 +119,7 @@ function losePlane(
     return {
       state: s,
       blocked: true,
+      blockedBy: 'insurance',
       description: `${player.name}'s Insurance protected their plane!`,
     };
   }
@@ -604,6 +606,9 @@ export function gameReducer(state: GameState, action: Action): GameState {
           // Attempt plane loss with protection checks
           const result = losePlane(s, bomb.targetId, 'cheap_bomb');
           s = result.state;
+          if (result.blockedBy) {
+            s = { ...s, bomb: { ...s.bomb!, blockedBy: result.blockedBy } };
+          }
         }
 
         s = checkWinner(s);
@@ -645,6 +650,9 @@ export function gameReducer(state: GameState, action: Action): GameState {
       } else {
         const result = losePlane(s, action.targetId, 'pricey_bomb');
         s = result.state;
+        if (result.blockedBy) {
+          s = { ...s, bomb: { ...s.bomb!, blockedBy: result.blockedBy } };
+        }
       }
 
       s = checkWinner(s);

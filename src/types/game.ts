@@ -99,6 +99,7 @@ export interface BombState {
   targetId: string;
   roll?: number;
   hit?: boolean;
+  blockedBy?: 'insurance' | 'anti_aircraft';
 }
 
 // ── Donation State ─────────────────────────────────────

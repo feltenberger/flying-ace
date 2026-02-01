@@ -380,7 +380,13 @@ function CheapBombResultPhase() {
         />
         <div className="text-5xl font-bold text-brass-500 mb-3">{bomb.roll}</div>
         <p className={`text-lg font-bold mb-4 ${bomb.hit ? 'text-danger-500' : 'text-ops-500'}`}>
-          {bomb.hit ? `Hit! ${target.name} takes damage!` : 'Miss!'}
+          {bomb.hit
+            ? bomb.blockedBy === 'insurance'
+              ? `Hit! But ${target.name}'s Insurance protected them!`
+              : bomb.blockedBy === 'anti_aircraft'
+                ? `Hit! But ${target.name}'s Anti-Aircraft absorbed it!`
+                : `Hit! ${target.name} takes damage!`
+            : 'Miss!'}
         </p>
         <button
           onClick={() => dispatch({ type: 'CHEAP_BOMB_ACKNOWLEDGE' })}
@@ -436,8 +442,15 @@ function PriceyBombResultPhase() {
       <div className="text-center">
         <img src={images.bombHit} alt="" className="spot-illustration mb-3" />
         <p className="text-lg text-danger-500 font-bold mb-4">
-          Direct hit on {target.name}!
+          {bomb.blockedBy === 'anti_aircraft'
+            ? `Direct hit on ${target.name}! But their Anti-Aircraft absorbed it!`
+            : `Direct hit on ${target.name}!`}
         </p>
+        {!bomb.blockedBy && target.insuranceTurnsLeft > 0 && (
+          <p className="text-sm text-military-400 mb-4">
+            {target.name}'s Insurance does not protect against Pricey Bombs.
+          </p>
+        )}
         <button
           onClick={() => dispatch({ type: 'PRICEY_BOMB_ACKNOWLEDGE' })}
           className="px-6 py-2 bg-military-700 hover:bg-military-600 text-military-200 rounded transition-colors"
