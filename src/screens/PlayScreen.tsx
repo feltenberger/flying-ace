@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useGame } from '../state/gameContext.tsx'
-import { TurnPhase, FUEL_TAX_PER_PLANE, OIL_TYCOON_REPAIR_COST, DOGFIGHT_FUEL_PENALTY } from '../types/game.ts'
+import { TurnPhase, FUEL_TAX_PER_PLANE, OIL_TYCOON_REPAIR_COST, DOGFIGHT_FUEL_PENALTY, planeAvatarPath } from '../types/game.ts'
 import { SHOP_CATALOG } from '../types/shop.ts'
 import type { ShopItemId } from '../types/shop.ts'
 import { rollDie } from '../utils/dice.ts'
@@ -36,7 +36,12 @@ function Scoreboard() {
                   : 'bg-military-950/50 border border-military-800 opacity-50'
             }`}
           >
-            <div className={`font-semibold truncate ${p.id === current.id ? 'text-brass-500' : p.alive ? 'text-military-100' : 'text-military-500 line-through'}`}>
+            <div className={`font-semibold truncate flex items-center gap-1.5 ${p.id === current.id ? 'text-brass-500' : p.alive ? 'text-military-100' : 'text-military-500 line-through'}`}>
+              <img
+                src={planeAvatarPath(p.planeColor)}
+                alt=""
+                className={`w-8 h-8 object-contain shrink-0 ${!p.alive ? 'grayscale opacity-40' : ''}`}
+              />
               {p.name}
               <span className={`ml-1.5 text-[10px] font-mono ${p.isCpu ? 'text-raf-500' : 'text-military-600'}`}>
                 {p.isCpu ? 'CPU' : 'HUM'}

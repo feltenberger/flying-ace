@@ -11,6 +11,7 @@ import {
   AA_COOLDOWN,
   OIL_TYCOON_INCOME,
   OIL_TYCOON_REPAIR_COST,
+  PlaneColor,
 } from '../types/game.ts';
 import { ShopItemId } from '../types/shop.ts';
 
@@ -21,6 +22,7 @@ function startedGame(overrides?: Partial<GameState>): GameState {
   let s = gameReducer(createInitialState(), {
     type: 'START_GAME',
     playerNames: ['Alice', 'Bob'],
+    planeColors: [PlaneColor.Purple, PlaneColor.Red],
     gameId: 'test-game',
   });
   s = gameReducer(s, { type: 'HANDOVER_COMPLETE' });
@@ -46,6 +48,7 @@ function threePlayerGame(overrides?: Partial<GameState>): GameState {
   let s = gameReducer(createInitialState(), {
     type: 'START_GAME',
     playerNames: ['Alice', 'Bob', 'Charlie'],
+    planeColors: [PlaneColor.Purple, PlaneColor.Red, PlaneColor.Blue],
     gameId: 'test-game-3p',
   });
   s = gameReducer(s, { type: 'HANDOVER_COMPLETE' });
@@ -60,6 +63,7 @@ describe('Core Game Flow', () => {
     const s = gameReducer(createInitialState(), {
       type: 'START_GAME',
       playerNames: ['Alice', 'Bob'],
+      planeColors: [PlaneColor.Purple, PlaneColor.Red],
       gameId: 'test-1',
     });
     expect(s.players).toHaveLength(2);
@@ -70,6 +74,8 @@ describe('Core Game Flow', () => {
     }
     expect(s.players[0].name).toBe('Alice');
     expect(s.players[1].name).toBe('Bob');
+    expect(s.players[0].planeColor).toBe(PlaneColor.Purple);
+    expect(s.players[1].planeColor).toBe(PlaneColor.Red);
     expect(s.gameId).toBe('test-1');
   });
 
@@ -77,6 +83,7 @@ describe('Core Game Flow', () => {
     const s = gameReducer(createInitialState(), {
       type: 'START_GAME',
       playerNames: ['Alice', 'Bob'],
+      planeColors: [PlaneColor.Purple, PlaneColor.Red],
       gameId: 'test-2',
     });
     expect(s.screen).toBe(GameScreen.Handover);
@@ -86,6 +93,7 @@ describe('Core Game Flow', () => {
     let s = gameReducer(createInitialState(), {
       type: 'START_GAME',
       playerNames: ['Alice', 'Bob'],
+      planeColors: [PlaneColor.Purple, PlaneColor.Red],
       gameId: 'test-3',
     });
     s = gameReducer(s, { type: 'HANDOVER_COMPLETE' });

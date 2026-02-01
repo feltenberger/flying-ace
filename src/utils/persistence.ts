@@ -1,5 +1,5 @@
 import type { GameState, GameIndexEntry } from '../types/game.ts';
-import { SCHEMA_VERSION } from '../types/game.ts';
+import { SCHEMA_VERSION, ALL_PLANE_COLORS } from '../types/game.ts';
 
 const INDEX_KEY = 'flying-ace-index';
 const GAME_KEY_PREFIX = 'flying-ace-game-';
@@ -90,6 +90,15 @@ function migrateState(state: GameState): GameState | null {
       s.phase = 'shop';
     }
     state.schemaVersion = 3;
+  }
+
+  // v3 -> v4: add planeColor to players
+  if (state.schemaVersion === 3) {
+    state.players = state.players.map((p, i) => ({
+      ...p,
+      planeColor: p.planeColor ?? ALL_PLANE_COLORS[i % ALL_PLANE_COLORS.length],
+    }));
+    state.schemaVersion = 4;
   }
 
   if (state.schemaVersion !== SCHEMA_VERSION) return null;

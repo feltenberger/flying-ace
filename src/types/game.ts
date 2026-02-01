@@ -46,6 +46,32 @@ export const TurnPhase = {
 
 export type TurnPhase = (typeof TurnPhase)[keyof typeof TurnPhase];
 
+// ── Plane Colors ──────────────────────────────────────
+
+export const PlaneColor = {
+  Purple: 'purple',
+  Red: 'red',
+  Blue: 'blue',
+  Green: 'green',
+  Yellow: 'yellow',
+  Pink: 'pink',
+} as const;
+
+export type PlaneColor = (typeof PlaneColor)[keyof typeof PlaneColor];
+
+export const ALL_PLANE_COLORS: PlaneColor[] = [
+  PlaneColor.Purple,
+  PlaneColor.Red,
+  PlaneColor.Blue,
+  PlaneColor.Green,
+  PlaneColor.Yellow,
+  PlaneColor.Pink,
+];
+
+export function planeAvatarPath(color: PlaneColor): string {
+  return `/assets/global/plane-${color}.png`;
+}
+
 // ── Player ─────────────────────────────────────────────
 
 export interface Player {
@@ -55,6 +81,7 @@ export interface Player {
   fuel: number;
   alive: boolean;
   isCpu: boolean;
+  planeColor: PlaneColor;
   // Items / status
   insuranceTurnsLeft: number;
   insuranceUsed: boolean; // can only buy once per game
@@ -159,7 +186,7 @@ export interface GameIndexEntry {
 // ── Actions ────────────────────────────────────────────
 
 export type Action =
-  | { type: 'START_GAME'; playerNames: string[]; gameId: string; cpuFlags?: boolean[] }
+  | { type: 'START_GAME'; playerNames: string[]; gameId: string; cpuFlags?: boolean[]; planeColors: PlaneColor[] }
   | { type: 'GO_HOME' }
   | { type: 'HANDOVER_COMPLETE' }
   | { type: 'ROLL_DIE'; roll: number }
@@ -221,4 +248,4 @@ export const OIL_TYCOON_REPAIR_COST = 50;
 export const OIL_TYCOON_REPAIR_WINDOW = 2;
 export const OIL_TYCOON_HITS_TO_DESTROY = 3;
 export const DOGFIGHT_FUEL_PENALTY = 10;
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;

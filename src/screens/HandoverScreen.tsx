@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useGame } from '../state/gameContext.tsx'
+import { planeAvatarPath } from '../types/game.ts'
 import { useImages } from '../utils/images.ts'
 import RulesOverlay from '../components/RulesOverlay.tsx'
 
@@ -51,6 +52,11 @@ export function HandoverScreen() {
             Next pilot, report for duty
           </p>
           <img src={pilotImage} alt="" className="spot-illustration mb-4" />
+          <img
+            src={planeAvatarPath(player.planeColor)}
+            alt=""
+            className="w-40 h-40 object-contain mb-2"
+          />
           <h2 className="font-stencil text-5xl text-brass-500 mb-2">
             {player.name}
           </h2>

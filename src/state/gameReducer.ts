@@ -4,6 +4,7 @@ import type {
   Player,
   LogEntry,
   BombState,
+  PlaneColor,
 } from '../types/game.ts';
 import {
   GameScreen,
@@ -24,7 +25,7 @@ import { ShopItemId } from '../types/shop.ts';
 
 // ── Helpers ──────────────────────────────────────────────
 
-function createPlayer(id: string, name: string, isCpu: boolean): Player {
+function createPlayer(id: string, name: string, isCpu: boolean, planeColor: PlaneColor): Player {
   return {
     id,
     name,
@@ -32,6 +33,7 @@ function createPlayer(id: string, name: string, isCpu: boolean): Player {
     fuel: STARTING_FUEL,
     alive: true,
     isCpu,
+    planeColor,
     insuranceTurnsLeft: 0,
     insuranceUsed: false,
     hasAntiAircraft: false,
@@ -237,7 +239,7 @@ export function gameReducer(state: GameState, action: Action): GameState {
     // ─── Setup ─────────────────────────────────────────
     case 'START_GAME': {
       const players = action.playerNames.map((name, i) =>
-        createPlayer(`player-${i}`, name, action.cpuFlags?.[i] ?? false),
+        createPlayer(`player-${i}`, name, action.cpuFlags?.[i] ?? false, action.planeColors[i]),
       );
       let s: GameState = {
         ...initialState(),
