@@ -267,31 +267,30 @@ describe('Shop - Basic Items', () => {
     expect(s.phase).toBe(TurnPhase.Tax);
   });
 
-  it('17. BUY_ITEM DigForFuel: costs 1 fuel, transitions to DigForFuelRoll', () => {
+  it('17. BUY_ITEM DigForFuel: transitions to DigForFuelRoll (fuel deducted on roll)', () => {
     const s0 = shopPhase(50);
     const s = gameReducer(s0, {
       type: 'BUY_ITEM',
       itemId: ShopItemId.DigForFuel,
     });
-    expect(s.players[0].fuel).toBe(49);
+    expect(s.players[0].fuel).toBe(50); // not deducted yet
     expect(s.phase).toBe(TurnPhase.DigForFuelRoll);
   });
 
-  it('18. DIG_FOR_FUEL_ROLL: adds fuel (6 = 10 fuel, otherwise face value)', () => {
-    // Roll a 4 => gain 4
+  it('18. DIG_FOR_FUEL_ROLL: deducts 1 fuel cost and adds fuel (6 = 10 fuel, otherwise face value)', () => {
+    // Roll a 4 => cost 1, gain 4 => net +3
     let s = shopPhase(50);
     s = gameReducer(s, { type: 'BUY_ITEM', itemId: ShopItemId.DigForFuel });
-    const fuelAfterBuy = s.players[0].fuel; // 49
+    expect(s.players[0].fuel).toBe(50); // not deducted yet
     s = gameReducer(s, { type: 'DIG_FOR_FUEL_ROLL', roll: 4 });
-    expect(s.players[0].fuel).toBe(fuelAfterBuy + 4);
+    expect(s.players[0].fuel).toBe(50 - 1 + 4); // 53
     expect(s.phase).toBe(TurnPhase.DigForFuelResult);
 
-    // Roll a 6 => gain 10
+    // Roll a 6 => cost 1, gain 10 => net +9
     let s2 = shopPhase(50);
     s2 = gameReducer(s2, { type: 'BUY_ITEM', itemId: ShopItemId.DigForFuel });
-    const fuelAfterBuy2 = s2.players[0].fuel; // 49
     s2 = gameReducer(s2, { type: 'DIG_FOR_FUEL_ROLL', roll: 6 });
-    expect(s2.players[0].fuel).toBe(fuelAfterBuy2 + 10);
+    expect(s2.players[0].fuel).toBe(50 - 1 + 10); // 59
   });
 
   it('19. SKIP_SHOP transitions to Tax', () => {
@@ -393,14 +392,14 @@ describe('Shop - Insurance', () => {
 // 25-29  Shop - Bombs
 // ─────────────────────────────────────────────────────────
 describe('Shop - Bombs', () => {
-  it('25. BUY_ITEM CheapBomb: costs 5 fuel, transitions to target selection', () => {
+  it('25. BUY_ITEM CheapBomb: transitions to target selection (fuel deducted on roll)', () => {
     let s = startedGame({ phase: TurnPhase.Shop });
     s = withPlayer(s, 0, { fuel: 50 });
     const s1 = gameReducer(s, {
       type: 'BUY_ITEM',
       itemId: ShopItemId.CheapBomb,
     });
-    expect(s1.players[0].fuel).toBe(45);
+    expect(s1.players[0].fuel).toBe(50); // not deducted yet
     expect(s1.phase).toBe(TurnPhase.CheapBombTarget);
     expect(s1.bomb).toBeDefined();
   });
@@ -431,17 +430,18 @@ describe('Shop - Bombs', () => {
     expect(s.players[1].planes).toBe(STARTING_PLANES - 1);
   });
 
-  it('28. BUY_ITEM PriceyBomb: costs 12 fuel, guaranteed hit', () => {
+  it('28. BUY_ITEM PriceyBomb: transitions to target selection, guaranteed hit (fuel deducted on target)', () => {
     let s = startedGame({ phase: TurnPhase.Shop });
     s = withPlayer(s, 0, { fuel: 100 });
     s = gameReducer(s, { type: 'BUY_ITEM', itemId: ShopItemId.PriceyBomb });
-    expect(s.players[0].fuel).toBe(88);
+    expect(s.players[0].fuel).toBe(100); // not deducted yet
     expect(s.phase).toBe(TurnPhase.PriceyBombTarget);
 
     s = gameReducer(s, {
       type: 'PRICEY_BOMB_TARGET',
       targetId: s.players[1].id,
     });
+    expect(s.players[0].fuel).toBe(88); // deducted on commit
     expect(s.players[1].planes).toBe(STARTING_PLANES - 1);
   });
 

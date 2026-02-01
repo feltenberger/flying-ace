@@ -439,8 +439,6 @@ export function gameReducer(state: GameState, action: Action): GameState {
         // ── 3. Dig for Fuel ──
         case ShopItemId.DigForFuel: {
           if (player.fuel < 1) return state;
-          s = updatePlayer(s, player.id, { fuel: player.fuel - 1 });
-          s = addLog(s, player.name, 'Paid 1 fuel to dig for fuel.');
           s = { ...s, phase: TurnPhase.DigForFuelRoll };
           return s;
         }
@@ -462,8 +460,6 @@ export function gameReducer(state: GameState, action: Action): GameState {
         // ── 5. Cheap Bomb ──
         case ShopItemId.CheapBomb: {
           if (player.fuel < 5) return state;
-          s = updatePlayer(s, player.id, { fuel: player.fuel - 5 });
-          s = addLog(s, player.name, 'Bought a Cheap Bomb for 5 fuel.');
           s = {
             ...s,
             phase: TurnPhase.CheapBombTarget,
@@ -475,8 +471,6 @@ export function gameReducer(state: GameState, action: Action): GameState {
         // ── 6. Pricey Bomb ──
         case ShopItemId.PriceyBomb: {
           if (player.fuel < 12) return state;
-          s = updatePlayer(s, player.id, { fuel: player.fuel - 12 });
-          s = addLog(s, player.name, 'Bought a Pricey Bomb for 12 fuel.');
           s = {
             ...s,
             phase: TurnPhase.PriceyBombTarget,
@@ -546,6 +540,28 @@ export function gameReducer(state: GameState, action: Action): GameState {
       }
     }
 
+    // ─── Cancel Shop Item Sub-Phase ────────────────────
+    case 'CANCEL_SHOP_ITEM': {
+      const cancelable: TurnPhase[] = [
+        TurnPhase.DigForFuelRoll,
+        TurnPhase.CheapBombTarget,
+        TurnPhase.CheapBombRoll,
+        TurnPhase.PriceyBombTarget,
+        TurnPhase.DonationTarget,
+        TurnPhase.DonationAmount,
+        TurnPhase.MercenaryTarget,
+        TurnPhase.MercenaryOffer,
+      ];
+      if (!cancelable.includes(state.phase)) return state;
+      return {
+        ...state,
+        phase: TurnPhase.Shop,
+        bomb: undefined,
+        donation: undefined,
+        mercenary: undefined,
+      };
+    }
+
     // ─── Dig for Fuel ──────────────────────────────────
     case 'DIG_FOR_FUEL_ROLL': {
       if (state.phase !== TurnPhase.DigForFuelRoll) return state;
@@ -553,7 +569,9 @@ export function gameReducer(state: GameState, action: Action): GameState {
       const roll = action.roll;
       const fuelGained = fuelForRoll(roll);
       const player = currentPlayer(state);
-      let s = updatePlayer(state, player.id, { fuel: player.fuel + fuelGained });
+      // Deduct the 1 fuel cost at commit time (not at purchase)
+      let s = updatePlayer(state, player.id, { fuel: player.fuel - 1 + fuelGained });
+      s = addLog(s, player.name, 'Paid 1 fuel to dig for fuel.');
       s = addLog(s, player.name, `Dug for fuel: rolled ${roll}, gained ${fuelGained} fuel.`);
       s = { ...s, digForFuelRoll: roll, phase: TurnPhase.DigForFuelResult };
       return s;
@@ -583,8 +601,11 @@ export function gameReducer(state: GameState, action: Action): GameState {
       const target = getPlayer(state, bomb.targetId);
       const attacker = getPlayer(state, bomb.attackerId);
 
-      let s: GameState = {
-        ...state,
+      // Deduct the 5 fuel cost at commit time (not at purchase)
+      let s: GameState = updatePlayer(state, attacker.id, { fuel: attacker.fuel - 5 });
+      s = addLog(s, attacker.name, 'Bought a Cheap Bomb for 5 fuel.');
+      s = {
+        ...s,
         bomb: { ...bomb, roll, hit },
       };
 
@@ -637,10 +658,13 @@ export function gameReducer(state: GameState, action: Action): GameState {
         targetId: action.targetId,
         hit: true,
       };
-      const target = getPlayer(state, action.targetId);
       const attacker = getPlayer(state, bomb.attackerId);
 
-      let s: GameState = { ...state, bomb };
+      // Deduct the 12 fuel cost at commit time (not at purchase)
+      let s: GameState = updatePlayer(state, attacker.id, { fuel: attacker.fuel - 12 });
+      s = addLog(s, attacker.name, 'Bought a Pricey Bomb for 12 fuel.');
+      s = { ...s, bomb };
+      const target = getPlayer(s, action.targetId);
       s = addLog(s, attacker.name, `Pricey Bomb targets ${target.name}!`);
 
       // Pricey bomb: guaranteed hit. OVERRIDES insurance. AA CAN block.

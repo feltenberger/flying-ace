@@ -187,6 +187,8 @@ export type Action =
   // Tax
   | { type: 'PAY_TAX' }
   | { type: 'END_TURN' }
+  // Cancel shop item sub-phase
+  | { type: 'CANCEL_SHOP_ITEM' }
   // Game management
   | { type: 'LOAD_STATE'; state: GameState }
   | { type: 'RESET_GAME' };

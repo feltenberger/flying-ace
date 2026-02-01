@@ -337,6 +337,12 @@ function CheapBombTargetPhase() {
           </button>
         ))}
       </div>
+      <button
+        onClick={() => dispatch({ type: 'CANCEL_SHOP_ITEM' })}
+        className="w-full mt-3 py-2 bg-military-700 hover:bg-military-600 text-military-400 rounded transition-colors text-sm"
+      >
+        Back to Shop
+      </button>
     </PhaseCard>
   )
 }
@@ -359,6 +365,12 @@ function CheapBombRollPhase() {
         className="w-full py-3 bg-danger-500 hover:bg-danger-400 text-white font-bold rounded-lg transition-colors"
       >
         Drop Bomb
+      </button>
+      <button
+        onClick={() => dispatch({ type: 'CANCEL_SHOP_ITEM' })}
+        className="w-full mt-2 py-2 bg-military-700 hover:bg-military-600 text-military-400 rounded transition-colors text-sm"
+      >
+        Back to Shop
       </button>
     </PhaseCard>
   )
@@ -427,6 +439,12 @@ function PriceyBombTargetPhase() {
           </button>
         ))}
       </div>
+      <button
+        onClick={() => dispatch({ type: 'CANCEL_SHOP_ITEM' })}
+        className="w-full mt-3 py-2 bg-military-700 hover:bg-military-600 text-military-400 rounded transition-colors text-sm"
+      >
+        Back to Shop
+      </button>
     </PhaseCard>
   )
 }
@@ -488,6 +506,12 @@ function DonationTargetPhase() {
           </button>
         ))}
       </div>
+      <button
+        onClick={() => dispatch({ type: 'CANCEL_SHOP_ITEM' })}
+        className="w-full mt-3 py-2 bg-military-700 hover:bg-military-600 text-military-400 rounded transition-colors text-sm"
+      >
+        Back to Shop
+      </button>
     </PhaseCard>
   )
 }
@@ -534,6 +558,12 @@ function DonationAmountPhase() {
         className="w-full py-3 bg-raf-600 hover:bg-raf-500 disabled:bg-military-700 disabled:text-military-500 text-white font-bold rounded transition-colors"
       >
         Donate {amount} Fuel
+      </button>
+      <button
+        onClick={() => dispatch({ type: 'CANCEL_SHOP_ITEM' })}
+        className="w-full mt-2 py-2 bg-military-700 hover:bg-military-600 text-military-400 rounded transition-colors text-sm"
+      >
+        Back to Shop
       </button>
     </PhaseCard>
   )
@@ -589,6 +619,12 @@ function MercenaryTargetPhase() {
           </button>
         ))}
       </div>
+      <button
+        onClick={() => dispatch({ type: 'CANCEL_SHOP_ITEM' })}
+        className="w-full mt-3 py-2 bg-military-700 hover:bg-military-600 text-military-400 rounded transition-colors text-sm"
+      >
+        Back to Shop
+      </button>
     </PhaseCard>
   )
 }
@@ -626,6 +662,12 @@ function MercenaryOfferPhase() {
         className="w-full py-3 bg-brass-500 hover:bg-brass-400 disabled:bg-military-700 disabled:text-military-500 text-military-950 font-bold rounded transition-colors"
       >
         Send Offer
+      </button>
+      <button
+        onClick={() => dispatch({ type: 'CANCEL_SHOP_ITEM' })}
+        className="w-full mt-2 py-2 bg-military-700 hover:bg-military-600 text-military-400 rounded transition-colors text-sm"
+      >
+        Back to Shop
       </button>
     </PhaseCard>
   )
@@ -866,6 +908,12 @@ function DigForFuelRollPhase() {
         className="w-full py-3 bg-brass-500 hover:bg-brass-400 text-military-950 font-bold rounded-lg transition-colors"
       >
         Dig!
+      </button>
+      <button
+        onClick={() => dispatch({ type: 'CANCEL_SHOP_ITEM' })}
+        className="w-full mt-2 py-2 bg-military-700 hover:bg-military-600 text-military-400 rounded transition-colors text-sm"
+      >
+        Back to Shop
       </button>
     </PhaseCard>
   )
