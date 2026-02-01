@@ -63,10 +63,12 @@ function Scoreboard() {
 
 function RollPhase() {
   const { state, dispatch } = useGame()
+  const images = useImages()
   const player = state.players[state.currentPlayerIndex]
 
   return (
     <PhaseCard title={`${player.name}'s Turn`}>
+      <img src={images.diceRoll} alt="" className="spot-illustration mb-4" />
       <button
         onClick={() => dispatch({ type: 'ROLL_DIE', roll: rollDie() })}
         className="w-full py-4 bg-brass-500 hover:bg-brass-400 text-military-950 font-bold rounded-lg text-xl transition-colors"
