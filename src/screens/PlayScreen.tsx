@@ -197,12 +197,16 @@ function DogFightResultPhase() {
       {!hasRolled && (
         <img src={images.dogfightChallenge} alt="" className="spot-illustration mb-4" />
       )}
-      <div className="text-center mb-4">
-        <p className="text-lg text-military-200">
-          <span className="text-raf-500 font-bold">{attacker.name}</span>
-          {' vs '}
-          <span className="text-danger-500 font-bold">{defender.name}</span>
-        </p>
+      <div className="flex items-center justify-center gap-4 mb-4">
+        <div className="flex flex-col items-center">
+          <img src={planeAvatarPath(attacker.planeColor)} alt="" className="w-14 h-14 object-contain" />
+          <span className="text-raf-500 font-bold text-sm mt-1">{attacker.name}</span>
+        </div>
+        <span className="text-military-400 font-bold text-lg">vs</span>
+        <div className="flex flex-col items-center">
+          <img src={planeAvatarPath(defender.planeColor)} alt="" className="w-14 h-14 object-contain" />
+          <span className="text-danger-500 font-bold text-sm mt-1">{defender.name}</span>
+        </div>
       </div>
 
       {!hasRolled ? (
