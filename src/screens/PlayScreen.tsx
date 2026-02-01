@@ -1170,8 +1170,14 @@ function InGameMenu() {
 
   return (
     <>
-      {/* Menu + Rules buttons */}
+      {/* Home + Rules + Menu buttons */}
       <div className="flex justify-end gap-2 mb-2 relative">
+        <button
+          onClick={handleSaveExit}
+          className="text-military-400 hover:text-military-200 text-sm px-3 py-1 rounded border border-military-600 hover:border-military-500 transition-colors"
+        >
+          Home
+        </button>
         <button
           onClick={() => setShowRules(true)}
           className="text-military-400 hover:text-military-200 text-sm px-3 py-1 rounded border border-military-600 hover:border-military-500 transition-colors"
