@@ -63,11 +63,24 @@ export function loadGame(gameId: string): GameState | null {
     const raw = localStorage.getItem(GAME_KEY_PREFIX + gameId);
     if (!raw) return null;
     const state = JSON.parse(raw) as GameState;
-    if (state.schemaVersion !== SCHEMA_VERSION) return null;
-    return state;
+    return migrateState(state);
   } catch {
     return null;
   }
+}
+
+function migrateState(state: GameState): GameState | null {
+  // v1 -> v2: add isCpu field to players
+  if (state.schemaVersion === 1) {
+    state.players = state.players.map((p) => ({
+      ...p,
+      isCpu: p.isCpu ?? false,
+    }));
+    state.schemaVersion = 2;
+  }
+
+  if (state.schemaVersion !== SCHEMA_VERSION) return null;
+  return state;
 }
 
 export function deleteGame(gameId: string): void {
