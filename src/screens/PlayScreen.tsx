@@ -1065,10 +1065,10 @@ function PhaseCard({ title, headerImage, children }: { title: string; headerImag
     <div className="bg-military-800 rounded-lg shadow-lg overflow-hidden">
       {headerImage && (
         <div
-          className="h-24 bg-cover bg-center relative"
+          className="h-40 bg-cover bg-center relative"
           style={{ backgroundImage: `url(${headerImage})` }}
         >
-          <div className="absolute inset-0 bg-gradient-to-b from-military-800/40 to-military-800" />
+          <div className="absolute inset-0 bg-gradient-to-b from-military-800/10 via-transparent to-military-800" />
         </div>
       )}
       <div className="p-6">
