@@ -4,9 +4,7 @@ import { TurnPhase, FUEL_TAX_PER_PLANE, OIL_TYCOON_REPAIR_COST, DOGFIGHT_FUEL_PE
 import { SHOP_CATALOG } from '../types/shop.ts'
 import type { ShopItemId } from '../types/shop.ts'
 import { rollDie } from '../utils/dice.ts'
-import { deleteGame } from '../utils/persistence.ts'
 import GameLog from '../components/GameLog.tsx'
-import ConfirmDialog from '../components/ConfirmDialog.tsx'
 import RulesOverlay from '../components/RulesOverlay.tsx'
 import { useImages } from '../utils/images.ts'
 import { useCpuAction } from '../cpu/useCpuAction.ts'
@@ -1194,38 +1192,17 @@ function PhaseRouter() {
 // ── In-Game Menu ────────────────────────────────────────
 
 function InGameMenu() {
-  const { state, dispatch } = useGame()
-  const [menuOpen, setMenuOpen] = useState(false)
+  const { dispatch } = useGame()
   const [showRules, setShowRules] = useState(false)
-  const [showResetConfirm, setShowResetConfirm] = useState(false)
-
-  function handleSaveExit() {
-    setMenuOpen(false)
-    dispatch({ type: 'GO_HOME' })
-  }
-
-  function handleReset() {
-    setMenuOpen(false)
-    setShowResetConfirm(true)
-  }
-
-  function confirmReset() {
-    if (state.gameId) {
-      deleteGame(state.gameId)
-    }
-    setShowResetConfirm(false)
-    dispatch({ type: 'GO_HOME' })
-  }
 
   return (
     <>
-      {/* Home + Rules + Menu buttons */}
-      <div className="flex justify-end gap-2 mb-2 relative">
+      <div className="flex justify-end gap-2 mb-2">
         <button
-          onClick={handleSaveExit}
+          onClick={() => dispatch({ type: 'GO_HOME' })}
           className="text-military-400 hover:text-military-200 text-sm px-3 py-1 rounded border border-military-600 hover:border-military-500 transition-colors"
         >
-          Home
+          Save &amp; Go Home
         </button>
         <button
           onClick={() => setShowRules(true)}
@@ -1233,45 +1210,9 @@ function InGameMenu() {
         >
           Rules
         </button>
-        <button
-          onClick={() => setMenuOpen((v) => !v)}
-          className="text-military-400 hover:text-military-200 text-sm px-3 py-1 rounded border border-military-600 hover:border-military-500 transition-colors"
-        >
-          Menu
-        </button>
-        {menuOpen && (
-          <>
-            <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
-            <div className="absolute right-0 top-full mt-1 z-50 bg-military-800 border border-military-600 rounded-lg shadow-xl min-w-[10rem]">
-              <button
-                onClick={handleSaveExit}
-                className="w-full text-left px-4 py-2.5 text-sm text-military-200 hover:bg-military-700 rounded-t-lg transition-colors"
-              >
-                Save &amp; Exit
-              </button>
-              <button
-                onClick={handleReset}
-                className="w-full text-left px-4 py-2.5 text-sm text-danger-500 hover:bg-military-700 rounded-b-lg transition-colors"
-              >
-                Reset Game
-              </button>
-            </div>
-          </>
-        )}
       </div>
 
-      {/* Rules overlay */}
       {showRules && <RulesOverlay onClose={() => setShowRules(false)} />}
-
-      {/* Reset confirmation dialog */}
-      {showResetConfirm && (
-        <ConfirmDialog
-          title="Reset Game"
-          message="This will permanently delete the current game and return to the lobby. This cannot be undone."
-          onConfirm={confirmReset}
-          onCancel={() => setShowResetConfirm(false)}
-        />
-      )}
     </>
   )
 }
