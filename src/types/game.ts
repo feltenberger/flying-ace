@@ -23,9 +23,11 @@ export const TurnPhase = {
   CheapBombResult: 'cheap_bomb_result',
   PriceyBombTarget: 'pricey_bomb_target',
   PriceyBombResult: 'pricey_bomb_result',
-  DonationTarget: 'donation_target',
-  DonationAmount: 'donation_amount',
-  DonationResult: 'donation_result',
+  TradeTarget: 'trade_target',
+  TradeOffer: 'trade_offer',
+  TradeHandover: 'trade_handover',
+  TradeResponse: 'trade_response',
+  TradeResult: 'trade_result',
   MercenaryTarget: 'mercenary_target',
   MercenaryOffer: 'mercenary_offer',
   MercenaryHandover: 'mercenary_handover',
@@ -104,12 +106,22 @@ export interface BombState {
   blockedBy?: 'insurance' | 'anti_aircraft';
 }
 
-// ── Donation State ─────────────────────────────────────
+// ── Trade State ───────────────────────────────────────
 
-export interface DonationState {
-  donorId: string;
-  recipientId?: string;
-  amount?: number;
+export interface TradeOffer {
+  fuel: number;
+  planes: number;
+  antiAircraft: boolean;
+  oilTycoon: boolean;
+  insurance: boolean;
+}
+
+export interface TradeState {
+  offererId: string;
+  partnerId?: string;
+  offering?: TradeOffer;
+  requesting?: TradeOffer;
+  accepted?: boolean;
 }
 
 // ── Game State ─────────────────────────────────────────
@@ -127,7 +139,7 @@ export interface GameState {
   dogFight?: DogFightState;
   mercenary?: MercenaryState;
   bomb?: BombState;
-  donation?: DonationState;
+  trade?: TradeState;
   digForFuelRoll?: number;
   log: LogEntry[];
   winnerId?: string;
@@ -166,10 +178,12 @@ export type Action =
   // Pricey bomb
   | { type: 'PRICEY_BOMB_TARGET'; targetId: string }
   | { type: 'PRICEY_BOMB_ACKNOWLEDGE' }
-  // Donation
-  | { type: 'DONATION_TARGET'; targetId: string }
-  | { type: 'DONATION_AMOUNT'; amount: number }
-  | { type: 'DONATION_ACKNOWLEDGE' }
+  // Trade
+  | { type: 'TRADE_TARGET'; partnerId: string }
+  | { type: 'TRADE_PROPOSE'; offering: TradeOffer; requesting: TradeOffer }
+  | { type: 'TRADE_HANDOVER_COMPLETE' }
+  | { type: 'TRADE_RESPOND'; accepted: boolean }
+  | { type: 'TRADE_ACKNOWLEDGE' }
   // Dig for fuel
   | { type: 'DIG_FOR_FUEL_ROLL'; roll: number }
   | { type: 'DIG_FOR_FUEL_ACKNOWLEDGE' }
@@ -207,4 +221,4 @@ export const OIL_TYCOON_REPAIR_COST = 50;
 export const OIL_TYCOON_REPAIR_WINDOW = 2;
 export const OIL_TYCOON_HITS_TO_DESTROY = 3;
 export const DOGFIGHT_FUEL_PENALTY = 10;
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;

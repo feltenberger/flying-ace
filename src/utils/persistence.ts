@@ -79,6 +79,19 @@ function migrateState(state: GameState): GameState | null {
     state.schemaVersion = 2;
   }
 
+  // v2 -> v3: replace donation with trade
+  if (state.schemaVersion === 2) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const s = state as any;
+    delete s.donation;
+    s.trade = undefined;
+    // Reset any donation phases to Shop
+    if (s.phase === 'donation_target' || s.phase === 'donation_amount' || s.phase === 'donation_result') {
+      s.phase = 'shop';
+    }
+    state.schemaVersion = 3;
+  }
+
   if (state.schemaVersion !== SCHEMA_VERSION) return null;
   return state;
 }

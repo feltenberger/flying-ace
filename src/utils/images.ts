@@ -97,7 +97,7 @@ export function buildImages(setName: string): GameImages {
     insurance: itemInsurance,
     cheap_bomb: itemCheapbomb,
     pricey_bomb: itemPriceybomb,
-    donation: itemDonation,
+    trade: itemDonation,
     mercenary: itemMercenary,
     anti_aircraft: itemAntiaircraft,
     oil_tycoon: itemOiltycoon,

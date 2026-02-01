@@ -487,29 +487,32 @@ function PriceyBombResultPhase() {
   )
 }
 
-// ── Phase: Donation ─────────────────────────────────────
+// ── Phase: Trade ────────────────────────────────────────
 
-function DonationTargetPhase() {
+function TradeTargetPhase() {
   const { state, dispatch } = useGame()
   const images = useImages()
   const player = state.players[state.currentPlayerIndex]
   const targets = state.players.filter((p) => p.alive && p.id !== player.id)
 
   return (
-    <PhaseCard title="Donation">
+    <PhaseCard title="Trade">
       <img src={images.itemDonation} alt="" className="spot-illustration mb-4" />
-      <p className="text-military-300 mb-4">
-        Choose who to donate fuel to (costs amount + 2 fee):
-      </p>
+      <p className="text-military-300 mb-4">Choose a trading partner:</p>
       <div className="space-y-2">
         {targets.map((t) => (
           <button
             key={t.id}
-            onClick={() => dispatch({ type: 'DONATION_TARGET', targetId: t.id })}
+            onClick={() => dispatch({ type: 'TRADE_TARGET', partnerId: t.id })}
             className="w-full py-3 bg-military-700 hover:bg-military-600 text-military-100 rounded transition-colors px-4 text-left"
           >
             <span className="font-semibold">{t.name}</span>
-            <span className="text-military-400 text-sm ml-2">({t.fuel} fuel)</span>
+            <span className="text-military-400 text-sm ml-2">
+              ({t.planes} planes, {t.fuel} fuel
+              {t.hasAntiAircraft ? ', AA' : ''}
+              {t.hasOilTycoon ? ', Oil' : ''}
+              {t.insuranceTurnsLeft > 0 ? `, Ins:${t.insuranceTurnsLeft}` : ''})
+            </span>
           </button>
         ))}
       </div>
@@ -523,48 +526,125 @@ function DonationTargetPhase() {
   )
 }
 
-function DonationAmountPhase() {
+function TradeOfferPhase() {
   const { state, dispatch } = useGame()
   const images = useImages()
   const player = state.players[state.currentPlayerIndex]
-  const donation = state.donation!
-  const recipient = state.players.find((p) => p.id === donation.recipientId)!
-  const [amount, setAmount] = useState(1)
-  const maxDonation = Math.max(0, player.fuel - 2) // must keep 2 for the fee
+  const trade = state.trade!
+  const partner = state.players.find((p) => p.id === trade.partnerId)!
 
-  function handleDonate() {
-    if (amount >= 1 && amount <= maxDonation) {
-      dispatch({ type: 'DONATION_AMOUNT', amount })
-    }
+  const [offerFuel, setOfferFuel] = useState(0)
+  const [offerPlanes, setOfferPlanes] = useState(0)
+  const [offerAA, setOfferAA] = useState(false)
+  const [offerOT, setOfferOT] = useState(false)
+  const [offerIns, setOfferIns] = useState(false)
+
+  const [reqFuel, setReqFuel] = useState(0)
+  const [reqPlanes, setReqPlanes] = useState(0)
+  const [reqAA, setReqAA] = useState(false)
+  const [reqOT, setReqOT] = useState(false)
+  const [reqIns, setReqIns] = useState(false)
+
+  const offerEmpty = offerFuel === 0 && offerPlanes === 0 && !offerAA && !offerOT && !offerIns
+  const reqEmpty = reqFuel === 0 && reqPlanes === 0 && !reqAA && !reqOT && !reqIns
+  const canPropose = !(offerEmpty && reqEmpty)
+
+  function handlePropose() {
+    dispatch({
+      type: 'TRADE_PROPOSE',
+      offering: { fuel: offerFuel, planes: offerPlanes, antiAircraft: offerAA, oilTycoon: offerOT, insurance: offerIns },
+      requesting: { fuel: reqFuel, planes: reqPlanes, antiAircraft: reqAA, oilTycoon: reqOT, insurance: reqIns },
+    })
   }
 
   return (
-    <PhaseCard title="Donation">
+    <PhaseCard title={`Trade with ${partner.name}`}>
       <img src={images.itemDonation} alt="" className="spot-illustration mb-4" />
-      <p className="text-military-300 mb-4">
-        Donating to <span className="text-raf-500 font-bold">{recipient.name}</span>.
-        You have {player.fuel} fuel (2 fuel fee applies).
-      </p>
-      <div className="flex items-center gap-3 mb-4">
-        <label className="text-military-400 text-sm">Amount:</label>
-        <input
-          type="number"
-          min={1}
-          max={maxDonation}
-          value={amount}
-          onChange={(e) => setAmount(Math.max(1, Math.min(maxDonation, parseInt(e.target.value) || 1)))}
-          className="w-24 bg-military-700 border border-military-600 rounded px-3 py-2 text-military-100 text-center focus:outline-none focus:border-raf-500"
-        />
-        <span className="text-military-500 text-sm">
-          (total cost: {amount + 2})
-        </span>
+
+      {/* You Give */}
+      <div className="bg-military-700/50 rounded p-3 mb-3">
+        <h4 className="text-sm font-semibold text-danger-500 mb-2 uppercase tracking-wider">You Give</h4>
+        <div className="flex items-center gap-3 mb-2">
+          <label className="text-military-400 text-xs w-12">Fuel:</label>
+          <input type="number" min={0} max={player.fuel} value={offerFuel}
+            onChange={(e) => setOfferFuel(Math.max(0, Math.min(player.fuel, parseInt(e.target.value) || 0)))}
+            className="w-20 bg-military-700 border border-military-600 rounded px-2 py-1 text-military-100 text-center text-sm focus:outline-none focus:border-raf-500" />
+          <span className="text-military-500 text-xs">/ {player.fuel}</span>
+        </div>
+        <div className="flex items-center gap-3 mb-2">
+          <label className="text-military-400 text-xs w-12">Planes:</label>
+          <input type="number" min={0} max={player.planes - 1} value={offerPlanes}
+            onChange={(e) => setOfferPlanes(Math.max(0, Math.min(player.planes - 1, parseInt(e.target.value) || 0)))}
+            className="w-20 bg-military-700 border border-military-600 rounded px-2 py-1 text-military-100 text-center text-sm focus:outline-none focus:border-raf-500" />
+          <span className="text-military-500 text-xs">/ {player.planes - 1}</span>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          {player.hasAntiAircraft && !reqAA && (
+            <label className="flex items-center gap-1 text-xs text-military-300">
+              <input type="checkbox" checked={offerAA} onChange={(e) => setOfferAA(e.target.checked)} className="accent-brass-500" />
+              AA
+            </label>
+          )}
+          {player.hasOilTycoon && !reqOT && (
+            <label className="flex items-center gap-1 text-xs text-military-300">
+              <input type="checkbox" checked={offerOT} onChange={(e) => setOfferOT(e.target.checked)} className="accent-brass-500" />
+              Oil Tycoon
+            </label>
+          )}
+          {player.insuranceTurnsLeft > 0 && !reqIns && (
+            <label className="flex items-center gap-1 text-xs text-military-300">
+              <input type="checkbox" checked={offerIns} onChange={(e) => setOfferIns(e.target.checked)} className="accent-brass-500" />
+              Insurance ({player.insuranceTurnsLeft}t)
+            </label>
+          )}
+        </div>
       </div>
+
+      {/* You Request */}
+      <div className="bg-military-700/50 rounded p-3 mb-4">
+        <h4 className="text-sm font-semibold text-ops-500 mb-2 uppercase tracking-wider">You Request</h4>
+        <div className="flex items-center gap-3 mb-2">
+          <label className="text-military-400 text-xs w-12">Fuel:</label>
+          <input type="number" min={0} max={partner.fuel} value={reqFuel}
+            onChange={(e) => setReqFuel(Math.max(0, Math.min(partner.fuel, parseInt(e.target.value) || 0)))}
+            className="w-20 bg-military-700 border border-military-600 rounded px-2 py-1 text-military-100 text-center text-sm focus:outline-none focus:border-raf-500" />
+          <span className="text-military-500 text-xs">/ {partner.fuel}</span>
+        </div>
+        <div className="flex items-center gap-3 mb-2">
+          <label className="text-military-400 text-xs w-12">Planes:</label>
+          <input type="number" min={0} max={partner.planes - 1} value={reqPlanes}
+            onChange={(e) => setReqPlanes(Math.max(0, Math.min(partner.planes - 1, parseInt(e.target.value) || 0)))}
+            className="w-20 bg-military-700 border border-military-600 rounded px-2 py-1 text-military-100 text-center text-sm focus:outline-none focus:border-raf-500" />
+          <span className="text-military-500 text-xs">/ {partner.planes - 1}</span>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          {partner.hasAntiAircraft && !offerAA && (
+            <label className="flex items-center gap-1 text-xs text-military-300">
+              <input type="checkbox" checked={reqAA} onChange={(e) => setReqAA(e.target.checked)} className="accent-brass-500" />
+              AA
+            </label>
+          )}
+          {partner.hasOilTycoon && !offerOT && (
+            <label className="flex items-center gap-1 text-xs text-military-300">
+              <input type="checkbox" checked={reqOT} onChange={(e) => setReqOT(e.target.checked)} className="accent-brass-500" />
+              Oil Tycoon
+            </label>
+          )}
+          {partner.insuranceTurnsLeft > 0 && !offerIns && (
+            <label className="flex items-center gap-1 text-xs text-military-300">
+              <input type="checkbox" checked={reqIns} onChange={(e) => setReqIns(e.target.checked)} className="accent-brass-500" />
+              Insurance ({partner.insuranceTurnsLeft}t)
+            </label>
+          )}
+        </div>
+      </div>
+
       <button
-        onClick={handleDonate}
-        disabled={amount < 1 || amount > maxDonation}
-        className="w-full py-3 bg-raf-600 hover:bg-raf-500 disabled:bg-military-700 disabled:text-military-500 text-white font-bold rounded transition-colors"
+        onClick={handlePropose}
+        disabled={!canPropose}
+        className="w-full py-3 bg-brass-500 hover:bg-brass-400 disabled:bg-military-700 disabled:text-military-500 text-military-950 font-bold rounded transition-colors"
       >
-        Donate {amount} Fuel
+        Propose Trade
       </button>
       <button
         onClick={() => dispatch({ type: 'CANCEL_SHOP_ITEM' })}
@@ -576,21 +656,144 @@ function DonationAmountPhase() {
   )
 }
 
-function DonationResultPhase() {
-  const { state, dispatch } = useGame()
-  const images = useImages()
-  const donation = state.donation!
-  const recipient = state.players.find((p) => p.id === donation.recipientId)!
+function TradeOfferSummary({ offering, requesting, offererName, partnerName }: {
+  offering: import('../types/game.ts').TradeOffer
+  requesting: import('../types/game.ts').TradeOffer
+  offererName: string
+  partnerName: string
+}) {
+  function describeOffer(offer: import('../types/game.ts').TradeOffer): string[] {
+    const parts: string[] = []
+    if (offer.fuel > 0) parts.push(`${offer.fuel} fuel`)
+    if (offer.planes > 0) parts.push(`${offer.planes} plane${offer.planes > 1 ? 's' : ''}`)
+    if (offer.antiAircraft) parts.push('Anti-Aircraft')
+    if (offer.oilTycoon) parts.push('Oil Tycoon')
+    if (offer.insurance) parts.push('Insurance')
+    return parts
+  }
+
+  const offererGives = describeOffer(offering)
+  const partnerGives = describeOffer(requesting)
 
   return (
-    <PhaseCard title="Donation Complete">
+    <div className="bg-military-700/50 rounded p-3 mb-4 text-sm">
+      <div className="mb-2">
+        <span className="text-danger-500 font-semibold">{offererName} gives:</span>
+        <span className="text-military-300 ml-2">
+          {offererGives.length > 0 ? offererGives.join(', ') : 'Nothing'}
+        </span>
+      </div>
+      <div>
+        <span className="text-ops-500 font-semibold">{partnerName} gives:</span>
+        <span className="text-military-300 ml-2">
+          {partnerGives.length > 0 ? partnerGives.join(', ') : 'Nothing'}
+        </span>
+      </div>
+    </div>
+  )
+}
+
+function TradeHandoverPhase() {
+  const { state, dispatch } = useGame()
+  const trade = state.trade!
+  const partner = state.players.find((p) => p.id === trade.partnerId)!
+  const offerer = state.players.find((p) => p.id === trade.offererId)!
+
+  return (
+    <div
+      className="flex flex-col items-center justify-center min-h-[40vh] cursor-pointer select-none"
+      onClick={() => dispatch({ type: 'TRADE_HANDOVER_COMPLETE' })}
+    >
+      <p className="text-military-500 text-sm uppercase tracking-widest mb-4">
+        Pass device to trade partner
+      </p>
+      <h2 className="font-stencil text-4xl text-brass-500 mb-4">
+        {partner.name}
+      </h2>
+      <TradeOfferSummary
+        offering={trade.offering!}
+        requesting={trade.requesting!}
+        offererName={offerer.name}
+        partnerName={partner.name}
+      />
+      <button
+        onClick={(e) => {
+          e.stopPropagation()
+          dispatch({ type: 'TRADE_HANDOVER_COMPLETE' })
+        }}
+        className="px-8 py-3 bg-raf-600 hover:bg-raf-500 text-white font-bold rounded-lg transition-colors"
+      >
+        Ready
+      </button>
+    </div>
+  )
+}
+
+function TradeResponsePhase() {
+  const { state, dispatch } = useGame()
+  const images = useImages()
+  const trade = state.trade!
+  const offerer = state.players.find((p) => p.id === trade.offererId)!
+  const partner = state.players.find((p) => p.id === trade.partnerId)!
+
+  return (
+    <PhaseCard title="Trade Proposal">
+      <img src={images.itemDonation} alt="" className="spot-illustration mb-4" />
+      <p className="text-military-300 mb-3">
+        <span className="text-raf-500 font-bold">{offerer.name}</span> wants to trade with you.
+      </p>
+      <TradeOfferSummary
+        offering={trade.offering!}
+        requesting={trade.requesting!}
+        offererName={offerer.name}
+        partnerName={partner.name}
+      />
+      <div className="flex gap-3">
+        <button
+          onClick={() => dispatch({ type: 'TRADE_RESPOND', accepted: true })}
+          className="flex-1 py-3 bg-ops-500 hover:bg-ops-400 text-white font-bold rounded transition-colors"
+        >
+          Accept
+        </button>
+        <button
+          onClick={() => dispatch({ type: 'TRADE_RESPOND', accepted: false })}
+          className="flex-1 py-3 bg-danger-500 hover:bg-danger-400 text-white font-bold rounded transition-colors"
+        >
+          Decline
+        </button>
+      </div>
+    </PhaseCard>
+  )
+}
+
+function TradeResultPhase() {
+  const { state, dispatch } = useGame()
+  const images = useImages()
+  const trade = state.trade!
+  const offerer = state.players.find((p) => p.id === trade.offererId)!
+  const partner = state.players.find((p) => p.id === trade.partnerId)!
+
+  return (
+    <PhaseCard title={trade.accepted ? 'Trade Accepted' : 'Trade Declined'}>
       <div className="text-center">
         <img src={images.itemDonation} alt="" className="spot-illustration mb-3" />
-        <p className="text-lg text-ops-500 font-bold mb-4">
-          Donated {donation.amount} fuel to {recipient.name}!
-        </p>
+        {trade.accepted ? (
+          <>
+            <p className="text-lg text-ops-500 font-bold mb-3">Trade completed!</p>
+            <TradeOfferSummary
+              offering={trade.offering!}
+              requesting={trade.requesting!}
+              offererName={offerer.name}
+              partnerName={partner.name}
+            />
+          </>
+        ) : (
+          <p className="text-lg text-danger-500 font-bold mb-4">
+            {partner.name} declined the trade.
+          </p>
+        )}
         <button
-          onClick={() => dispatch({ type: 'DONATION_ACKNOWLEDGE' })}
+          onClick={() => dispatch({ type: 'TRADE_ACKNOWLEDGE' })}
           className="px-6 py-2 bg-military-700 hover:bg-military-600 text-military-200 rounded transition-colors"
         >
           Continue
@@ -1113,7 +1316,7 @@ const ACKNOWLEDGE_ACTIONS = new Set([
   'DOG_FIGHT_ACKNOWLEDGE',
   'CHEAP_BOMB_ACKNOWLEDGE',
   'PRICEY_BOMB_ACKNOWLEDGE',
-  'DONATION_ACKNOWLEDGE',
+  'TRADE_ACKNOWLEDGE',
   'DIG_FOR_FUEL_ACKNOWLEDGE',
   'MERCENARY_FIGHT_ACKNOWLEDGE',
   'MERCENARY_COMPLETE_ACKNOWLEDGE',
@@ -1166,12 +1369,16 @@ function PhaseRouter() {
       return <PriceyBombTargetPhase />
     case TurnPhase.PriceyBombResult:
       return <PriceyBombResultPhase />
-    case TurnPhase.DonationTarget:
-      return <DonationTargetPhase />
-    case TurnPhase.DonationAmount:
-      return <DonationAmountPhase />
-    case TurnPhase.DonationResult:
-      return <DonationResultPhase />
+    case TurnPhase.TradeTarget:
+      return <TradeTargetPhase />
+    case TurnPhase.TradeOffer:
+      return <TradeOfferPhase />
+    case TurnPhase.TradeHandover:
+      return <TradeHandoverPhase />
+    case TurnPhase.TradeResponse:
+      return <TradeResponsePhase />
+    case TurnPhase.TradeResult:
+      return <TradeResultPhase />
     case TurnPhase.MercenaryTarget:
       return <MercenaryTargetPhase />
     case TurnPhase.MercenaryOffer:

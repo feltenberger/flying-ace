@@ -684,43 +684,112 @@ describe('Elimination and Win', () => {
 });
 
 // ─────────────────────────────────────────────────────────
-// 47-48  Donation
+// 47-50  Trade
 // ─────────────────────────────────────────────────────────
-describe('Donation', () => {
-  function donationSetup(): GameState {
+describe('Trade', () => {
+  const emptyOffer = { fuel: 0, planes: 0, antiAircraft: false, oilTycoon: false, insurance: false };
+
+  function tradeSetup(): GameState {
     let s = startedGame({ phase: TurnPhase.Shop });
-    s = withPlayer(s, 0, { fuel: 100 });
-    // Enter donation flow
-    s = gameReducer(s, { type: 'BUY_ITEM', itemId: ShopItemId.Donation });
-    s = gameReducer(s, {
-      type: 'DONATION_TARGET',
-      targetId: s.players[1].id,
-    });
+    s = withPlayer(s, 0, { fuel: 100, hasAntiAircraft: true, hasOilTycoon: true, insuranceTurnsLeft: 3, insuranceUsed: true });
+    s = withPlayer(s, 1, { fuel: 50, hasAntiAircraft: true });
+    s = gameReducer(s, { type: 'BUY_ITEM', itemId: ShopItemId.Trade });
+    s = gameReducer(s, { type: 'TRADE_TARGET', partnerId: s.players[1].id });
     return s;
   }
 
-  it('47. DONATION_AMOUNT transfers fuel (minus 2 fee)', () => {
-    const s0 = donationSetup();
-    const bobFuelBefore = s0.players[1].fuel;
-    const aliceFuelBefore = s0.players[0].fuel;
-    const s = gameReducer(s0, { type: 'DONATION_AMOUNT', amount: 20 });
-    expect(s.players[0].fuel).toBe(aliceFuelBefore - 22); // amount + 2 fee
-    expect(s.players[1].fuel).toBe(bobFuelBefore + 20);
+  it('47. Accepted trade transfers items bidirectionally', () => {
+    let s = tradeSetup();
+    const offering = { fuel: 20, planes: 1, antiAircraft: true, oilTycoon: false, insurance: false };
+    const requesting = { fuel: 10, planes: 0, antiAircraft: true, oilTycoon: false, insurance: false };
+    s = gameReducer(s, { type: 'TRADE_PROPOSE', offering, requesting });
+    expect(s.phase).toBe(TurnPhase.TradeHandover);
+    s = gameReducer(s, { type: 'TRADE_HANDOVER_COMPLETE' });
+    expect(s.phase).toBe(TurnPhase.TradeResponse);
+
+    const aliceFuelBefore = s.players[0].fuel;
+    const bobFuelBefore = s.players[1].fuel;
+    const alicePlanesBefore = s.players[0].planes;
+
+    s = gameReducer(s, { type: 'TRADE_RESPOND', accepted: true });
+    expect(s.phase).toBe(TurnPhase.TradeResult);
+    expect(s.trade!.accepted).toBe(true);
+
+    // Fuel: Alice -20 +10, Bob -10 +20
+    expect(s.players[0].fuel).toBe(aliceFuelBefore - 20 + 10);
+    expect(s.players[1].fuel).toBe(bobFuelBefore - 10 + 20);
+    // Planes: Alice -1
+    expect(s.players[0].planes).toBe(alicePlanesBefore - 1);
+    // AA: swapped (Alice gave AA, received AA from Bob)
+    expect(s.players[0].hasAntiAircraft).toBe(true);
+    expect(s.players[1].hasAntiAircraft).toBe(true);
   });
 
-  it('48. Cannot donate more fuel than you have (including fee)', () => {
-    let s = startedGame({ phase: TurnPhase.Shop });
-    s = withPlayer(s, 0, { fuel: 10 });
-    s = gameReducer(s, { type: 'BUY_ITEM', itemId: ShopItemId.Donation });
-    s = gameReducer(s, {
-      type: 'DONATION_TARGET',
-      targetId: s.players[1].id,
-    });
-    // Try to donate 9 => total cost 11 > 10 fuel
-    const s1 = gameReducer(s, { type: 'DONATION_AMOUNT', amount: 9 });
-    // Should be rejected: fuel unchanged
-    expect(s1.players[0].fuel).toBe(10);
-    expect(s1.phase).toBe(TurnPhase.DonationAmount); // still in donation phase
+  it('48. Declined trade transfers nothing', () => {
+    let s = tradeSetup();
+    const offering = { fuel: 20, planes: 0, antiAircraft: false, oilTycoon: false, insurance: false };
+    const requesting = { fuel: 10, planes: 0, antiAircraft: false, oilTycoon: false, insurance: false };
+    s = gameReducer(s, { type: 'TRADE_PROPOSE', offering, requesting });
+    s = gameReducer(s, { type: 'TRADE_HANDOVER_COMPLETE' });
+
+    const aliceFuelBefore = s.players[0].fuel;
+    const bobFuelBefore = s.players[1].fuel;
+    s = gameReducer(s, { type: 'TRADE_RESPOND', accepted: false });
+
+    expect(s.phase).toBe(TurnPhase.TradeResult);
+    expect(s.trade!.accepted).toBe(false);
+    expect(s.players[0].fuel).toBe(aliceFuelBefore);
+    expect(s.players[1].fuel).toBe(bobFuelBefore);
+  });
+
+  it('49. Rejects trade offering more planes than allowed (must keep 1)', () => {
+    const s = tradeSetup();
+    // Alice has STARTING_PLANES planes, try to offer all of them
+    const offering = { fuel: 0, planes: STARTING_PLANES, antiAircraft: false, oilTycoon: false, insurance: false };
+    const requesting = { fuel: 5, planes: 0, antiAircraft: false, oilTycoon: false, insurance: false };
+    const s1 = gameReducer(s, { type: 'TRADE_PROPOSE', offering, requesting });
+    expect(s1.phase).toBe(TurnPhase.TradeOffer); // rejected, still in offer phase
+  });
+
+  it('50. TRADE_ACKNOWLEDGE clears trade state', () => {
+    let s = tradeSetup();
+    const offering = { fuel: 5, planes: 0, antiAircraft: false, oilTycoon: false, insurance: false };
+    s = gameReducer(s, { type: 'TRADE_PROPOSE', offering, requesting: emptyOffer });
+    s = gameReducer(s, { type: 'TRADE_HANDOVER_COMPLETE' });
+    s = gameReducer(s, { type: 'TRADE_RESPOND', accepted: true });
+    s = gameReducer(s, { type: 'TRADE_ACKNOWLEDGE' });
+    expect(s.trade).toBeUndefined();
+    expect(s.phase).toBe(TurnPhase.Tax);
+  });
+
+  it('Rejects empty trade (both sides empty)', () => {
+    const s = tradeSetup();
+    const s1 = gameReducer(s, { type: 'TRADE_PROPOSE', offering: emptyOffer, requesting: emptyOffer });
+    expect(s1.phase).toBe(TurnPhase.TradeOffer); // rejected
+  });
+
+  it('Oil Tycoon transfers with damage state', () => {
+    let s = tradeSetup();
+    s = withPlayer(s, 0, { ...s.players[0], oilTycoonDamage: 2, oilTycoonRepairTurnsLeft: -1 });
+    const offering = { fuel: 0, planes: 0, antiAircraft: false, oilTycoon: true, insurance: false };
+    s = gameReducer(s, { type: 'TRADE_PROPOSE', offering, requesting: emptyOffer });
+    s = gameReducer(s, { type: 'TRADE_HANDOVER_COMPLETE' });
+    s = gameReducer(s, { type: 'TRADE_RESPOND', accepted: true });
+    expect(s.players[1].hasOilTycoon).toBe(true);
+    expect(s.players[1].oilTycoonDamage).toBe(2);
+    expect(s.players[0].hasOilTycoon).toBe(false);
+    expect(s.players[0].oilTycoonDamage).toBe(0);
+  });
+
+  it('Insurance transfers with insuranceUsed flag', () => {
+    let s = tradeSetup();
+    const offering = { fuel: 0, planes: 0, antiAircraft: false, oilTycoon: false, insurance: true };
+    s = gameReducer(s, { type: 'TRADE_PROPOSE', offering, requesting: emptyOffer });
+    s = gameReducer(s, { type: 'TRADE_HANDOVER_COMPLETE' });
+    s = gameReducer(s, { type: 'TRADE_RESPOND', accepted: true });
+    expect(s.players[1].insuranceTurnsLeft).toBe(3);
+    expect(s.players[1].insuranceUsed).toBe(true);
+    expect(s.players[0].insuranceTurnsLeft).toBe(0);
   });
 });
 

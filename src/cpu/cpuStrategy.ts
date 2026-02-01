@@ -28,6 +28,9 @@ export function getDecisionMakerId(state: GameState): string {
   if (state.phase === TurnPhase.MercenaryResponse && state.mercenary) {
     return state.mercenary.mercenaryId
   }
+  if (state.phase === TurnPhase.TradeResponse && state.trade) {
+    return state.trade.partnerId!
+  }
   return currentPlayer(state).id
 }
 
@@ -94,24 +97,47 @@ export class RandomStrategy implements CpuStrategy {
       case TurnPhase.PriceyBombResult:
         return { type: 'PRICEY_BOMB_ACKNOWLEDGE' }
 
-      // ── Donation ──
-      case TurnPhase.DonationTarget: {
+      // ── Trade ──
+      case TurnPhase.TradeTarget: {
         const targets = state.players.filter(
           (p) => p.alive && p.id !== player.id,
         )
         if (targets.length === 0) return null
-        return { type: 'DONATION_TARGET', targetId: randomFrom(targets).id }
+        return { type: 'TRADE_TARGET', partnerId: randomFrom(targets).id }
       }
 
-      case TurnPhase.DonationAmount: {
-        const maxDonation = Math.max(0, player.fuel - 2)
-        if (maxDonation < 1) return { type: 'CANCEL_SHOP_ITEM' }
-        const amount = Math.floor(Math.random() * maxDonation) + 1
-        return { type: 'DONATION_AMOUNT', amount }
+      case TurnPhase.TradeOffer: {
+        const trade = state.trade!
+        const partner = state.players.find((p) => p.id === trade.partnerId)!
+
+        // Build a random offering from owned assets
+        const offerFuel = Math.min(player.fuel, Math.floor(Math.random() * 10) + 1)
+        const offerPlanes = (Math.random() < 0.2 && player.planes > 1) ? 1 : 0
+        const offerAA = Math.random() < 0.15 && player.hasAntiAircraft
+        const offerInsurance = Math.random() < 0.1 && player.insuranceTurnsLeft > 0
+
+        // Build a random request from partner's assets
+        const reqFuel = Math.min(partner.fuel, Math.floor(Math.random() * 10) + 1)
+        const reqPlanes = (Math.random() < 0.2 && partner.planes > 1) ? 1 : 0
+        const reqAA = Math.random() < 0.15 && partner.hasAntiAircraft && !offerAA
+        const reqInsurance = Math.random() < 0.1 && partner.insuranceTurnsLeft > 0 && !offerInsurance
+
+        const offering = { fuel: offerFuel, planes: offerPlanes, antiAircraft: offerAA, oilTycoon: false, insurance: offerInsurance }
+        const requesting = { fuel: reqFuel, planes: reqPlanes, antiAircraft: reqAA, oilTycoon: false, insurance: reqInsurance }
+
+        return { type: 'TRADE_PROPOSE', offering, requesting }
       }
 
-      case TurnPhase.DonationResult:
-        return { type: 'DONATION_ACKNOWLEDGE' }
+      case TurnPhase.TradeHandover:
+        return { type: 'TRADE_HANDOVER_COMPLETE' }
+
+      case TurnPhase.TradeResponse: {
+        const accepted = Math.random() < 0.5
+        return { type: 'TRADE_RESPOND', accepted }
+      }
+
+      case TurnPhase.TradeResult:
+        return { type: 'TRADE_ACKNOWLEDGE' }
 
       // ── Mercenary (CPU responding to offers from human players) ──
       case TurnPhase.MercenaryHandover:
@@ -256,16 +282,25 @@ export function describeCpuAction(state: GameState, action: Action): string {
     }
     case 'PRICEY_BOMB_ACKNOWLEDGE':
       return `The bombing is over. Continue to move on.`
-    case 'DONATION_TARGET': {
-      const target = state.players.find((p) => p.id === action.targetId)
-      return `${player.name} has chosen to donate fuel to ${target?.name ?? 'unknown'}.`
+    case 'TRADE_TARGET': {
+      const target = state.players.find((p) => p.id === action.partnerId)
+      return `${player.name} wants to trade with ${target?.name ?? 'unknown'}.`
     }
-    case 'DONATION_AMOUNT': {
-      const recipName = state.players.find((p) => p.id === state.donation?.recipientId)?.name ?? 'unknown'
-      return `${player.name} is donating ${action.amount} fuel to ${recipName}.`
+    case 'TRADE_PROPOSE': {
+      const partnerName = state.players.find((p) => p.id === state.trade?.partnerId)?.name ?? 'unknown'
+      return `${player.name} is proposing a trade to ${partnerName}.`
     }
-    case 'DONATION_ACKNOWLEDGE':
-      return `The donation is complete. Continue to move on.`
+    case 'TRADE_HANDOVER_COMPLETE':
+      return 'Passing to the trade partner. Continue to proceed.'
+    case 'TRADE_RESPOND': {
+      const trade = state.trade
+      const partnerName = state.players.find((p) => p.id === trade?.partnerId)?.name ?? 'Partner'
+      return action.accepted
+        ? `${partnerName} has accepted the trade!`
+        : `${partnerName} has declined the trade.`
+    }
+    case 'TRADE_ACKNOWLEDGE':
+      return `The trade is complete. Continue to move on.`
     case 'MERCENARY_HANDOVER_COMPLETE':
       return 'Passing to the mercenary. Continue to proceed.'
     case 'MERCENARY_RESPOND': {
