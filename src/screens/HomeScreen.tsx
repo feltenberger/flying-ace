@@ -5,6 +5,7 @@ import { loadIndex, loadGame, deleteGame } from '../utils/persistence.ts'
 import type { GameIndexEntry } from '../types/game.ts'
 import { GameScreen } from '../types/game.ts'
 import ConfirmDialog from '../components/ConfirmDialog.tsx'
+import RulesOverlay from '../components/RulesOverlay.tsx'
 import { useImages } from '../utils/images.ts'
 
 export function HomeScreen() {
@@ -12,6 +13,7 @@ export function HomeScreen() {
   const images = useImages()
   const [entries, setEntries] = useState<GameIndexEntry[]>([])
   const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [showRules, setShowRules] = useState(false)
 
   useEffect(() => {
     setEntries(loadIndex())
@@ -65,9 +67,15 @@ export function HomeScreen() {
 
       <button
         onClick={handleNewGame}
-        className="w-full py-4 bg-brass-500 hover:bg-brass-400 text-military-950 font-bold rounded-lg text-lg transition-colors mb-6"
+        className="w-full py-4 bg-brass-500 hover:bg-brass-400 text-military-950 font-bold rounded-lg text-lg transition-colors mb-3"
       >
         New Game
+      </button>
+      <button
+        onClick={() => setShowRules(true)}
+        className="w-full py-3 bg-military-800 hover:bg-military-700 text-military-300 font-semibold rounded-lg transition-colors mb-6 border border-military-600"
+      >
+        Rules
       </button>
 
       {inProgress.length > 0 && (
@@ -150,6 +158,8 @@ export function HomeScreen() {
           </p>
         </div>
       )}
+
+      {showRules && <RulesOverlay onClose={() => setShowRules(false)} />}
 
       {deleteId && (
         <ConfirmDialog
