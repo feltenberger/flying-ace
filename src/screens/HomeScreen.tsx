@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useGame } from '../state/gameContext.tsx'
 import { createInitialState } from '../state/gameReducer.ts'
 import { loadIndex, loadGame, deleteGame } from '../utils/persistence.ts'
@@ -14,10 +14,21 @@ export function HomeScreen() {
   const [entries, setEntries] = useState<GameIndexEntry[]>([])
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [showRules, setShowRules] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  const refreshIndex = useCallback(async () => {
+    setLoading(true)
+    try {
+      const index = await loadIndex()
+      setEntries(index)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   useEffect(() => {
-    setEntries(loadIndex())
-  }, [])
+    void refreshIndex()
+  }, [refreshIndex])
 
   const inProgress = entries
     .filter((e) => e.status === 'in_progress')
@@ -33,16 +44,16 @@ export function HomeScreen() {
     })
   }
 
-  function handleResume(gameId: string) {
-    const saved = loadGame(gameId)
+  async function handleResume(gameId: string) {
+    const saved = await loadGame(gameId)
     if (saved) {
       dispatch({ type: 'LOAD_STATE', state: saved })
     }
   }
 
-  function handleDelete(gameId: string) {
-    deleteGame(gameId)
-    setEntries(loadIndex())
+  async function handleDelete(gameId: string) {
+    await deleteGame(gameId)
+    await refreshIndex()
     setDeleteId(null)
   }
 
@@ -78,7 +89,13 @@ export function HomeScreen() {
         Rules
       </button>
 
-      {inProgress.length > 0 && (
+      {loading && (
+        <div className="text-center py-6">
+          <div className="text-military-400 text-sm">Loading saved games...</div>
+        </div>
+      )}
+
+      {!loading && inProgress.length > 0 && (
         <div className="mb-6">
           <h2 className="text-sm font-semibold text-military-400 uppercase tracking-wider mb-3">
             In Progress
@@ -90,7 +107,7 @@ export function HomeScreen() {
                 className="bg-military-800 rounded-lg border border-military-600 p-4 flex items-center justify-between"
               >
                 <button
-                  onClick={() => handleResume(entry.id)}
+                  onClick={() => void handleResume(entry.id)}
                   className="flex-1 text-left"
                 >
                   <div className="font-semibold text-military-100 text-sm">
@@ -113,7 +130,7 @@ export function HomeScreen() {
         </div>
       )}
 
-      {completed.length > 0 && (
+      {!loading && completed.length > 0 && (
         <div>
           <h2 className="text-sm font-semibold text-military-400 uppercase tracking-wider mb-3">
             Completed
@@ -146,7 +163,7 @@ export function HomeScreen() {
         </div>
       )}
 
-      {entries.length === 0 && (
+      {!loading && entries.length === 0 && (
         <div className="text-center mt-4 relative">
           <img
             src={images.uiCompass}
@@ -165,7 +182,7 @@ export function HomeScreen() {
         <ConfirmDialog
           title="Delete Game"
           message="This game will be permanently deleted. This cannot be undone."
-          onConfirm={() => handleDelete(deleteId)}
+          onConfirm={() => void handleDelete(deleteId)}
           onCancel={() => setDeleteId(null)}
         />
       )}
