@@ -5,4 +5,5 @@ dist
 .venv
 .gemini
 image_gen/.packages_new
+asset_gen/.packages_new
 api_key.txt
