@@ -69,30 +69,30 @@ export const SfxId = {
 export type SfxId = (typeof SfxId)[keyof typeof SfxId]
 
 const SFX_PATHS: Record<SfxId, string> = {
-  [SfxId.DiceRoll]: '/audio/sfx/dice-roll.mp3',
-  [SfxId.Shotdown]: '/audio/sfx/shotdown.mp3',
-  [SfxId.DogfightStart]: '/audio/sfx/dogfight-start.mp3',
-  [SfxId.DogfightWin]: '/audio/sfx/dogfight-win.mp3',
-  [SfxId.DogfightLose]: '/audio/sfx/dogfight-lose.mp3',
-  [SfxId.FuelGain]: '/audio/sfx/fuel-gain.mp3',
-  [SfxId.Jackpot]: '/audio/sfx/jackpot.mp3',
-  [SfxId.ShopPurchase]: '/audio/sfx/shop-purchase.mp3',
-  [SfxId.BombHit]: '/audio/sfx/bomb-hit.mp3',
-  [SfxId.BombMiss]: '/audio/sfx/bomb-miss.mp3',
-  [SfxId.Victory]: '/audio/sfx/victory.mp3',
-  [SfxId.Eliminated]: '/audio/sfx/eliminated.mp3',
-  [SfxId.HandoverChime]: '/audio/sfx/handover-chime.mp3',
-  [SfxId.ButtonClick]: '/audio/sfx/button-click.mp3',
+  [SfxId.DiceRoll]: '/audio/sfx/dice-roll.wav',
+  [SfxId.Shotdown]: '/audio/sfx/shotdown.wav',
+  [SfxId.DogfightStart]: '/audio/sfx/dogfight-start.wav',
+  [SfxId.DogfightWin]: '/audio/sfx/dogfight-win.wav',
+  [SfxId.DogfightLose]: '/audio/sfx/dogfight-lose.wav',
+  [SfxId.FuelGain]: '/audio/sfx/fuel-gain.wav',
+  [SfxId.Jackpot]: '/audio/sfx/jackpot.wav',
+  [SfxId.ShopPurchase]: '/audio/sfx/shop-purchase.wav',
+  [SfxId.BombHit]: '/audio/sfx/bomb-hit.wav',
+  [SfxId.BombMiss]: '/audio/sfx/bomb-miss.wav',
+  [SfxId.Victory]: '/audio/sfx/victory.wav',
+  [SfxId.Eliminated]: '/audio/sfx/eliminated.wav',
+  [SfxId.HandoverChime]: '/audio/sfx/handover-chime.wav',
+  [SfxId.ButtonClick]: '/audio/sfx/button-click.wav',
 }
 
 // ── Screen → Music Track ─────────────────────────────────
 
 const SCREEN_MUSIC: Partial<Record<GameScreen, string>> = {
-  [GameScreen.Home]: '/audio/music/theme-home.mp3',
-  [GameScreen.Setup]: '/audio/music/theme-home.mp3',
-  [GameScreen.Handover]: '/audio/music/theme-game.mp3',
-  [GameScreen.Playing]: '/audio/music/theme-game.mp3',
-  [GameScreen.GameOver]: '/audio/music/theme-victory.mp3',
+  [GameScreen.Home]: '/audio/music/theme-home.wav',
+  [GameScreen.Setup]: '/audio/music/theme-home.wav',
+  [GameScreen.Handover]: '/audio/music/theme-game.wav',
+  [GameScreen.Playing]: '/audio/music/theme-game.wav',
+  [GameScreen.GameOver]: '/audio/music/theme-victory.wav',
 }
 
 // ── SFX Engine (Web Audio API) ───────────────────────────

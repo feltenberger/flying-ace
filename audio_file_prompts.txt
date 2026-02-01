@@ -1,0 +1,57 @@
+# Audio File Prompts — 8-bit Retro WAV Synthesis
+# Flying Ace: aerial combat board game, military theme
+
+## Music (loopable)
+
+public/audio/music/theme-home.mp3
+8-bit military march, relaxed tempo, loopable. Snare drum rhythm with square wave melody evoking a WWII airfield at dawn. Major key, steady and inviting. 60-90 seconds.
+
+public/audio/music/theme-game.mp3
+8-bit aerial combat theme, uptempo, loopable. Driving pulse wave bassline with tense chromatic melody suggesting dogfights and danger. Minor key, urgent but fun. 90-120 seconds.
+
+public/audio/music/theme-victory.mp3
+8-bit triumphant brass fanfare, loopable. Bold major key melody with arpeggiated chords and a marching cadence. Celebratory and heroic, like a medal ceremony. 30-60 seconds.
+
+## Sound Effects
+
+public/audio/sfx/dice-roll.mp3
+8-bit dice roll. Short burst of rapid staccato noise-channel clicks simulating dice tumbling on wood, ending with a solid thud. 1-2 seconds.
+
+public/audio/sfx/shotdown.mp3
+8-bit plane crash. Descending pitch-bend whistle followed by a low noise-channel explosion and brief crackle. Dramatic but quick. 2-3 seconds.
+
+public/audio/sfx/dogfight-start.mp3
+8-bit alert siren. Two-tone oscillating square wave rising in urgency, like a scramble alarm at an airbase. Sharp and attention-grabbing. 1-2 seconds.
+
+public/audio/sfx/dogfight-win.mp3
+8-bit victory sting. Short ascending arpeggio in major key ending on a bright sustained note. Punchy and satisfying. 1-2 seconds.
+
+public/audio/sfx/dogfight-lose.mp3
+8-bit defeat sting. Short descending chromatic run ending on a low dissonant buzz. Deflating and brief. 1-2 seconds.
+
+public/audio/sfx/fuel-gain.mp3
+8-bit fuel pickup. Quick rising three-note chime with a bubbly quality, like collecting a power-up. Bright and positive. 0.5-1 second.
+
+public/audio/sfx/jackpot.mp3
+8-bit jackpot jingle. Rapid ascending arpeggios with a shimmering triangle wave flourish at the top, like hitting a slot machine. Exciting and rewarding. 1-2 seconds.
+
+public/audio/sfx/shop-purchase.mp3
+8-bit cash register. Short percussive click followed by a bright two-note confirmation chime. Clean and snappy. 0.5-1 second.
+
+public/audio/sfx/bomb-hit.mp3
+8-bit explosion. Noise-channel burst with a low square wave punch, brief reverb tail. Impactful and heavy. 1-2 seconds.
+
+public/audio/sfx/bomb-miss.mp3
+8-bit bomb miss. Descending whistle (pitch-bent square wave) followed by a soft dull thud on the noise channel. Anticlimactic. 1 second.
+
+public/audio/sfx/victory.mp3
+8-bit victory fanfare. Triumphant ascending melody with a resolving major chord and a final sustained note. Grand and celebratory. 3-4 seconds.
+
+public/audio/sfx/eliminated.mp3
+8-bit elimination. Slow descending minor-key phrase ending in a low hollow tone that fades out. Somber and final. 2-3 seconds.
+
+public/audio/sfx/handover-chime.mp3
+8-bit notification chime. Simple two-note rising interval, clean square wave. Neutral and clear, like a turn bell. 1 second.
+
+public/audio/sfx/button-click.mp3
+8-bit button press. Single short pulse wave tick, minimal and crisp. Subtle UI feedback. 0.2 seconds.
