@@ -194,6 +194,9 @@ function DogFightResultPhase() {
 
   return (
     <PhaseCard title="Dog Fight!">
+      {!hasRolled && (
+        <img src={images.dogfightChallenge} alt="" className="spot-illustration mb-4" />
+      )}
       <div className="text-center mb-4">
         <p className="text-lg text-military-200">
           <span className="text-raf-500 font-bold">{attacker.name}</span>
