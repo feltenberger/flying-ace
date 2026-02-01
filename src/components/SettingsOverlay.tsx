@@ -1,4 +1,5 @@
 import { IMAGE_SETS, useImageSet } from '../utils/images.ts'
+import { useAudio } from '../utils/audio.ts'
 
 interface SettingsOverlayProps {
   onClose: () => void
@@ -6,6 +7,16 @@ interface SettingsOverlayProps {
 
 export default function SettingsOverlay({ onClose }: SettingsOverlayProps) {
   const { imageSet, setImageSet } = useImageSet()
+  const {
+    musicEnabled,
+    sfxEnabled,
+    musicVolume,
+    sfxVolume,
+    setMusicEnabled,
+    setSfxEnabled,
+    setMusicVolume,
+    setSfxVolume,
+  } = useAudio()
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4">
@@ -27,6 +38,7 @@ export default function SettingsOverlay({ onClose }: SettingsOverlayProps) {
 
         {/* Content */}
         <div className="px-6 py-5 space-y-6 text-sm text-military-300">
+          {/* Image Set */}
           <div>
             <h3 className="text-military-100 font-semibold mb-3">Image Set</h3>
             <div className="flex gap-2">
@@ -43,6 +55,62 @@ export default function SettingsOverlay({ onClose }: SettingsOverlayProps) {
                   {name}
                 </button>
               ))}
+            </div>
+          </div>
+
+          {/* Audio */}
+          <div>
+            <h3 className="text-military-100 font-semibold mb-3">Audio</h3>
+            <div className="space-y-4">
+              {/* Music */}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setMusicEnabled(!musicEnabled)}
+                  className={`shrink-0 px-3 py-1.5 rounded border text-xs font-medium transition-colors w-16 text-center ${
+                    musicEnabled
+                      ? 'bg-brass-500 text-military-900 border-brass-400'
+                      : 'bg-military-700 text-military-400 border-military-600 hover:border-military-500'
+                  }`}
+                >
+                  {musicEnabled ? 'On' : 'Off'}
+                </button>
+                <span className="shrink-0 w-12 text-military-300">Music</span>
+                <input
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  value={musicVolume}
+                  onChange={(e) => setMusicVolume(parseFloat(e.target.value))}
+                  disabled={!musicEnabled}
+                  className="flex-1 h-1.5 accent-brass-500 disabled:opacity-30"
+                />
+              </div>
+
+              {/* SFX */}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setSfxEnabled(!sfxEnabled)}
+                  className={`shrink-0 px-3 py-1.5 rounded border text-xs font-medium transition-colors w-16 text-center ${
+                    sfxEnabled
+                      ? 'bg-brass-500 text-military-900 border-brass-400'
+                      : 'bg-military-700 text-military-400 border-military-600 hover:border-military-500'
+                  }`}
+                >
+                  {sfxEnabled ? 'On' : 'Off'}
+                </button>
+                <span className="shrink-0 w-12 text-military-300">SFX</span>
+                <input
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  value={sfxVolume}
+                  onChange={(e) => setSfxVolume(parseFloat(e.target.value))}
+                  disabled={!sfxEnabled}
+                  className="flex-1 h-1.5 accent-brass-500 disabled:opacity-30"
+                />
+              </div>
             </div>
           </div>
         </div>

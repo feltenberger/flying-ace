@@ -7,6 +7,7 @@ import { HandoverScreen } from './screens/HandoverScreen.tsx'
 import { PlayScreen } from './screens/PlayScreen.tsx'
 import { GameOverScreen } from './screens/GameOverScreen.tsx'
 import { ImageSetProvider, useImages } from './utils/images.ts'
+import { AudioProvider, useBackgroundMusic, useGameSfx } from './utils/audio.ts'
 import SettingsOverlay from './components/SettingsOverlay.tsx'
 
 function Router() {
@@ -26,8 +27,12 @@ function Router() {
 }
 
 function AppShell() {
+  const { state } = useGame()
   const images = useImages()
   const [settingsOpen, setSettingsOpen] = useState(false)
+
+  useBackgroundMusic(state.screen)
+  useGameSfx()
 
   return (
     <div
@@ -59,10 +64,12 @@ function AppShell() {
 
 export default function App() {
   return (
-    <ImageSetProvider>
-      <GameProvider>
-        <AppShell />
-      </GameProvider>
-    </ImageSetProvider>
+    <AudioProvider>
+      <ImageSetProvider>
+        <GameProvider>
+          <AppShell />
+        </GameProvider>
+      </ImageSetProvider>
+    </AudioProvider>
   )
 }
