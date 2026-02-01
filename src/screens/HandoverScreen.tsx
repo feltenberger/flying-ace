@@ -8,7 +8,6 @@ export function HandoverScreen() {
   const { state, dispatch } = useGame()
   const images = useImages()
   const player = state.players[state.currentPlayerIndex]
-  const pilotImage = state.turnNumber % 2 === 0 ? images.pilotReady : images.pilotSalute
   const [showRules, setShowRules] = useState(false)
 
   const proceed = useCallback(() => {
@@ -48,26 +47,25 @@ export function HandoverScreen() {
           </button>
         </div>
         <div className="flex flex-col items-center justify-center min-h-[50vh]">
-          <p className="text-military-500 text-sm uppercase tracking-widest mb-4">
+          <p className="text-military-500 text-sm uppercase tracking-widest mb-2">
             Next pilot, report for duty
           </p>
-          <img src={pilotImage} alt="" className="spot-illustration mb-4" />
-          <img
-            src={planeAvatarPath(player.planeColor)}
-            alt=""
-            className="w-40 h-40 object-contain mb-2"
-          />
-          <h2 className="font-stencil text-5xl text-brass-500 mb-2">
+          <h2 className="font-stencil text-5xl text-brass-500 mb-1">
             {player.name}
           </h2>
           {player.isCpu && (
-            <p className="text-raf-500 text-xs font-bold uppercase tracking-wider mt-1 mb-1">
+            <p className="text-raf-500 text-xs font-bold uppercase tracking-wider mb-1">
               Computer Player
             </p>
           )}
-          <p className="text-military-400 text-sm mt-1 mb-8">
+          <p className="text-military-400 text-sm mb-0">
             Turn {state.turnNumber}
           </p>
+          <img
+            src={planeAvatarPath(player.planeColor)}
+            alt=""
+            className="w-64 h-64 object-contain mb-4"
+          />
           <button
             onClick={(e) => {
               e.stopPropagation()
