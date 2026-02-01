@@ -71,7 +71,7 @@ export default function ShopPanel() {
       </p>
 
       <div className="flex flex-col gap-2">
-        {SHOP_CATALOG.map((item) => {
+        {SHOP_CATALOG.filter((item) => !(player.fuel <= 0 && (item.id === ShopItemId.Donation || item.id === ShopItemId.Mercenary))).map((item) => {
           const { disabled, reason } = canBuyItem(item.id, player.fuel, item.cost, player);
 
           return (
