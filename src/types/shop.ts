@@ -5,7 +5,7 @@ export const ShopItemId = {
   Insurance: 'insurance',
   CheapBomb: 'cheap_bomb',
   PriceyBomb: 'pricey_bomb',
-  Donation: 'donation',
+  Trade: 'trade',
   Mercenary: 'mercenary',
   AntiAircraft: 'anti_aircraft',
   OilTycoon: 'oil_tycoon',
@@ -65,10 +65,10 @@ export const SHOP_CATALOG: ShopItem[] = [
     cost: 12,
   },
   {
-    id: ShopItemId.Donation,
+    id: ShopItemId.Trade,
     number: 7,
-    name: 'Donation',
-    description: 'Give fuel to another player. Pay amount + 2 fuel fee.',
+    name: 'Trade',
+    description: 'Propose a trade with another player. Offer and request any combination of fuel, planes, and items.',
     cost: 'variable',
   },
   {

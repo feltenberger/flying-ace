@@ -4,6 +4,7 @@ import type {
   Player,
   LogEntry,
   BombState,
+  PlaneColor,
 } from '../types/game.ts';
 import {
   GameScreen,
@@ -24,7 +25,7 @@ import { ShopItemId } from '../types/shop.ts';
 
 // ── Helpers ──────────────────────────────────────────────
 
-function createPlayer(id: string, name: string, isCpu: boolean): Player {
+function createPlayer(id: string, name: string, isCpu: boolean, planeColor: PlaneColor): Player {
   return {
     id,
     name,
@@ -32,6 +33,7 @@ function createPlayer(id: string, name: string, isCpu: boolean): Player {
     fuel: STARTING_FUEL,
     alive: true,
     isCpu,
+    planeColor,
     insuranceTurnsLeft: 0,
     insuranceUsed: false,
     hasAntiAircraft: false,
@@ -237,7 +239,7 @@ export function gameReducer(state: GameState, action: Action): GameState {
     // ─── Setup ─────────────────────────────────────────
     case 'START_GAME': {
       const players = action.playerNames.map((name, i) =>
-        createPlayer(`player-${i}`, name, action.cpuFlags?.[i] ?? false),
+        createPlayer(`player-${i}`, name, action.cpuFlags?.[i] ?? false, action.planeColors[i]),
       );
       let s: GameState = {
         ...initialState(),
@@ -503,12 +505,12 @@ export function gameReducer(state: GameState, action: Action): GameState {
           return s;
         }
 
-        // ── 7. Donation ──
-        case ShopItemId.Donation: {
+        // ── 7. Trade ──
+        case ShopItemId.Trade: {
           s = {
             ...s,
-            phase: TurnPhase.DonationTarget,
-            donation: { donorId: player.id },
+            phase: TurnPhase.TradeTarget,
+            trade: { offererId: player.id },
           };
           return s;
         }
@@ -571,8 +573,8 @@ export function gameReducer(state: GameState, action: Action): GameState {
         TurnPhase.CheapBombTarget,
         TurnPhase.CheapBombRoll,
         TurnPhase.PriceyBombTarget,
-        TurnPhase.DonationTarget,
-        TurnPhase.DonationAmount,
+        TurnPhase.TradeTarget,
+        TurnPhase.TradeOffer,
         TurnPhase.MercenaryTarget,
         TurnPhase.MercenaryOffer,
       ];
@@ -581,7 +583,7 @@ export function gameReducer(state: GameState, action: Action): GameState {
         ...state,
         phase: TurnPhase.Shop,
         bomb: undefined,
-        donation: undefined,
+        trade: undefined,
         mercenary: undefined,
       };
     }
@@ -716,41 +718,169 @@ export function gameReducer(state: GameState, action: Action): GameState {
       return s;
     }
 
-    // ─── Donation ──────────────────────────────────────
-    case 'DONATION_TARGET': {
-      if (state.phase !== TurnPhase.DonationTarget) return state;
+    // ─── Trade ────────────────────────────────────────
+    case 'TRADE_TARGET': {
+      if (state.phase !== TurnPhase.TradeTarget) return state;
       return {
         ...state,
-        donation: { ...state.donation!, recipientId: action.targetId },
-        phase: TurnPhase.DonationAmount,
+        trade: { ...state.trade!, partnerId: action.partnerId },
+        phase: TurnPhase.TradeOffer,
       };
     }
 
-    case 'DONATION_AMOUNT': {
-      if (state.phase !== TurnPhase.DonationAmount) return state;
+    case 'TRADE_PROPOSE': {
+      if (state.phase !== TurnPhase.TradeOffer) return state;
 
-      const amount = action.amount;
-      const totalCost = amount + 2; // fee is 2 fuel
-      const player = currentPlayer(state);
-      if (player.fuel < totalCost) return state;
+      const { offering, requesting } = action;
+      const trade = state.trade!;
+      const offerer = currentPlayer(state);
+      const partner = getPlayer(state, trade.partnerId!);
 
-      const donation = state.donation!;
-      const recipient = getPlayer(state, donation.recipientId!);
+      // Validate offerer has what they offer
+      if (offering.fuel > offerer.fuel) return state;
+      if (offering.planes >= offerer.planes) return state; // must keep at least 1
+      if (offering.antiAircraft && !offerer.hasAntiAircraft) return state;
+      if (offering.oilTycoon && !offerer.hasOilTycoon) return state;
+      if (offering.insurance && offerer.insuranceTurnsLeft <= 0) return state;
 
-      let s = updatePlayer(state, player.id, { fuel: player.fuel - totalCost });
-      s = updatePlayer(s, donation.recipientId!, { fuel: recipient.fuel + amount });
-      s = addLog(s, player.name, `Donated ${amount} fuel to ${recipient.name} (cost: ${totalCost}).`);
-      s = {
-        ...s,
-        donation: { ...donation, amount },
-        phase: TurnPhase.DonationResult,
+      // Validate partner has what's requested
+      if (requesting.fuel > partner.fuel) return state;
+      if (requesting.planes >= partner.planes) return state; // must keep at least 1
+      if (requesting.antiAircraft && !partner.hasAntiAircraft) return state;
+      if (requesting.oilTycoon && !partner.hasOilTycoon) return state;
+      if (requesting.insurance && partner.insuranceTurnsLeft <= 0) return state;
+
+      // At least one side must offer something
+      const offeringEmpty = offering.fuel === 0 && offering.planes === 0 && !offering.antiAircraft && !offering.oilTycoon && !offering.insurance;
+      const requestingEmpty = requesting.fuel === 0 && requesting.planes === 0 && !requesting.antiAircraft && !requesting.oilTycoon && !requesting.insurance;
+      if (offeringEmpty && requestingEmpty) return state;
+
+      let s: GameState = {
+        ...state,
+        trade: { ...trade, offering, requesting },
+        phase: TurnPhase.TradeHandover,
       };
+      s = addLog(s, offerer.name, `Proposed a trade to ${partner.name}.`);
       return s;
     }
 
-    case 'DONATION_ACKNOWLEDGE': {
-      if (state.phase !== TurnPhase.DonationResult) return state;
-      return { ...state, donation: undefined, phase: TurnPhase.Tax };
+    case 'TRADE_HANDOVER_COMPLETE': {
+      if (state.phase !== TurnPhase.TradeHandover) return state;
+      return { ...state, phase: TurnPhase.TradeResponse };
+    }
+
+    case 'TRADE_RESPOND': {
+      if (state.phase !== TurnPhase.TradeResponse) return state;
+
+      const trade = state.trade!;
+      const offerer = getPlayer(state, trade.offererId);
+      const partner = getPlayer(state, trade.partnerId!);
+      const offering = trade.offering!;
+      const requesting = trade.requesting!;
+
+      if (action.accepted) {
+        let s: GameState = { ...state };
+
+        // Transfer fuel
+        s = updatePlayer(s, offerer.id, { fuel: getPlayer(s, offerer.id).fuel - offering.fuel + requesting.fuel });
+        s = updatePlayer(s, partner.id, { fuel: getPlayer(s, partner.id).fuel - requesting.fuel + offering.fuel });
+
+        // Transfer planes
+        s = updatePlayer(s, offerer.id, { planes: getPlayer(s, offerer.id).planes - offering.planes + requesting.planes });
+        s = updatePlayer(s, partner.id, { planes: getPlayer(s, partner.id).planes - requesting.planes + offering.planes });
+
+        // Transfer AA — snapshot before mutating
+        if (offering.antiAircraft && requesting.antiAircraft) {
+          // Both trading AA: both keep AA, reset cooldowns
+          s = updatePlayer(s, offerer.id, { antiAircraftCooldown: 0 });
+          s = updatePlayer(s, partner.id, { antiAircraftCooldown: 0 });
+        } else if (offering.antiAircraft) {
+          s = updatePlayer(s, offerer.id, { hasAntiAircraft: false });
+          s = updatePlayer(s, partner.id, { hasAntiAircraft: true, antiAircraftCooldown: 0 });
+        } else if (requesting.antiAircraft) {
+          s = updatePlayer(s, partner.id, { hasAntiAircraft: false });
+          s = updatePlayer(s, offerer.id, { hasAntiAircraft: true, antiAircraftCooldown: 0 });
+        }
+
+        // Transfer Oil Tycoon (with damage state) — snapshot before mutating
+        if (offering.oilTycoon && requesting.oilTycoon) {
+          // Both trading OT: swap damage states
+          const offererDmg = getPlayer(s, offerer.id).oilTycoonDamage;
+          const offererRepair = getPlayer(s, offerer.id).oilTycoonRepairTurnsLeft;
+          const partnerDmg = getPlayer(s, partner.id).oilTycoonDamage;
+          const partnerRepair = getPlayer(s, partner.id).oilTycoonRepairTurnsLeft;
+          s = updatePlayer(s, offerer.id, { oilTycoonDamage: partnerDmg, oilTycoonRepairTurnsLeft: partnerRepair });
+          s = updatePlayer(s, partner.id, { oilTycoonDamage: offererDmg, oilTycoonRepairTurnsLeft: offererRepair });
+        } else if (offering.oilTycoon) {
+          const offererData = getPlayer(s, offerer.id);
+          s = updatePlayer(s, partner.id, {
+            hasOilTycoon: true,
+            oilTycoonDamage: offererData.oilTycoonDamage,
+            oilTycoonRepairTurnsLeft: offererData.oilTycoonRepairTurnsLeft,
+          });
+          s = updatePlayer(s, offerer.id, {
+            hasOilTycoon: false,
+            oilTycoonDamage: 0,
+            oilTycoonRepairTurnsLeft: -1,
+          });
+        } else if (requesting.oilTycoon) {
+          const partnerData = getPlayer(s, partner.id);
+          s = updatePlayer(s, offerer.id, {
+            hasOilTycoon: true,
+            oilTycoonDamage: partnerData.oilTycoonDamage,
+            oilTycoonRepairTurnsLeft: partnerData.oilTycoonRepairTurnsLeft,
+          });
+          s = updatePlayer(s, partner.id, {
+            hasOilTycoon: false,
+            oilTycoonDamage: 0,
+            oilTycoonRepairTurnsLeft: -1,
+          });
+        }
+
+        // Transfer Insurance — snapshot before mutating
+        if (offering.insurance && requesting.insurance) {
+          // Both trading insurance: swap turns remaining
+          const offererTurns = getPlayer(s, offerer.id).insuranceTurnsLeft;
+          const partnerTurns = getPlayer(s, partner.id).insuranceTurnsLeft;
+          s = updatePlayer(s, offerer.id, { insuranceTurnsLeft: partnerTurns, insuranceUsed: true });
+          s = updatePlayer(s, partner.id, { insuranceTurnsLeft: offererTurns, insuranceUsed: true });
+        } else if (offering.insurance) {
+          const offererData = getPlayer(s, offerer.id);
+          s = updatePlayer(s, partner.id, {
+            insuranceTurnsLeft: offererData.insuranceTurnsLeft,
+            insuranceUsed: true,
+          });
+          s = updatePlayer(s, offerer.id, { insuranceTurnsLeft: 0 });
+        } else if (requesting.insurance) {
+          const partnerData = getPlayer(s, partner.id);
+          s = updatePlayer(s, offerer.id, {
+            insuranceTurnsLeft: partnerData.insuranceTurnsLeft,
+            insuranceUsed: true,
+          });
+          s = updatePlayer(s, partner.id, { insuranceTurnsLeft: 0 });
+        }
+
+        s = addLog(s, partner.name, `Accepted trade with ${offerer.name}.`);
+        s = {
+          ...s,
+          trade: { ...trade, accepted: true },
+          phase: TurnPhase.TradeResult,
+        };
+        return s;
+      } else {
+        let s = addLog(state, partner.name, `Declined trade with ${offerer.name}.`);
+        s = {
+          ...s,
+          trade: { ...trade, accepted: false },
+          phase: TurnPhase.TradeResult,
+        };
+        return s;
+      }
+    }
+
+    case 'TRADE_ACKNOWLEDGE': {
+      if (state.phase !== TurnPhase.TradeResult) return state;
+      return { ...state, trade: undefined, phase: TurnPhase.Tax };
     }
 
     // ─── Mercenary ─────────────────────────────────────
@@ -1137,7 +1267,7 @@ export function gameReducer(state: GameState, action: Action): GameState {
         dogFight: undefined,
         mercenary: undefined,
         bomb: undefined,
-        donation: undefined,
+        trade: undefined,
         digForFuelRoll: undefined,
         screen: GameScreen.Handover,
       };

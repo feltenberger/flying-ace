@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useGame } from '../state/gameContext.tsx'
+import { planeAvatarPath } from '../types/game.ts'
 import GameLog from '../components/GameLog.tsx'
 import RulesOverlay from '../components/RulesOverlay.tsx'
 import { useImages } from '../utils/images.ts'
@@ -38,6 +39,13 @@ export function GameOverScreen() {
         <p className="font-stencil text-military-400 text-sm uppercase tracking-widest mb-3">
           Victory!
         </p>
+        {winner && (
+          <img
+            src={planeAvatarPath(winner.planeColor)}
+            alt=""
+            className="w-40 h-40 object-contain mx-auto mb-2"
+          />
+        )}
         <h2 className="font-stencil text-5xl text-brass-500 mb-2">
           {winner?.name ?? 'Unknown'}
         </h2>
@@ -76,6 +84,11 @@ export function GameOverScreen() {
                   <span className="text-military-500 font-mono text-sm w-5 text-right">
                     {index + 1}.
                   </span>
+                  <img
+                    src={planeAvatarPath(player.planeColor)}
+                    alt=""
+                    className={`w-8 h-8 object-contain shrink-0 ${!player.alive ? 'grayscale opacity-40' : ''}`}
+                  />
                   <div className="flex items-center gap-2">
                     {!player.alive && player.id !== state.winnerId && (
                       <img src={images.eliminated} alt="Eliminated" className="w-5 h-5 object-contain opacity-60" />
@@ -95,9 +108,9 @@ export function GameOverScreen() {
                       {player.id === state.winnerId && (
                         <span className="text-brass-600 text-xs ml-2">WINNER</span>
                       )}
-                      <span className={`text-[10px] font-mono ml-2 ${player.isCpu ? 'text-raf-500' : 'text-military-600'}`}>
-                        {player.isCpu ? 'CPU' : 'HUM'}
-                      </span>
+                      {player.isCpu && (
+                        <span className="text-[10px] font-mono ml-2 text-raf-500">CPU</span>
+                      )}
                     </div>
                   </div>
                 </div>

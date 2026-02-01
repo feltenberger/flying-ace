@@ -1,5 +1,5 @@
 import type { GameState, GameIndexEntry } from '../types/game.ts';
-import { SCHEMA_VERSION } from '../types/game.ts';
+import { SCHEMA_VERSION, ALL_PLANE_COLORS } from '../types/game.ts';
 import { getDb } from './firebase.ts';
 
 const INDEX_KEY = 'flying-ace-index';
@@ -93,6 +93,28 @@ function migrateState(state: GameState): GameState | null {
       isCpu: p.isCpu ?? false,
     }));
     state.schemaVersion = 2;
+  }
+
+  // v2 -> v3: replace donation with trade
+  if (state.schemaVersion === 2) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const s = state as any;
+    delete s.donation;
+    s.trade = undefined;
+    // Reset any donation phases to Shop
+    if (s.phase === 'donation_target' || s.phase === 'donation_amount' || s.phase === 'donation_result') {
+      s.phase = 'shop';
+    }
+    state.schemaVersion = 3;
+  }
+
+  // v3 -> v4: add planeColor to players
+  if (state.schemaVersion === 3) {
+    state.players = state.players.map((p, i) => ({
+      ...p,
+      planeColor: p.planeColor ?? ALL_PLANE_COLORS[i % ALL_PLANE_COLORS.length],
+    }));
+    state.schemaVersion = 4;
   }
 
   if (state.schemaVersion !== SCHEMA_VERSION) return null;
