@@ -214,8 +214,8 @@ function DogFightResultPhase() {
             {df.blockedBy
               ? `A ${df.attackerRoll} is a ${attackerWon ? 'winning' : 'losing'} roll, but ${attackerWon ? defender.name : attacker.name}'s ${df.blockedBy === 'anti_aircraft' ? 'Anti-Aircraft' : 'Insurance'} absorbed the hit! No plane or fuel lost.`
               : attackerWon
-                ? `A ${df.attackerRoll} is a winning roll, so ${defender.name} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel.`
-                : `A ${df.attackerRoll} is a losing roll, so ${attacker.name} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel.`}
+                ? `A ${df.attackerRoll} is a winning roll, so ${defender.name} loses a plane and up to ${DOGFIGHT_FUEL_PENALTY} fuel to ${attacker.name}.`
+                : `A ${df.attackerRoll} is a losing roll, so ${attacker.name} loses a plane and up to ${DOGFIGHT_FUEL_PENALTY} fuel to ${defender.name}.`}
           </p>
           <button
             onClick={() => dispatch({ type: 'DOG_FIGHT_ACKNOWLEDGE' })}
@@ -851,8 +851,8 @@ function MercenaryFightResultPhase() {
           {fight.blockedBy
             ? `A ${fight.attackerRoll} is a ${attackerWon ? 'winning' : 'losing'} roll, but ${attackerWon ? target.name : mercenary.name}'s ${fight.blockedBy === 'anti_aircraft' ? 'Anti-Aircraft' : 'Insurance'} absorbed the hit! No plane or fuel lost.`
             : attackerWon
-              ? `A ${fight.attackerRoll} is a winning roll, so ${target.name} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel.`
-              : `A ${fight.attackerRoll} is a losing roll, so ${mercenary.name} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel.`}
+              ? `A ${fight.attackerRoll} is a winning roll, so ${target.name} loses a plane and up to ${DOGFIGHT_FUEL_PENALTY} fuel to ${mercenary.name}.`
+              : `A ${fight.attackerRoll} is a losing roll, so ${mercenary.name} loses a plane and up to ${DOGFIGHT_FUEL_PENALTY} fuel to ${target.name}.`}
         </p>
         <button
           onClick={() => dispatch({ type: 'MERCENARY_FIGHT_ACKNOWLEDGE' })}

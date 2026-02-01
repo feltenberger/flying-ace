@@ -193,8 +193,8 @@ export default function MercenaryModal() {
         </p>
         <p className={`text-sm mb-4 ${attackerWon ? 'text-emerald-400' : 'text-red-400'}`}>
           {attackerWon
-            ? `A ${fight.attackerRoll} is a winning roll, so ${targetPlayer.name} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel.`
-            : `A ${fight.attackerRoll} is a losing roll, so ${mercenaryPlayer.name} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel.`}
+            ? `A ${fight.attackerRoll} is a winning roll, so ${targetPlayer.name} loses a plane and up to ${DOGFIGHT_FUEL_PENALTY} fuel to ${mercenaryPlayer.name}.`
+            : `A ${fight.attackerRoll} is a losing roll, so ${mercenaryPlayer.name} loses a plane and up to ${DOGFIGHT_FUEL_PENALTY} fuel to ${targetPlayer.name}.`}
         </p>
 
         <button

@@ -73,8 +73,8 @@ export default function DogFightModal() {
         </p>
         <p className={`text-sm mb-4 ${attackerWon ? 'text-emerald-400' : 'text-red-400'}`}>
           {attackerWon
-            ? `A ${dogFight.attackerRoll} is a winning roll, so ${defender.name} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel.`
-            : `A ${dogFight.attackerRoll} is a losing roll, so ${attacker.name} loses a plane and ${DOGFIGHT_FUEL_PENALTY} fuel.`}
+            ? `A ${dogFight.attackerRoll} is a winning roll, so ${defender.name} loses a plane and up to ${DOGFIGHT_FUEL_PENALTY} fuel to ${attacker.name}.`
+            : `A ${dogFight.attackerRoll} is a losing roll, so ${attacker.name} loses a plane and up to ${DOGFIGHT_FUEL_PENALTY} fuel to ${defender.name}.`}
         </p>
 
         <button

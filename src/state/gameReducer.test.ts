@@ -186,9 +186,10 @@ describe('Dog Fight', () => {
     expect(s.dogFight!.defenderId).toBe(s0.players[1].id);
   });
 
-  it('12. DOG_FIGHT_ROLL with attackerRoll 1-3: attacker loses plane and 10 fuel', () => {
+  it('12. DOG_FIGHT_ROLL with attackerRoll 1-3: attacker loses plane and fuel transfers to defender', () => {
     let s = dogFightState();
     const attackerFuelBefore = s.players[0].fuel;
+    const defenderFuelBefore = s.players[1].fuel;
     s = gameReducer(s, {
       type: 'DOG_FIGHT_PICK',
       defenderId: s.players[1].id,
@@ -201,10 +202,12 @@ describe('Dog Fight', () => {
     expect(s.players[0].planes).toBe(STARTING_PLANES - 1);
     expect(s.players[0].fuel).toBe(attackerFuelBefore - 10);
     expect(s.players[1].planes).toBe(STARTING_PLANES);
+    expect(s.players[1].fuel).toBe(defenderFuelBefore + 10);
   });
 
-  it('13. DOG_FIGHT_ROLL with attackerRoll 4-6: defender loses plane and 10 fuel', () => {
+  it('13. DOG_FIGHT_ROLL with attackerRoll 4-6: defender loses plane and fuel transfers to attacker', () => {
     let s = dogFightState();
+    const attackerFuelBefore = s.players[0].fuel;
     const defenderFuelBefore = s.players[1].fuel;
     s = gameReducer(s, {
       type: 'DOG_FIGHT_PICK',
@@ -216,8 +219,25 @@ describe('Dog Fight', () => {
     });
     expect(s.dogFight!.loserId).toBe(s.players[1].id);
     expect(s.players[0].planes).toBe(STARTING_PLANES);
+    expect(s.players[0].fuel).toBe(attackerFuelBefore + 10);
     expect(s.players[1].planes).toBe(STARTING_PLANES - 1);
     expect(s.players[1].fuel).toBe(defenderFuelBefore - 10);
+  });
+
+  it('DOG_FIGHT_ROLL transfers only available fuel when loser has less than 10', () => {
+    let s = dogFightState();
+    s = { ...s, players: s.players.map((p, i) => i === 1 ? { ...p, fuel: 7 } : p) };
+    const attackerFuelBefore = s.players[0].fuel;
+    s = gameReducer(s, {
+      type: 'DOG_FIGHT_PICK',
+      defenderId: s.players[1].id,
+    });
+    s = gameReducer(s, {
+      type: 'DOG_FIGHT_ROLL',
+      attackerRoll: 5,
+    });
+    expect(s.players[1].fuel).toBe(0);
+    expect(s.players[0].fuel).toBe(attackerFuelBefore + 7);
   });
 
   it('14. DOG_FIGHT_ACKNOWLEDGE clears dogFight and transitions to Shop', () => {
