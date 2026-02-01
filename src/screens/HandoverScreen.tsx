@@ -36,6 +36,11 @@ export function HandoverScreen() {
       <h2 className="font-stencil text-5xl text-brass-500 mb-2">
         {player.name}
       </h2>
+      {player.isCpu && (
+        <p className="text-raf-500 text-xs font-bold uppercase tracking-wider mt-1 mb-1">
+          Computer Player
+        </p>
+      )}
       <p className="text-military-400 text-sm mt-1 mb-8">
         Turn {state.turnNumber}
       </p>

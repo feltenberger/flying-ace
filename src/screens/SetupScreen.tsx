@@ -7,18 +7,27 @@ export function SetupScreen() {
   const { dispatch } = useGame()
   const images = useImages()
   const [names, setNames] = useState<string[]>(['', ''])
+  const [cpuFlags, setCpuFlags] = useState<boolean[]>([false, false])
 
-  const canStart = names.filter((n) => n.trim().length > 0).length >= 2
+  // Need at least 2 named players and at least 1 human
+  const validPlayers = names
+    .map((n, i) => ({ name: n.trim(), isCpu: cpuFlags[i] }))
+    .filter((p) => p.name.length > 0)
+  const hasEnoughPlayers = validPlayers.length >= 2
+  const hasHuman = validPlayers.some((p) => !p.isCpu)
+  const canStart = hasEnoughPlayers && hasHuman
 
   function addPlayer() {
     if (names.length < 6) {
       setNames([...names, ''])
+      setCpuFlags([...cpuFlags, false])
     }
   }
 
   function removePlayer(index: number) {
     if (names.length > 2) {
       setNames(names.filter((_, i) => i !== index))
+      setCpuFlags(cpuFlags.filter((_, i) => i !== index))
     }
   }
 
@@ -28,12 +37,35 @@ export function SetupScreen() {
     setNames(updated)
   }
 
+  function toggleCpu(index: number) {
+    const updated = [...cpuFlags]
+    updated[index] = !updated[index]
+    setCpuFlags(updated)
+    // Auto-fill name when toggling CPU on with empty name
+    if (updated[index] && names[index].trim() === '') {
+      const cpuCount = updated.filter((f) => f).length
+      const updatedNames = [...names]
+      updatedNames[index] = `CPU ${cpuCount}`
+      setNames(updatedNames)
+    }
+  }
+
   function handleStart() {
-    const trimmed = names
-      .map((n) => n.trim())
-      .filter((n) => n.length > 0)
-    if (trimmed.length >= 2) {
-      dispatch({ type: 'START_GAME', playerNames: trimmed, gameId: generateGameId() })
+    // Build parallel arrays of valid (named) players
+    const result: { name: string; isCpu: boolean }[] = []
+    for (let i = 0; i < names.length; i++) {
+      const trimmed = names[i].trim()
+      if (trimmed.length > 0) {
+        result.push({ name: trimmed, isCpu: cpuFlags[i] })
+      }
+    }
+    if (result.length >= 2 && result.some((p) => !p.isCpu)) {
+      dispatch({
+        type: 'START_GAME',
+        playerNames: result.map((p) => p.name),
+        cpuFlags: result.map((p) => p.isCpu),
+        gameId: generateGameId(),
+      })
     }
   }
 
@@ -56,6 +88,17 @@ export function SetupScreen() {
               <span className="text-military-500 text-sm w-6 text-right shrink-0">
                 {i + 1}.
               </span>
+              <button
+                onClick={() => toggleCpu(i)}
+                className={`shrink-0 px-2 py-1 text-xs font-bold rounded border transition-colors ${
+                  cpuFlags[i]
+                    ? 'bg-raf-600/30 border-raf-500 text-raf-400'
+                    : 'bg-military-700 border-military-600 text-military-500 hover:text-military-300 hover:border-military-500'
+                }`}
+                title={cpuFlags[i] ? 'Computer player' : 'Human player'}
+              >
+                {cpuFlags[i] ? 'CPU' : 'HUM'}
+              </button>
               <input
                 type="text"
                 value={name}
@@ -63,7 +106,7 @@ export function SetupScreen() {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && canStart) handleStart()
                 }}
-                placeholder={`Player ${i + 1}`}
+                placeholder={cpuFlags[i] ? `CPU ${i + 1}` : `Player ${i + 1}`}
                 maxLength={20}
                 className="flex-1 bg-military-700 border border-military-600 rounded px-3 py-2 text-military-100 placeholder-military-500 focus:outline-none focus:border-raf-500 focus:ring-1 focus:ring-raf-500"
               />
@@ -87,6 +130,12 @@ export function SetupScreen() {
           >
             + Add Player
           </button>
+        )}
+
+        {hasEnoughPlayers && !hasHuman && (
+          <p className="text-danger-500 text-sm mb-3 text-center">
+            At least one player must be human.
+          </p>
         )}
 
         <div className="space-y-3">

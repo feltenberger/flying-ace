@@ -9,6 +9,8 @@ import GameLog from '../components/GameLog.tsx'
 import ConfirmDialog from '../components/ConfirmDialog.tsx'
 import RulesOverlay from '../components/RulesOverlay.tsx'
 import { useImages } from '../utils/images.ts'
+import { useCpuAction } from '../cpu/useCpuAction.ts'
+import { describeCpuAction } from '../cpu/cpuStrategy.ts'
 
 // ── Scoreboard ──────────────────────────────────────────
 
@@ -38,6 +40,9 @@ function Scoreboard() {
           >
             <div className={`font-semibold truncate ${p.id === current.id ? 'text-brass-500' : p.alive ? 'text-military-100' : 'text-military-500 line-through'}`}>
               {p.name}
+              <span className={`ml-1.5 text-[10px] font-mono ${p.isCpu ? 'text-raf-500' : 'text-military-600'}`}>
+                {p.isCpu ? 'CPU' : 'HUM'}
+              </span>
             </div>
             {p.alive ? (
               <div className="text-xs text-military-400 mt-0.5">
@@ -1079,10 +1084,54 @@ function PhaseCard({ title, headerImage, children }: { title: string; headerImag
   )
 }
 
+// ── CPU Phase Display ───────────────────────────────────
+
+function CpuPhaseDisplay({ description, onContinue }: { description: string; onContinue: () => void }) {
+  const images = useImages()
+  return (
+    <PhaseCard title="Computer Player">
+      <img src={images.pilotReady} alt="" className="spot-illustration mb-4" />
+      <p className="text-military-200 text-lg text-center mb-6">
+        {description}
+      </p>
+      <button
+        onClick={onContinue}
+        className="w-full py-3 bg-raf-600 hover:bg-raf-500 text-white font-bold rounded-lg transition-colors"
+      >
+        Continue
+      </button>
+    </PhaseCard>
+  )
+}
+
 // ── Phase Router ────────────────────────────────────────
 
+// Acknowledge actions just dismiss a result screen — show the normal phase UI
+// so the human can see what happened, then click the existing Continue button.
+const ACKNOWLEDGE_ACTIONS = new Set([
+  'ROLL_ACKNOWLEDGE',
+  'DOG_FIGHT_ACKNOWLEDGE',
+  'CHEAP_BOMB_ACKNOWLEDGE',
+  'PRICEY_BOMB_ACKNOWLEDGE',
+  'DONATION_ACKNOWLEDGE',
+  'DIG_FOR_FUEL_ACKNOWLEDGE',
+  'MERCENARY_FIGHT_ACKNOWLEDGE',
+  'MERCENARY_COMPLETE_ACKNOWLEDGE',
+])
+
 function PhaseRouter() {
-  const { state } = useGame()
+  const { state, dispatch } = useGame()
+  const cpuAction = useCpuAction(state)
+
+  if (cpuAction && !ACKNOWLEDGE_ACTIONS.has(cpuAction.type)) {
+    const description = describeCpuAction(state, cpuAction)
+    return (
+      <CpuPhaseDisplay
+        description={description}
+        onContinue={() => dispatch(cpuAction)}
+      />
+    )
+  }
 
   switch (state.phase) {
     case TurnPhase.Roll:
