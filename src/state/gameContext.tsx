@@ -9,7 +9,7 @@ import {
 import type { GameState, Action } from '../types/game.ts';
 import { GameScreen } from '../types/game.ts';
 import { gameReducer, createInitialState } from './gameReducer.ts';
-import { saveGame, clearOldSave } from '../utils/persistence.ts';
+import { saveGame, clearOldSave, loadActiveGame, setActiveGameId } from '../utils/persistence.ts';
 
 interface GameContextValue {
   state: GameState;
@@ -20,6 +20,8 @@ const GameContext = createContext<GameContextValue | null>(null);
 
 function initState(): GameState {
   clearOldSave();
+  const active = loadActiveGame();
+  if (active) return active;
   return createInitialState();
 }
 
@@ -34,6 +36,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
       state.screen !== GameScreen.Setup
     ) {
       saveGame(state);
+      setActiveGameId(state.gameId);
+    } else {
+      setActiveGameId(null);
     }
   }, [state]);
 

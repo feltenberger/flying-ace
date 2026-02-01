@@ -3,6 +3,7 @@ import { SCHEMA_VERSION } from '../types/game.ts';
 
 const INDEX_KEY = 'flying-ace-index';
 const GAME_KEY_PREFIX = 'flying-ace-game-';
+const ACTIVE_GAME_KEY = 'flying-ace-active';
 const OLD_SAVE_KEY = 'flying-ace-save';
 
 // ── Index helpers ───────────────────────────────────────
@@ -83,6 +84,30 @@ export function deleteGame(gameId: string): void {
 
 export function generateGameId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+// ── Active game tracking ────────────────────────────────
+
+export function setActiveGameId(gameId: string | null): void {
+  try {
+    if (gameId) {
+      localStorage.setItem(ACTIVE_GAME_KEY, gameId);
+    } else {
+      localStorage.removeItem(ACTIVE_GAME_KEY);
+    }
+  } catch {
+    // ignore
+  }
+}
+
+export function loadActiveGame(): GameState | null {
+  try {
+    const gameId = localStorage.getItem(ACTIVE_GAME_KEY);
+    if (!gameId) return null;
+    return loadGame(gameId);
+  } catch {
+    return null;
+  }
 }
 
 // ── Legacy cleanup ──────────────────────────────────────
