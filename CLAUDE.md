@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Rules
+
+- **Never commit or push to git unless the user explicitly asks.** Do not proactively commit, amend, or push.
+
 ## Commands
 
 ```bash
