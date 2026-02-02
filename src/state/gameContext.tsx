@@ -4,6 +4,7 @@ import {
   useReducer,
   useEffect,
   useRef,
+  useCallback,
   type Dispatch,
   type ReactNode,
 } from 'react';
@@ -29,8 +30,18 @@ function initState(): GameState {
 }
 
 export function GameProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(gameReducer, undefined, initState);
+  const [state, rawDispatch] = useReducer(gameReducer, undefined, initState);
+  const stateRef = useRef(state);
+  stateRef.current = state;
   const firestoreTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Wrap dispatch to save before GO_HOME wipes the state
+  const dispatch: Dispatch<Action> = useCallback((action: Action) => {
+    if (action.type === 'GO_HOME' && stateRef.current.gameId) {
+      saveGame(stateRef.current);
+    }
+    rawDispatch(action);
+  }, []);
 
   // Auto-save when in an active game (has gameId, not on Home or Setup)
   useEffect(() => {

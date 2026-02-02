@@ -4,6 +4,7 @@ let dbPromise: Promise<Firestore | null> | null = null;
 
 function hasFirebaseConfig(): boolean {
   return !!(
+    import.meta.env.VITE_ENABLE_FIRESTORE === 'true' &&
     import.meta.env.VITE_FIREBASE_API_KEY &&
     import.meta.env.VITE_FIREBASE_PROJECT_ID
   );

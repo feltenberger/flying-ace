@@ -234,17 +234,22 @@ export async function loadIndex(): Promise<GameIndexEntry[]> {
 }
 
 export async function loadGame(gameId: string): Promise<GameState | null> {
+  // Prefer localStorage — it's always the most current since writes are synchronous.
+  // Firestore writes are debounced and async, so they may lag behind.
+  const local = localLoadGame(gameId);
+  if (local) return local;
+
+  // Fall back to Firestore when localStorage is empty (e.g. different browser/device)
   try {
     const remote = await firestoreLoadGame(gameId);
     if (remote) {
-      // Update local cache
       localSaveGame(remote);
       return remote;
     }
   } catch {
-    // Firestore unavailable, fall back to local
+    // Firestore unavailable
   }
-  return localLoadGame(gameId);
+  return null;
 }
 
 export async function deleteGame(gameId: string): Promise<void> {
