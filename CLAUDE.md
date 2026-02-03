@@ -16,6 +16,8 @@ npm run lint         # ESLint across all .ts/.tsx files
 npm test             # Run tests once (vitest run)
 npm run test:watch   # Run tests in watch mode (vitest)
 npx vitest run -t "test name pattern"  # Run a single test by name
+npm run deploy       # Build + firebase deploy (all targets)
+npm run deploy:hosting  # Build + firebase deploy --only hosting
 ```
 
 ## Architecture
@@ -27,7 +29,7 @@ npx vitest run -t "test name pattern"  # Run a single test by name
 All game logic lives in a single `useReducer`-based system:
 
 - **`src/types/game.ts`** — Core types (`GameState`, `Player`, `Action` union, `TurnPhase`), game constants, and sub-state interfaces (`DogFightState`, `MercenaryState`, `BombState`, `TradeState`)
-- **`src/state/gameReducer.ts`** — Single large reducer (~1100 lines) handling 40+ action types. All game rules, phase transitions, win-condition checks, and protection logic live here.
+- **`src/state/gameReducer.ts`** — Single large reducer (~1100 lines) handling 40+ action types. All game rules, phase transitions, win-condition checks, and protection logic live here. Key helper functions: `createPlayer()`, `addLog()`, `playerStatusSummary()`, `getNextAlivePlayerIndex()`, `updatePlayer()`, `getPlayer()`, `currentPlayer()`.
 - **`src/state/gameContext.tsx`** — `GameProvider` wraps the app with `useReducer` + `useContext`. Exposes `useGame()` hook returning `{ state, dispatch }`. Auto-saves to localStorage + Firestore on every local state change. Uses `ActionOrigin` (`'local' | 'server'`) via `lastOriginRef` to prevent save-back loops — only `'local'` dispatches trigger saves.
 
 ### Screen Flow
@@ -51,7 +53,7 @@ The game progresses through phases defined in `TurnPhase` (27 phases). A typical
 `src/utils/persistence.ts` manages localStorage + Firestore persistence:
 - **Index**: `flying-ace-index` — array of `GameIndexEntry` (lightweight metadata for lobby)
 - **Game data**: `flying-ace-game-{gameId}` — full `GameState` per game
-- Schema versioning (`SCHEMA_VERSION` in game.ts) with `migrateState()` prevents loading incompatible saves
+- Schema versioning (`SCHEMA_VERSION` in game.ts, currently v4) with `migrateState()` prevents loading incompatible saves. Migration history: v1→v2 added `isCpu` to players, v2→v3 replaced donation with trade, v3→v4 added `planeColor` to players
 - **Real-time sync**: `subscribeToGame()` uses Firestore `onSnapshot` to push live updates to observer devices. The subscription fires immediately with the current document state, then on every change. `gameContext.tsx` subscribes when `state.gameId` is set and dispatches `LOAD_STATE` with `origin: 'server'`, which skips the save effect (preventing write-back loops)
 
 ### Types Pattern
@@ -70,7 +72,7 @@ Enums use `as const` objects with derived union types (not TypeScript `enum`) fo
 
 Two Firebase projects exist, configured via `.firebaserc` aliases:
 
-- **Staging (`staging`):** `flying-ace-staging` — config in `.env` (default)
+- **Staging (`staging`):** `flying-ace-staging` — config in `.env.staging` (default)
 - **Production (`default`):** `flying-ace-board-game` — config in `.env.production`
 
 Staging is the default environment. Plain `npm run dev` and `npm run build` target staging. To target production, use `--mode production` explicitly:
@@ -86,6 +88,18 @@ npx firebase use default             # Switch Firebase CLI to production
 ### Testing
 
 Tests live alongside source in `src/state/gameReducer.test.ts`. Vitest config is inherited from `vite.config.ts` (no separate vitest config file). Test helpers `startedGame()`, `withPlayer()`, and `threePlayerGame()` create pre-configured game states for reducer testing.
+
+### CPU Players
+
+`src/cpu/cpuStrategy.ts` defines a `CpuStrategy` interface with a `chooseAction()` method. `RandomStrategy` implements random action selection. `getDecisionMakerId()` identifies the current decision-maker (which varies by phase — e.g., during a dog fight, the defender decides). `src/cpu/useCpuAction.ts` is a hook that auto-dispatches CPU actions during gameplay.
+
+### Debug System
+
+`src/utils/debug.ts` provides a `DebugProvider` context and standalone `debugLog()` function. Debug logging is controlled via the localStorage key `flying-ace-debug` — set it to `"true"` to enable verbose logging throughout the app (gameContext, persistence, firebase, reducer).
+
+### Image Sets
+
+`src/utils/images.ts` provides an `ImageSetProvider` context for runtime image set switching. Two sets are supported: `'default'` and `'v3'`. Images (~48 assets: backgrounds, UI elements, game events, shop items) are loaded dynamically through this context.
 
 ### Styling
 
