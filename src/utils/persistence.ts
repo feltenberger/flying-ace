@@ -1,6 +1,7 @@
 import type { GameState, GameIndexEntry } from '../types/game.ts';
 import { SCHEMA_VERSION, ALL_PLANE_COLORS } from '../types/game.ts';
 import { getDb } from './firebase.ts';
+import { debugLog } from './debug.ts';
 
 const INDEX_KEY = 'flying-ace-index';
 const GAME_KEY_PREFIX = 'flying-ace-game-';
@@ -15,7 +16,8 @@ function localLoadIndex(): GameIndexEntry[] {
     const raw = localStorage.getItem(INDEX_KEY);
     if (!raw) return [];
     return JSON.parse(raw) as GameIndexEntry[];
-  } catch {
+  } catch (err) {
+    debugLog('[LoadIndex] localStorage error', err);
     return [];
   }
 }
@@ -23,8 +25,8 @@ function localLoadIndex(): GameIndexEntry[] {
 function localSaveIndex(index: GameIndexEntry[]): void {
   try {
     localStorage.setItem(INDEX_KEY, JSON.stringify(index));
-  } catch {
-    // localStorage might be full or unavailable
+  } catch (err) {
+    debugLog('[SaveIndex] localStorage error', err);
   }
 }
 
@@ -43,8 +45,8 @@ function localSaveGame(state: GameState): void {
       index.push(entry);
     }
     localSaveIndex(index);
-  } catch {
-    // localStorage might be full or unavailable
+  } catch (err) {
+    debugLog('[Save] localStorage error', err);
   }
 }
 
@@ -54,7 +56,8 @@ function localLoadGame(gameId: string): GameState | null {
     if (!raw) return null;
     const state = JSON.parse(raw) as GameState;
     return migrateState(state);
-  } catch {
+  } catch (err) {
+    debugLog('[LoadGame] localStorage error', err);
     return null;
   }
 }
@@ -64,8 +67,8 @@ function localDeleteGame(gameId: string): void {
     localStorage.removeItem(GAME_KEY_PREFIX + gameId);
     const index = localLoadIndex().filter((e) => e.id !== gameId);
     localSaveIndex(index);
-  } catch {
-    // ignore
+  } catch (err) {
+    debugLog('[DeleteGame] localStorage error', err);
   }
 }
 
@@ -86,6 +89,8 @@ function buildIndexEntry(state: GameState): GameIndexEntry {
 }
 
 function migrateState(state: GameState): GameState | null {
+  const fromVersion = state.schemaVersion;
+
   // v1 -> v2: add isCpu field to players
   if (state.schemaVersion === 1) {
     state.players = state.players.map((p) => ({
@@ -115,6 +120,10 @@ function migrateState(state: GameState): GameState | null {
       planeColor: p.planeColor ?? ALL_PLANE_COLORS[i % ALL_PLANE_COLORS.length],
     }));
     state.schemaVersion = 4;
+  }
+
+  if (fromVersion !== state.schemaVersion) {
+    debugLog('[Migrate]', `v${fromVersion}→v${state.schemaVersion}`);
   }
 
   if (state.schemaVersion !== SCHEMA_VERSION) return null;
@@ -210,12 +219,14 @@ async function firestoreDeleteGame(gameId: string): Promise<void> {
 // ── Public composite API ──────────────────────────────
 
 export function saveGame(state: GameState): void {
+  debugLog('[Save]', `gameId=${state.gameId}`);
+
   // Write localStorage immediately (synchronous)
   localSaveGame(state);
 
   // Fire-and-forget Firestore write
-  void firestoreSaveGame(state).catch(() => {
-    // Firestore write failed — localStorage is still the source of truth
+  void firestoreSaveGame(state).catch((err) => {
+    debugLog('[Save] Firestore error', err);
   });
 }
 
@@ -223,41 +234,49 @@ export async function loadIndex(): Promise<GameIndexEntry[]> {
   try {
     const remote = await firestoreLoadIndex();
     if (remote) {
-      // Update local cache with remote data
       localSaveIndex(remote);
+      debugLog('[LoadIndex]', `source=firestore, count=${remote.length}`);
       return remote;
     }
-  } catch {
-    // Firestore unavailable, fall back to local
+  } catch (err) {
+    debugLog('[LoadIndex] Firestore error, falling back to localStorage', err);
   }
-  return localLoadIndex();
+  const local = localLoadIndex();
+  debugLog('[LoadIndex]', `source=localStorage, count=${local.length}`);
+  return local;
 }
 
 export async function loadGame(gameId: string): Promise<GameState | null> {
   // Prefer localStorage — it's always the most current since writes are synchronous.
   // Firestore writes are debounced and async, so they may lag behind.
   const local = localLoadGame(gameId);
-  if (local) return local;
+  if (local) {
+    debugLog('[LoadGame]', `gameId=${gameId}, source=localStorage`);
+    return local;
+  }
 
   // Fall back to Firestore when localStorage is empty (e.g. different browser/device)
   try {
     const remote = await firestoreLoadGame(gameId);
     if (remote) {
       localSaveGame(remote);
+      debugLog('[LoadGame]', `gameId=${gameId}, source=firestore`);
       return remote;
     }
-  } catch {
-    // Firestore unavailable
+  } catch (err) {
+    debugLog('[LoadGame] Firestore error', err);
   }
+  debugLog('[LoadGame]', `gameId=${gameId}, source=null`);
   return null;
 }
 
 export async function deleteGame(gameId: string): Promise<void> {
+  debugLog('[DeleteGame]', `gameId=${gameId}`);
   localDeleteGame(gameId);
   try {
     await firestoreDeleteGame(gameId);
-  } catch {
-    // Firestore delete failed — local is already cleaned up
+  } catch (err) {
+    debugLog('[DeleteGame] Firestore error', err);
   }
 }
 
@@ -276,17 +295,23 @@ export function setActiveGameId(gameId: string | null): void {
     } else {
       localStorage.removeItem(ACTIVE_GAME_KEY);
     }
-  } catch {
-    // ignore
+  } catch (err) {
+    debugLog('[SetActive] localStorage error', err);
   }
 }
 
 export function loadActiveGame(): GameState | null {
   try {
     const gameId = localStorage.getItem(ACTIVE_GAME_KEY);
-    if (!gameId) return null;
-    return localLoadGame(gameId);
-  } catch {
+    if (!gameId) {
+      debugLog('[LoadActive]', 'none');
+      return null;
+    }
+    const state = localLoadGame(gameId);
+    debugLog('[LoadActive]', state ? `gameId=${gameId}` : `gameId=${gameId} (not found)`);
+    return state;
+  } catch (err) {
+    debugLog('[LoadActive] error', err);
     return null;
   }
 }
@@ -296,7 +321,7 @@ export function loadActiveGame(): GameState | null {
 export function clearOldSave(): void {
   try {
     localStorage.removeItem(OLD_SAVE_KEY);
-  } catch {
-    // ignore
+  } catch (err) {
+    debugLog('[ClearOldSave] localStorage error', err);
   }
 }

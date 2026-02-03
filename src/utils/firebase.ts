@@ -1,4 +1,5 @@
 import type { Firestore } from 'firebase/firestore';
+import { debugLog } from './debug.ts';
 
 let dbPromise: Promise<Firestore | null> | null = null;
 
@@ -11,7 +12,10 @@ function hasFirebaseConfig(): boolean {
 }
 
 async function initFirestore(): Promise<Firestore | null> {
-  if (!hasFirebaseConfig()) return null;
+  if (!hasFirebaseConfig()) {
+    debugLog('[Firebase]', 'disabled (no config)');
+    return null;
+  }
 
   const { initializeApp } = await import('firebase/app');
   const { getFirestore } = await import('firebase/firestore');
@@ -25,12 +29,17 @@ async function initFirestore(): Promise<Firestore | null> {
     appId: import.meta.env.VITE_FIREBASE_APP_ID,
   });
 
-  return getFirestore(app);
+  const db = getFirestore(app);
+  debugLog('[Firebase]', `enabled, project=${import.meta.env.VITE_FIREBASE_PROJECT_ID}`);
+  return db;
 }
 
 export function getDb(): Promise<Firestore | null> {
   if (!dbPromise) {
-    dbPromise = initFirestore().catch(() => null);
+    dbPromise = initFirestore().catch((err) => {
+      debugLog('[Firebase]', 'init failed', err);
+      return null;
+    });
   }
   return dbPromise;
 }

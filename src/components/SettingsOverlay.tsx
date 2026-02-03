@@ -1,5 +1,6 @@
 import { IMAGE_SETS, useImageSet } from '../utils/images.ts'
 import { useAudio } from '../utils/audio.ts'
+import { useDebug } from '../utils/debug.ts'
 
 interface SettingsOverlayProps {
   onClose: () => void
@@ -17,6 +18,7 @@ export default function SettingsOverlay({ onClose }: SettingsOverlayProps) {
     setMusicVolume,
     setSfxVolume,
   } = useAudio()
+  const { debugEnabled, setDebugEnabled } = useDebug()
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4">
@@ -111,6 +113,24 @@ export default function SettingsOverlay({ onClose }: SettingsOverlayProps) {
                   className="flex-1 h-1.5 accent-brass-500 disabled:opacity-30"
                 />
               </div>
+            </div>
+          </div>
+
+          {/* Debug */}
+          <div>
+            <h3 className="text-military-100 font-semibold mb-3">Debug</h3>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setDebugEnabled(!debugEnabled)}
+                className={`shrink-0 px-3 py-1.5 rounded border text-xs font-medium transition-colors w-16 text-center ${
+                  debugEnabled
+                    ? 'bg-brass-500 text-military-900 border-brass-400'
+                    : 'bg-military-700 text-military-400 border-military-600 hover:border-military-500'
+                }`}
+              >
+                {debugEnabled ? 'On' : 'Off'}
+              </button>
+              <span className="text-military-300">Log to console</span>
             </div>
           </div>
         </div>

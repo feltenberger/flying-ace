@@ -8,6 +8,7 @@ import { PlayScreen } from './screens/PlayScreen.tsx'
 import { GameOverScreen } from './screens/GameOverScreen.tsx'
 import { ImageSetProvider, useImages } from './utils/images.ts'
 import { AudioProvider, useBackgroundMusic, useGameSfx } from './utils/audio.ts'
+import { DebugProvider } from './utils/debug.ts'
 import SettingsOverlay from './components/SettingsOverlay.tsx'
 
 function Router() {
@@ -65,11 +66,13 @@ function AppShell() {
 export default function App() {
   return (
     <AudioProvider>
-      <ImageSetProvider>
-        <GameProvider>
-          <AppShell />
-        </GameProvider>
-      </ImageSetProvider>
+      <DebugProvider>
+        <ImageSetProvider>
+          <GameProvider>
+            <AppShell />
+          </GameProvider>
+        </ImageSetProvider>
+      </DebugProvider>
     </AudioProvider>
   )
 }

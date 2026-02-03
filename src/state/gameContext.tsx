@@ -12,6 +12,7 @@ import type { GameState, Action } from '../types/game.ts';
 import { GameScreen } from '../types/game.ts';
 import { gameReducer, createInitialState } from './gameReducer.ts';
 import { saveGame, clearOldSave, loadActiveGame, setActiveGameId } from '../utils/persistence.ts';
+import { debugLog } from '../utils/debug.ts';
 
 interface GameContextValue {
   state: GameState;
@@ -25,7 +26,11 @@ const FIRESTORE_DEBOUNCE_MS = 500;
 function initState(): GameState {
   clearOldSave();
   const active = loadActiveGame();
-  if (active) return active;
+  if (active) {
+    debugLog('[Init] resumed game', { gameId: active.gameId, players: active.players.map(p => p.name) });
+    return active;
+  }
+  debugLog('[Init] fresh state (no active game)');
   return createInitialState();
 }
 
@@ -37,11 +42,33 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   // Wrap dispatch to save before GO_HOME wipes the state
   const dispatch: Dispatch<Action> = useCallback((action: Action) => {
+    if (action.type === 'LOAD_STATE') {
+      debugLog('[Dispatch]', action.type, { gameId: action.state.gameId });
+    } else if (action.type === 'START_GAME') {
+      debugLog('[Dispatch]', action.type, { playerNames: action.playerNames });
+    } else {
+      debugLog('[Dispatch]', action.type, action);
+    }
+
     if (action.type === 'GO_HOME' && stateRef.current.gameId) {
       saveGame(stateRef.current);
     }
     rawDispatch(action);
   }, []);
+
+  // Log screen/phase transitions
+  const prevScreenRef = useRef(state.screen);
+  const prevPhaseRef = useRef(state.phase);
+  useEffect(() => {
+    if (state.screen !== prevScreenRef.current) {
+      debugLog('[Screen]', `${prevScreenRef.current} → ${state.screen}`);
+      prevScreenRef.current = state.screen;
+    }
+    if (state.phase !== prevPhaseRef.current) {
+      debugLog('[Phase]', `${prevPhaseRef.current} → ${state.phase}`);
+      prevPhaseRef.current = state.phase;
+    }
+  }, [state.screen, state.phase]);
 
   // Auto-save when in an active game (has gameId, not on Home or Setup)
   useEffect(() => {

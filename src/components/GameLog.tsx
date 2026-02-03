@@ -1,12 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
 import { useGame } from '../state/gameContext.tsx';
 import { useImages } from '../utils/images.ts';
+import { useDebug } from '../utils/debug.ts';
 
 export default function GameLog() {
   const { state } = useGame();
   const images = useImages();
+  const { debugEnabled } = useDebug();
   const [open, setOpen] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const prevLogLengthRef = useRef(state.log.length);
 
   // Auto-scroll to bottom when new entries arrive
   useEffect(() => {
@@ -14,6 +17,17 @@ export default function GameLog() {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [state.log.length, open]);
+
+  // Mirror new log entries to console when debug is enabled
+  useEffect(() => {
+    const prev = prevLogLengthRef.current;
+    prevLogLengthRef.current = state.log.length;
+    if (!debugEnabled || state.log.length <= prev) return;
+    for (let i = prev; i < state.log.length; i++) {
+      const e = state.log[i];
+      console.log(`[GameLog] T${e.turn} ${e.playerName}: ${e.message}`);
+    }
+  }, [state.log.length, debugEnabled]);
 
   return (
     <div className="w-full">
