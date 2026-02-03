@@ -185,7 +185,10 @@ export interface GameIndexEntry {
 
 // ── Actions ────────────────────────────────────────────
 
-export type Action =
+/** Where this action originated — 'local' (default) for user input, 'server' for Firestore sync. */
+export type ActionOrigin = 'local' | 'server';
+
+export type Action = (
   | { type: 'START_GAME'; playerNames: string[]; gameId: string; cpuFlags?: boolean[]; planeColors: PlaneColor[] }
   | { type: 'GO_HOME' }
   | { type: 'HANDOVER_COMPLETE' }
@@ -234,7 +237,8 @@ export type Action =
   | { type: 'CANCEL_SHOP_ITEM' }
   // Game management
   | { type: 'LOAD_STATE'; state: GameState }
-  | { type: 'RESET_GAME' };
+  | { type: 'RESET_GAME' }
+) & { origin?: ActionOrigin };
 
 // ── Constants ──────────────────────────────────────────
 

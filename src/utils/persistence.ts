@@ -142,8 +142,11 @@ async function firestoreSaveGame(state: GameState): Promise<void> {
     ? state.players.find((p) => p.id === state.winnerId)
     : undefined;
 
+  // Firestore rejects undefined values — strip them via JSON round-trip
+  const cleaned = JSON.parse(JSON.stringify(state)) as Record<string, unknown>;
+
   await setDoc(doc(db, FIRESTORE_COLLECTION, state.gameId), {
-    ...state,
+    ...cleaned,
     ownerId: null,
     updatedAt: serverTimestamp(),
     // Denormalized index fields for queries
@@ -247,15 +250,8 @@ export async function loadIndex(): Promise<GameIndexEntry[]> {
 }
 
 export async function loadGame(gameId: string): Promise<GameState | null> {
-  // Prefer localStorage — it's always the most current since writes are synchronous.
-  // Firestore writes are debounced and async, so they may lag behind.
-  const local = localLoadGame(gameId);
-  if (local) {
-    debugLog('[LoadGame]', `gameId=${gameId}, source=localStorage`);
-    return local;
-  }
-
-  // Fall back to Firestore when localStorage is empty (e.g. different browser/device)
+  // Prefer Firestore — it's the shared source of truth across devices.
+  // Fall back to localStorage when Firestore is unavailable or disabled.
   try {
     const remote = await firestoreLoadGame(gameId);
     if (remote) {
@@ -264,8 +260,15 @@ export async function loadGame(gameId: string): Promise<GameState | null> {
       return remote;
     }
   } catch (err) {
-    debugLog('[LoadGame] Firestore error', err);
+    debugLog('[LoadGame] Firestore error, falling back to localStorage', err);
   }
+
+  const local = localLoadGame(gameId);
+  if (local) {
+    debugLog('[LoadGame]', `gameId=${gameId}, source=localStorage`);
+    return local;
+  }
+
   debugLog('[LoadGame]', `gameId=${gameId}, source=null`);
   return null;
 }
@@ -297,6 +300,14 @@ export function setActiveGameId(gameId: string | null): void {
     }
   } catch (err) {
     debugLog('[SetActive] localStorage error', err);
+  }
+}
+
+export function getActiveGameId(): string | null {
+  try {
+    return localStorage.getItem(ACTIVE_GAME_KEY);
+  } catch {
+    return null;
   }
 }
 

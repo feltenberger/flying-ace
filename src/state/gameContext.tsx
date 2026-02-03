@@ -11,7 +11,7 @@ import {
 import type { GameState, Action } from '../types/game.ts';
 import { GameScreen } from '../types/game.ts';
 import { gameReducer, createInitialState } from './gameReducer.ts';
-import { saveGame, clearOldSave, loadActiveGame, setActiveGameId } from '../utils/persistence.ts';
+import { saveGame, clearOldSave, loadActiveGame, getActiveGameId, loadGame, setActiveGameId } from '../utils/persistence.ts';
 import { debugLog } from '../utils/debug.ts';
 
 interface GameContextValue {
@@ -21,7 +21,6 @@ interface GameContextValue {
 
 const GameContext = createContext<GameContextValue | null>(null);
 
-const FIRESTORE_DEBOUNCE_MS = 500;
 
 function initState(): GameState {
   clearOldSave();
@@ -38,7 +37,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [state, rawDispatch] = useReducer(gameReducer, undefined, initState);
   const stateRef = useRef(state);
   stateRef.current = state;
-  const firestoreTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Tracks whether the latest state change came from a local dispatch (and thus needs saving).
+  // Starts as 'init' so the mount render is skipped — no dispatch happened yet.
+  const lastOriginRef = useRef<'init' | 'load' | 'local' | 'server'>('init');
 
   // Wrap dispatch to save before GO_HOME wipes the state
   const dispatch: Dispatch<Action> = useCallback((action: Action) => {
@@ -50,10 +51,28 @@ export function GameProvider({ children }: { children: ReactNode }) {
       debugLog('[Dispatch]', action.type, action);
     }
 
+    lastOriginRef.current = action.type === 'LOAD_STATE'
+      ? 'load'
+      : (action.origin ?? 'local');
     if (action.type === 'GO_HOME' && stateRef.current.gameId) {
       saveGame(stateRef.current);
     }
     rawDispatch(action);
+  }, []);
+
+  // On mount, refresh active game from Firestore (localStorage was used synchronously
+  // in initState, but Firestore may have newer data from another device)
+  useEffect(() => {
+    const gameId = getActiveGameId();
+    if (!gameId) return;
+    let cancelled = false;
+    loadGame(gameId).then((fresh) => {
+      if (cancelled || !fresh) return;
+      debugLog('[Init] refreshed from Firestore', { gameId });
+      rawDispatch({ type: 'LOAD_STATE', state: fresh });
+    });
+    return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Log screen/phase transitions
@@ -77,28 +96,18 @@ export function GameProvider({ children }: { children: ReactNode }) {
       state.screen !== GameScreen.Home &&
       state.screen !== GameScreen.Setup
     ) {
-      // localStorage write is immediate inside saveGame
-      // Firestore write is fire-and-forget but we debounce rapid state changes
-      if (firestoreTimerRef.current) {
-        clearTimeout(firestoreTimerRef.current);
+      // Only save for local dispatches — skip on mount ('init') and server-pushed updates
+      if (lastOriginRef.current !== 'local') {
+        debugLog('[Save] skipped', `origin=${lastOriginRef.current}`);
+        setActiveGameId(state.gameId);
+        return;
       }
-      firestoreTimerRef.current = setTimeout(() => {
-        saveGame(state);
-        firestoreTimerRef.current = null;
-      }, FIRESTORE_DEBOUNCE_MS);
 
-      // Immediate localStorage save (saveGame writes localStorage synchronously)
       saveGame(state);
       setActiveGameId(state.gameId);
     } else {
       setActiveGameId(null);
     }
-
-    return () => {
-      if (firestoreTimerRef.current) {
-        clearTimeout(firestoreTimerRef.current);
-      }
-    };
   }, [state]);
 
   return (
