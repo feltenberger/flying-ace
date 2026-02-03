@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "flying-ace-board-game"
+    "default": "flying-ace-board-game",
+    "staging": "flying-ace-staging"
   }
 }

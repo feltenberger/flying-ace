@@ -5,6 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Rules
 
 - **Never commit or push to git unless the user explicitly asks.** Do not proactively commit, amend, or push.
+- **At the start of every session, ask which Firebase environment to target: staging (default) or production.** Assume staging unless the user explicitly says production. Never deploy to or operate against production without explicit confirmation.
 
 ## Commands
 
@@ -63,6 +64,23 @@ Enums use `as const` objects with derived union types (not TypeScript `enum`) fo
 ### Audio System
 
 `src/utils/audio.ts` manages background music and sound effects via the Web Audio API. Music tracks crossfade automatically, and SFX are fire-and-forget. Audio context is lazily initialized on first user interaction.
+
+### Firebase Environments
+
+Two Firebase projects exist, configured via `.firebaserc` aliases:
+
+- **Staging (`staging`):** `flying-ace-staging` — config in `.env` (default)
+- **Production (`default`):** `flying-ace-board-game` — config in `.env.production`
+
+Staging is the default environment. Plain `npm run dev` and `npm run build` target staging. To target production, use `--mode production` explicitly:
+
+```bash
+npm run dev                          # Dev against staging (default)
+npx vite --mode production           # Dev against production (explicit)
+npx vite build --mode production     # Build for production (explicit)
+npx firebase use staging             # Switch Firebase CLI to staging
+npx firebase use default             # Switch Firebase CLI to production
+```
 
 ### Testing
 
