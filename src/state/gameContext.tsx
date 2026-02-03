@@ -11,7 +11,7 @@ import {
 import type { GameState, Action } from '../types/game.ts';
 import { GameScreen } from '../types/game.ts';
 import { gameReducer, createInitialState } from './gameReducer.ts';
-import { saveGame, clearOldSave, loadActiveGame, getActiveGameId, loadGame, setActiveGameId } from '../utils/persistence.ts';
+import { saveGame, clearOldSave, loadActiveGame, setActiveGameId, subscribeToGame } from '../utils/persistence.ts';
 import { debugLog } from '../utils/debug.ts';
 
 interface GameContextValue {
@@ -52,7 +52,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     }
 
     lastOriginRef.current = action.type === 'LOAD_STATE'
-      ? 'load'
+      ? (action.origin ?? 'load')
       : (action.origin ?? 'local');
     if (action.type === 'GO_HOME' && stateRef.current.gameId) {
       saveGame(stateRef.current);
@@ -60,20 +60,21 @@ export function GameProvider({ children }: { children: ReactNode }) {
     rawDispatch(action);
   }, []);
 
-  // On mount, refresh active game from Firestore (localStorage was used synchronously
-  // in initState, but Firestore may have newer data from another device)
+  // Subscribe to real-time Firestore updates for the active game.
+  // Fires immediately with the current document (replacing the old one-shot refresh)
+  // and then again on every remote change, keeping observer devices in sync.
   useEffect(() => {
-    const gameId = getActiveGameId();
-    if (!gameId) return;
-    let cancelled = false;
-    loadGame(gameId).then((fresh) => {
-      if (cancelled || !fresh) return;
-      debugLog('[Init] refreshed from Firestore', { gameId });
-      rawDispatch({ type: 'LOAD_STATE', state: fresh });
+    if (!state.gameId) return;
+
+    const unsubscribe = subscribeToGame(state.gameId, (fresh) => {
+      lastOriginRef.current = 'server';
+      rawDispatch({ type: 'LOAD_STATE', state: fresh, origin: 'server' });
     });
-    return () => { cancelled = true; };
+
+    return unsubscribe;
+  // Only re-subscribe when the gameId changes (not on every state update)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [state.gameId]);
 
   // Log screen/phase transitions
   const prevScreenRef = useRef(state.screen);

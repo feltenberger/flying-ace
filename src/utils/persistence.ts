@@ -219,6 +219,71 @@ async function firestoreDeleteGame(gameId: string): Promise<void> {
   await deleteDoc(doc(db, FIRESTORE_COLLECTION, gameId));
 }
 
+// ── Real-time subscription ────────────────────────────
+
+/**
+ * Subscribe to live Firestore updates for a game document.
+ * Returns an unsubscribe function. If Firestore is disabled, returns a no-op.
+ */
+export function subscribeToGame(
+  gameId: string,
+  onState: (state: GameState) => void,
+): () => void {
+  let unsubscribe: (() => void) | null = null;
+
+  debugLog('[Sync] subscribing', `gameId=${gameId}`);
+
+  void getDb().then(async (db) => {
+    if (!db) {
+      debugLog('[Sync] skipped (Firestore disabled)');
+      return;
+    }
+
+    const { doc, onSnapshot } = await import('firebase/firestore');
+
+    unsubscribe = onSnapshot(
+      doc(db, FIRESTORE_COLLECTION, gameId),
+      (snap) => {
+        if (!snap.exists()) {
+          debugLog('[Sync] snapshot empty', `gameId=${gameId}`);
+          return;
+        }
+
+        const data = snap.data() as GameState & Record<string, unknown>;
+
+        // Strip Firestore-only fields (same as firestoreLoadGame)
+        const {
+          ownerId: _ownerId,
+          updatedAt: _updatedAt,
+          createdAt: _createdAt,
+          ...gameState
+        } = data;
+        void _ownerId;
+        void _updatedAt;
+        void _createdAt;
+
+        const migrated = migrateState(gameState as GameState);
+        if (!migrated) {
+          debugLog('[Sync] migration failed', `gameId=${gameId}`);
+          return;
+        }
+
+        debugLog('[Sync] snapshot', `gameId=${gameId}, turn=${migrated.turnNumber}, phase=${migrated.phase}`);
+        onState(migrated);
+      },
+      (err) => {
+        debugLog('[Sync] error', `gameId=${gameId}`, err);
+      },
+    );
+  });
+
+  // Return a function that tears down the listener
+  return () => {
+    debugLog('[Sync] unsubscribing', `gameId=${gameId}`);
+    unsubscribe?.();
+  };
+}
+
 // ── Public composite API ──────────────────────────────
 
 export function saveGame(state: GameState): void {
