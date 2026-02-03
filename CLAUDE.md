@@ -26,9 +26,9 @@ npx vitest run -t "test name pattern"  # Run a single test by name
 
 All game logic lives in a single `useReducer`-based system:
 
-- **`src/types/game.ts`** — Core types (`GameState`, `Player`, `Action` union, `TurnPhase`), game constants, and sub-state interfaces (`DogFightState`, `MercenaryState`, `BombState`, `DonationState`)
+- **`src/types/game.ts`** — Core types (`GameState`, `Player`, `Action` union, `TurnPhase`), game constants, and sub-state interfaces (`DogFightState`, `MercenaryState`, `BombState`, `TradeState`)
 - **`src/state/gameReducer.ts`** — Single large reducer (~1100 lines) handling 40+ action types. All game rules, phase transitions, win-condition checks, and protection logic live here.
-- **`src/state/gameContext.tsx`** — `GameProvider` wraps the app with `useReducer` + `useContext`. Exposes `useGame()` hook returning `{ state, dispatch }`. Auto-saves to localStorage on every state change when in an active game.
+- **`src/state/gameContext.tsx`** — `GameProvider` wraps the app with `useReducer` + `useContext`. Exposes `useGame()` hook returning `{ state, dispatch }`. Auto-saves to localStorage + Firestore on every local state change. Uses `ActionOrigin` (`'local' | 'server'`) via `lastOriginRef` to prevent save-back loops — only `'local'` dispatches trigger saves.
 
 ### Screen Flow
 
@@ -46,12 +46,13 @@ All game logic lives in a single `useReducer`-based system:
 
 The game progresses through phases defined in `TurnPhase` (27 phases). A typical turn: `Roll` → `RollResult` → (optional `DogFight`) → `Shop` → (optional sub-phases for items: bombs, donations, mercenary, dig) → `OilTycoonRepair` → `Tax` → `TurnEnd`. The reducer enforces valid phase transitions.
 
-### Persistence
+### Persistence & Real-time Sync
 
-`src/utils/persistence.ts` manages localStorage with two key patterns:
+`src/utils/persistence.ts` manages localStorage + Firestore persistence:
 - **Index**: `flying-ace-index` — array of `GameIndexEntry` (lightweight metadata for lobby)
 - **Game data**: `flying-ace-game-{gameId}` — full `GameState` per game
-- Schema versioning (`SCHEMA_VERSION` in game.ts) prevents loading incompatible saves
+- Schema versioning (`SCHEMA_VERSION` in game.ts) with `migrateState()` prevents loading incompatible saves
+- **Real-time sync**: `subscribeToGame()` uses Firestore `onSnapshot` to push live updates to observer devices. The subscription fires immediately with the current document state, then on every change. `gameContext.tsx` subscribes when `state.gameId` is set and dispatches `LOAD_STATE` with `origin: 'server'`, which skips the save effect (preventing write-back loops)
 
 ### Types Pattern
 
